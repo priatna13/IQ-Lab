@@ -4,10 +4,10 @@
 
 **Blocked by:** 07 — Insight hybrid (Rule Payload + LLM/fallback)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Completed Attempt offers PDF download from dashboard/Report
-- [ ] PDF includes Ability Profile summary, Composite Index, IQ Estimate + temporary norm disclaimer, Insight/action plan, footer legal disclaimers in BI
-- [ ] PDF content is derived from Result Snapshot only (not live recompute of scores)
-- [ ] Regenerating the file does not change underlying snapshot fields
-- [ ] PDF is readable when printed/saved as A4-oriented layout
+- [x] Completed Attempt offers PDF download from dashboard/Report
+- [x] PDF includes Ability Profile summary, Composite Index, IQ Estimate + temporary norm disclaimer, Insight/action plan, footer legal disclaimers in BI
+- [x] PDF content is derived from Result Snapshot only (not live recompute of scores)
+- [x] Regenerating the file does not change underlying snapshot fields
+- [x] PDF is readable when printed/saved as A4-oriented layout

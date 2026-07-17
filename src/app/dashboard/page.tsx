@@ -115,12 +115,20 @@ export default async function DashboardPage() {
                         ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
                         : ""}
                     </span>
-                    <Link
-                      href={`/asesmen/${a.id}/hasil`}
-                      className="font-semibold text-lab-teal hover:underline"
-                    >
-                      Lihat hasil
-                    </Link>
+                    <span className="flex gap-3">
+                      <Link
+                        href={`/asesmen/${a.id}/hasil`}
+                        className="font-semibold text-lab-teal hover:underline"
+                      >
+                        Lihat
+                      </Link>
+                      <a
+                        href={`/api/asesmen/${a.id}/pdf`}
+                        className="font-semibold text-lab-navy hover:underline"
+                      >
+                        PDF
+                      </a>
+                    </span>
                   </li>
                 ))}
               </ul>

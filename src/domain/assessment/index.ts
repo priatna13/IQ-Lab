@@ -33,6 +33,7 @@ export type {
   PublicResultReport,
   ResultSnapshot,
 } from "./result-types";
+export { buildReportPdfBytes } from "./build-report-pdf";
 export {
   startDomainSession,
   upsertResponse,
