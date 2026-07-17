@@ -3,11 +3,26 @@
 import { redirect } from "next/navigation";
 import {
   AssessmentError,
+  closeDomainSessionIfTimedOut,
   createAttempt,
+  earlyFinishDomainSession,
+  getDomainRunnerView,
+  startDomainSession,
+  upsertResponse,
+  type PublicDomainRunnerView,
   type Track,
 } from "@/domain/assessment";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
+
+function isNextRedirect(err: unknown): boolean {
+  return (
+    !!err &&
+    typeof err === "object" &&
+    "digest" in err &&
+    String((err as { digest?: string }).digest).startsWith("NEXT_REDIRECT")
+  );
+}
 
 export type StartAttemptResult = {
   ok: boolean;
@@ -59,19 +74,131 @@ export async function startAttemptAction(
       }
       return { ok: false, error: err.message };
     }
-    // Next.js redirect throws; rethrow
-    if (
-      err &&
-      typeof err === "object" &&
-      "digest" in err &&
-      String((err as { digest?: string }).digest).startsWith("NEXT_REDIRECT")
-    ) {
-      throw err;
-    }
+    if (isNextRedirect(err)) throw err;
     console.error(err);
     return {
       ok: false,
       error: "Gagal memulai Attempt. Coba lagi beberapa saat.",
     };
+  }
+}
+
+export async function startDomainAction(
+  attemptId: string,
+  domainId: string,
+): Promise<{ ok: true; sessionId: string } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    const session = await startDomainSession(ports, {
+      attemptId,
+      participantId: user.id,
+      domainId,
+    });
+    return { ok: true, sessionId: session.id };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal memulai Domain Session." };
+  }
+}
+
+export async function saveResponseAction(input: {
+  sessionId: string;
+  itemId: string;
+  answer: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    await upsertResponse(ports, {
+      sessionId: input.sessionId,
+      participantId: user.id,
+      itemId: input.itemId,
+      answer: input.answer,
+    });
+    return { ok: true };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal menyimpan jawaban." };
+  }
+}
+
+export async function earlyFinishAction(
+  sessionId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    await earlyFinishDomainSession(ports, {
+      sessionId,
+      participantId: user.id,
+    });
+    return { ok: true };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal menyelesaikan domain." };
+  }
+}
+
+export async function syncTimerCloseAction(
+  sessionId: string,
+): Promise<{ ok: true; view: PublicDomainRunnerView } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    await closeDomainSessionIfTimedOut(ports, {
+      sessionId,
+      participantId: user.id,
+    });
+    const view = await getDomainRunnerView(ports, {
+      sessionId,
+      participantId: user.id,
+    });
+    return { ok: true, view };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal sinkron timer." };
+  }
+}
+
+export async function refreshRunnerViewAction(
+  sessionId: string,
+): Promise<{ ok: true; view: PublicDomainRunnerView } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    const view = await getDomainRunnerView(ports, {
+      sessionId,
+      participantId: user.id,
+    });
+    return { ok: true, view };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal memuat runner." };
   }
 }

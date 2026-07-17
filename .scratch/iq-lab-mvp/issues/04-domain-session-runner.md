@@ -4,12 +4,12 @@
 
 **Blocked by:** 03 — Content Version seed + Create Open Attempt
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Starting a Domain Session sets server `ends_at`; client timer is display-only
-- [ ] Participant can navigate Items within the open Domain and upsert Responses (last write wins)
-- [ ] Early Finish is disabled until every Item has a server Response; when enabled, closes and freezes Responses
-- [ ] On timer + Grace Window, Domain closes; missing Responses score empty/incorrect; no domain retry
-- [ ] Post-close Response mutation is rejected at the boundary
-- [ ] Correct keys never appear in client-facing payloads
-- [ ] Boundary tests with fake clock cover early finish, timer partial close, and freeze
+- [x] Starting a Domain Session sets server `ends_at`; client timer is display-only
+- [x] Participant can navigate Items within the open Domain and upsert Responses (last write wins)
+- [x] Early Finish is disabled until every Item has a Response; when enabled, closes and freezes Responses
+- [x] On timer + Grace Window, Domain closes; missing Responses score empty/incorrect; no domain retry
+- [x] Post-close Response mutation is rejected at the boundary
+- [x] Correct keys never appear in client-facing payloads
+- [x] Boundary tests with fake clock cover early finish, timer partial close, and freeze

@@ -23,6 +23,20 @@ export default async function AttemptProgressPage({ params }: Props) {
 
   const cv = await ports.content.getById(attempt.contentVersionId);
   const pub = cv ? toPublicContentVersion(cv) : null;
+  const sessions = await ports.domainSessions.listByAttempt(attemptId);
+  const byDomain = new Map(sessions.map((s) => [s.domainId, s]));
+
+  // First incomplete domain becomes the "continue" target
+  let nextDomainId: string | null = null;
+  if (pub) {
+    for (const domainId of pub.domainOrder) {
+      const s = byDomain.get(domainId);
+      if (!s || s.status !== "closed") {
+        nextDomainId = domainId;
+        break;
+      }
+    }
+  }
 
   return (
     <>
@@ -45,7 +59,8 @@ export default async function AttemptProgressPage({ params }: Props) {
               ? "Jelajahi potensi"
               : "Rancang langkah karir"}
           </strong>
-          . Content Version: <code className="text-xs">{attempt.contentVersionId}</code>
+          . Content Version:{" "}
+          <code className="text-xs">{attempt.contentVersionId}</code>
         </p>
 
         <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -63,29 +78,63 @@ export default async function AttemptProgressPage({ params }: Props) {
           </dl>
 
           {pub ? (
-            <ol className="mt-6 list-decimal space-y-2 pl-5 text-sm text-slate-700">
+            <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm text-slate-700">
               {pub.domainOrder.map((domainId) => {
                 const domain = pub.domains.find((d) => d.id === domainId);
+                const session = byDomain.get(domainId);
+                const closed = session?.status === "closed";
+                const inProgress = session?.status === "in_progress";
+                const locked =
+                  !closed &&
+                  !inProgress &&
+                  nextDomainId !== null &&
+                  domainId !== nextDomainId;
+
                 return (
-                  <li key={domainId}>
-                    <span className="font-medium">
-                      {domain?.label ?? domainId}
-                    </span>
-                    <span className="text-slate-400">
-                      {" "}
-                      · {domain?.itemCount ?? 0} soal · belum dikerjakan
-                    </span>
+                  <li key={domainId} className="pl-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <span className="font-medium">
+                          {domain?.label ?? domainId}
+                        </span>
+                        <span className="text-slate-400">
+                          {" "}
+                          · {domain?.itemCount ?? 0} soal
+                          {closed
+                            ? ` · selesai (${session?.closeReason === "early_finish" ? "awal" : "timer"}) ${session?.rawCorrect ?? "?"}/${session?.rawTotal ?? "?"}`
+                            : inProgress
+                              ? " · sedang dikerjakan"
+                              : locked
+                                ? " · terkunci (urut dulu)"
+                                : " · siap"}
+                        </span>
+                      </div>
+                      {!closed && !locked ? (
+                        <Link
+                          href={`/asesmen/${attemptId}/domain/${domainId}`}
+                          className="rounded-lg bg-lab-teal px-3 py-1.5 text-xs font-semibold text-white"
+                        >
+                          {inProgress ? "Lanjutkan" : "Mulai domain"}
+                        </Link>
+                      ) : null}
+                    </div>
                   </li>
                 );
               })}
             </ol>
           ) : null}
 
-          <p className="mt-6 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
-            Runner Domain (timer, Response, Early Finish) menyusul di ticket 04.
-            Progress Attempt sudah tersimpan — Anda dapat kembali ke dasbor dan
-            melanjutkan nanti.
-          </p>
+          {nextDomainId === null ? (
+            <p className="mt-6 rounded-lg bg-teal-50 px-3 py-2 text-sm text-lab-navy">
+              Semua 9 domain sudah ditutup. Penyelesaian Attempt + Result
+              Snapshot menyusul di ticket berikutnya.
+            </p>
+          ) : (
+            <p className="mt-6 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+              Kerjakan domain berurutan. Timer berlaku di dalam domain; Anda
+              boleh jeda antar domain lewat dasbor.
+            </p>
+          )}
         </div>
       </main>
     </>

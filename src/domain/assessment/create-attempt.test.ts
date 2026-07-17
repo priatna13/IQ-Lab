@@ -6,6 +6,10 @@ import { MVP_CONTENT_VERSION_ID } from "./content-seed";
 import { AssessmentError } from "./types";
 import { createFixedClock } from "./testing/fixed-clock";
 import { createInMemoryAttemptRepository } from "./testing/in-memory-attempts";
+import {
+  createInMemoryDomainSessionRepository,
+  createInMemoryResponseRepository,
+} from "./testing/in-memory-sessions";
 import type { AssessmentPorts } from "./ports";
 
 function buildPorts(): AssessmentPorts {
@@ -13,6 +17,8 @@ function buildPorts(): AssessmentPorts {
     clock: createFixedClock("2026-07-17T12:00:00.000Z"),
     attempts: createInMemoryAttemptRepository(),
     content: createSeedContentCatalog(),
+    domainSessions: createInMemoryDomainSessionRepository(),
+    responses: createInMemoryResponseRepository(),
   };
 }
 
