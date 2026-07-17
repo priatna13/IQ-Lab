@@ -16,7 +16,7 @@ Status vocabulary: `ready-for-agent` | done (when closed by implementer)
 
 | # | File | Status |
 |---|------|--------|
-| 02 | [02-landing-auth-age-band.md](./issues/02-landing-auth-age-band.md) | ready-for-agent |
+| 03 | [03-content-version-create-open-attempt.md](./issues/03-content-version-create-open-attempt.md) | ready-for-agent |
 | 11 | [11-faq-methodology.md](./issues/11-faq-methodology.md) | ready-for-agent |
 
 ## All tickets
@@ -24,7 +24,7 @@ Status vocabulary: `ready-for-agent` | done (when closed by implementer)
 | # | Title | Blocked by | Status |
 |---|--------|------------|--------|
 | 01 | Foundation: app + InsForge + Assessment boundary harness | — | **done** |
-| 02 | Landing, disclaimers, Auth & Age Band | 01 | ready-for-agent |
+| 02 | Landing, disclaimers, Auth & Age Band | 01 | **done** |
 | 03 | Content Version seed + Create Open Attempt | 02 | ready-for-agent |
 | 04 | Domain Session runner (timer, Response, Early Finish) | 03 | ready-for-agent |
 | 05 | Nine Domains: order, pause/resume, abandon | 04 | ready-for-agent |

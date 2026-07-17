@@ -4,12 +4,12 @@
 
 **Blocked by:** 01 — Foundation: app + InsForge + Assessment boundary harness
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Landing states inspired-by / self-development positioning and key disclaimers in Bahasa Indonesia
-- [ ] Participant can register and sign in with email+password
-- [ ] Participant can sign in with Google OAuth (configured against InsForge redirects)
-- [ ] Age Band collected; under 18 cannot proceed to Assessment onboarding
-- [ ] Age Band 46+ sees explicit disclaimer before continuing
-- [ ] Unauthenticated users cannot open the Participant dashboard shell
-- [ ] Sign-out works and clears session access to protected pages
+- [x] Landing states inspired-by / self-development positioning and key disclaimers in Bahasa Indonesia
+- [x] Participant can register and sign in with email+password
+- [x] Participant can sign in with Google OAuth (configured against InsForge redirects)
+- [x] Age Band collected; under 18 cannot proceed to Assessment onboarding
+- [x] Age Band 46+ sees explicit disclaimer before continuing
+- [x] Unauthenticated users cannot open the Participant dashboard shell
+- [x] Sign-out works and clears session access to protected pages

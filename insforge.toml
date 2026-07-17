@@ -1,0 +1,40 @@
+[auth]
+allowed_redirect_urls = [
+  "http://localhost:3000/api/auth/callback",
+  "http://localhost:3000/masuk",
+  "http://localhost:3000/daftar",
+  "http://localhost:3000/dashboard",
+  "http://127.0.0.1:3000/api/auth/callback",
+  "http://127.0.0.1:3000/masuk",
+]
+# MVP lokal: verifikasi email dimatikan agar daftar bisa diuji tanpa SMTP.
+# Nyalakan kembali + SMTP sebelum production.
+require_email_verification = false
+verify_email_method = "code"
+reset_password_method = "code"
+disable_signup = false
+
+[auth.password]
+min_length = 6
+require_number = false
+require_lowercase = false
+require_uppercase = false
+require_special_char = false
+
+[auth.smtp]
+enabled = false
+host = ""
+port = 465
+username = ""
+sender_email = ""
+sender_name = ""
+min_interval_seconds = 60
+
+[storage]
+max_file_size_mb = 50
+
+[realtime]
+retention_days = 0
+
+[schedules]
+retention_days = 7
