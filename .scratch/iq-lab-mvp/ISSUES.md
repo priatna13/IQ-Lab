@@ -16,7 +16,7 @@ Status vocabulary: `ready-for-agent` | done (when closed by implementer)
 
 | # | File | Status |
 |---|------|--------|
-| 11 | [11-faq-methodology.md](./issues/11-faq-methodology.md) | ready-for-agent |
+| — | **MVP ticket set complete** | — |
 
 ## All tickets
 
@@ -32,6 +32,7 @@ Status vocabulary: `ready-for-agent` | done (when closed by implementer)
 | 08 | PDF Report dari snapshot | 07 | **done** |
 | 09 | Primary, Retake Policy, Norm Sample | 06 | **done** |
 | 10 | Integrity Events + Account Deletion | 06, 09 | **done** |
+| 11 | FAQ metodologi inspired-by | 02 | **done** |
 | 07 | Insight hybrid (Rule Payload + LLM/fallback) | 06 | ready-for-agent |
 | 08 | PDF Report dari snapshot | 07 | ready-for-agent |
 | 09 | Primary, Retake Policy, Norm Sample | 06 | ready-for-agent |

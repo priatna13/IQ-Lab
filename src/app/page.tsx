@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import { getInsForgePublicConfig } from "@/lib/insforge/public-config";
 import { getSessionUser } from "@/lib/auth/session";
 
@@ -71,6 +72,14 @@ export default async function HomePage() {
               tradisi asesmen struktur inteligensi.
             </li>
           </ul>
+          <p className="mt-3">
+            <Link
+              href="/faq"
+              className="font-semibold text-lab-teal hover:underline"
+            >
+              Baca FAQ & metodologi lengkap →
+            </Link>
+          </p>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
@@ -103,6 +112,7 @@ export default async function HomePage() {
           {insforge.isConfigured ? "terhubung" : "belum dikonfigurasi"}.
         </p>
       </main>
+      <SiteFooter />
     </>
   );
 }

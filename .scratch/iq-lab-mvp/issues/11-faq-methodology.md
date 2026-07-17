@@ -4,10 +4,10 @@
 
 **Blocked by:** 02 — Landing, disclaimers, Auth & Age Band
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] FAQ reachable from landing and/or footer navigation
-- [ ] Explains inspired-by multi-domain framework without claiming official IST/IST 2000R
-- [ ] States non-goals: not clinical diagnosis, not hiring/CPNS certification
-- [ ] Mentions estimate/temporary internal norms at a high level
-- [ ] Copy is fully Bahasa Indonesia and consistent with PRD disclaimers
+- [x] FAQ reachable from landing and/or footer navigation
+- [x] Explains inspired-by multi-domain framework without claiming official IST/IST 2000R
+- [x] States non-goals: not clinical diagnosis, not hiring/CPNS certification
+- [x] Mentions estimate/temporary internal norms at a high level
+- [x] Copy is fully Bahasa Indonesia and consistent with PRD disclaimers
