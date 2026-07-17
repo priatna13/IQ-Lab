@@ -1,3 +1,4 @@
+import type { RulePayload } from "./career-rules";
 import type { ContentVersionId, ParticipantId, Track } from "./types";
 import type { DomainId } from "./content-types";
 
@@ -24,8 +25,7 @@ export type ResultSnapshot = {
   abilityProfile: AbilityProfile;
   compositeIndex: number;
   iqEstimate: number;
-  /** Filled in ticket 07+ */
-  rulePayload: unknown | null;
+  rulePayload: RulePayload | null;
   insightProse: string | null;
   actionPlanProse: string | null;
 };
@@ -46,6 +46,7 @@ export type PublicResultReport = {
     normBadge: string;
     disclaimer: string;
   };
+  rulePayload: RulePayload | null;
   insightProse: string | null;
   actionPlanProse: string | null;
 };
@@ -67,6 +68,9 @@ export function toPublicResultReport(snapshot: ResultSnapshot): PublicResultRepo
       disclaimer:
         "Hasil ini untuk pengembangan diri. Bukan tes IST resmi, bukan diagnosis klinis, dan bukan sertifikasi rekrutmen. Angka IQ adalah estimasi norma internal sementara.",
     },
+    rulePayload: snapshot.rulePayload
+      ? structuredClone(snapshot.rulePayload)
+      : null,
     insightProse: snapshot.insightProse,
     actionPlanProse: snapshot.actionPlanProse,
   };

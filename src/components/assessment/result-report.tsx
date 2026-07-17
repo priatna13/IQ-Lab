@@ -5,6 +5,7 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
     ...report.abilityProfile.map((d) => d.score),
     1,
   );
+  const payload = report.rulePayload;
 
   return (
     <div className="space-y-8">
@@ -70,11 +71,67 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
         </ul>
       </section>
 
-      <section className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-        <p className="font-medium text-lab-navy">Insight karir</p>
-        <p className="mt-2">
-          Narasi klaster karir & action plan (rule + LLM) menyusul di ticket
-          berikutnya. Snapshot skor sudah dibekukan dan tidak dihitung ulang.
+      {payload ? (
+        <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-semibold text-lab-navy">
+            Klaster arah (rule engine)
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Versi {payload.version} · keyakinan peta: {payload.confidence}
+          </p>
+          <ul className="mt-4 space-y-3">
+            {payload.clusters.map((c) => (
+              <li
+                key={c.id}
+                className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
+              >
+                <div className="flex justify-between gap-2 font-medium text-lab-navy">
+                  <span>{c.label}</span>
+                  <span className="tabular-nums text-lab-teal">
+                    ~{c.fitScore}
+                  </span>
+                </div>
+                {c.supportingDomains.length > 0 ? (
+                  <p className="mt-1 text-xs text-slate-500">
+                    Didukung: {c.supportingDomains.join(", ")}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {payload.skillPriorities.length > 0 ? (
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Prioritas skill
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {payload.skillPriorities.map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-lab-teal"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      <section className="rounded-xl border border-lab-warm/30 bg-orange-50/40 p-5 text-sm text-slate-700">
+        <h2 className="font-semibold text-lab-navy">Insight</h2>
+        <p className="mt-3 leading-relaxed">
+          {report.insightProse ??
+            "Insight belum tersedia pada snapshot ini."}
+        </p>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-700 shadow-sm">
+        <h2 className="font-semibold text-lab-navy">Action plan</h2>
+        <p className="mt-3 leading-relaxed">
+          {report.actionPlanProse ??
+            "Action plan belum tersedia pada snapshot ini."}
         </p>
       </section>
 

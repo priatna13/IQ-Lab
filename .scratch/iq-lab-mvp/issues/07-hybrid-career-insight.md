@@ -4,11 +4,11 @@
 
 **Blocked by:** 06 — Complete → Result Snapshot (skor + norma sintetik)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Rule engine emits versioned Rule Payload; no clusters outside the matrix
-- [ ] Track `explore` vs `career` changes action-plan framing/templates
-- [ ] LLM path only narrates within Rule Payload; failure uses template fallback still yielding usable Insight
-- [ ] Insight prose is frozen on Result Snapshot (no user-facing regenerate)
-- [ ] Report UI shows clusters, narrative, and action plan in Bahasa Indonesia
-- [ ] Boundary tests stub LLM: fallback path and payload-bound Insight persistence
+- [x] Rule engine emits versioned Rule Payload; no clusters outside the matrix
+- [x] Track `explore` vs `career` changes action-plan framing/templates
+- [x] LLM path only narrates within Rule Payload; failure uses template fallback still yielding usable Insight
+- [x] Insight prose is frozen on Result Snapshot (no user-facing regenerate)
+- [x] Report UI shows clusters, narrative, and action plan in Bahasa Indonesia
+- [x] Boundary tests stub LLM: fallback path and payload-bound Insight persistence

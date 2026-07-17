@@ -1,4 +1,5 @@
 import type { ContentCatalog } from "./content-catalog";
+import type { InsightNarrator } from "./insight-narrator";
 import type { ResultSnapshot } from "./result-types";
 import type {
   DomainSession,
@@ -51,6 +52,8 @@ export type AssessmentPorts = {
   domainSessions: DomainSessionRepository;
   responses: ResponseRepository;
   resultSnapshots: ResultSnapshotRepository;
+  /** Hybrid Insight narrator (rule payload → prose). Defaults to template-only if omitted in tests. */
+  insightNarrator?: InsightNarrator;
   /** Grace after endsAt for in-flight answer updates only. */
   graceWindowMs?: number;
 };

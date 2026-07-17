@@ -1,5 +1,10 @@
 import type { AssessmentPorts } from "./ports";
 import {
+  buildRulePayload,
+  sanitizeRulePayload,
+} from "./career-rules";
+import { createHybridInsightNarrator } from "./insight-narrator";
+import {
   compositeIndexFromDomainScores,
   domainScoreFromRaw,
   iqEstimateFromComposite,
@@ -95,6 +100,13 @@ export async function completeAttempt(
   );
   const isPrimary = priorCompleted.length === 0;
 
+  const rulePayload = sanitizeRulePayload(
+    buildRulePayload(abilityProfile, attempt.track),
+  );
+  const narrator =
+    ports.insightNarrator ?? createHybridInsightNarrator();
+  const narration = await narrator.narrate(rulePayload);
+
   const frozenAt = ports.clock.now();
   const snapshot: ResultSnapshot = {
     id: newSnapshotId(),
@@ -107,9 +119,9 @@ export async function completeAttempt(
     abilityProfile,
     compositeIndex,
     iqEstimate,
-    rulePayload: null,
-    insightProse: null,
-    actionPlanProse: null,
+    rulePayload,
+    insightProse: narration.insightProse,
+    actionPlanProse: narration.actionPlanProse,
   };
 
   await ports.resultSnapshots.save(snapshot);

@@ -10,6 +10,17 @@ export {
 } from "./complete-attempt";
 export type { CompleteAttemptResult } from "./complete-attempt";
 export {
+  buildRulePayload,
+  sanitizeRulePayload,
+  CAREER_RULES_VERSION,
+  CAREER_CLUSTER_MATRIX,
+} from "./career-rules";
+export type { RulePayload, CareerClusterId } from "./career-rules";
+export { createHybridInsightNarrator } from "./insight-narrator";
+export type { InsightNarrator } from "./insight-narrator";
+export { narrateFromTemplate } from "./insight-template";
+export type { InsightNarration } from "./insight-template";
+export {
   NORM_VERSION_SYNTHETIC_V1,
   domainScoreFromRaw,
   compositeIndexFromDomainScores,

@@ -16,7 +16,7 @@ Status vocabulary: `ready-for-agent` | done (when closed by implementer)
 
 | # | File | Status |
 |---|------|--------|
-| 07 | [07-hybrid-career-insight.md](./issues/07-hybrid-career-insight.md) | ready-for-agent |
+| 08 | [08-pdf-report-from-snapshot.md](./issues/08-pdf-report-from-snapshot.md) | ready-for-agent |
 | 09 | [09-primary-retake-norm-sample.md](./issues/09-primary-retake-norm-sample.md) | ready-for-agent |
 | 11 | [11-faq-methodology.md](./issues/11-faq-methodology.md) | ready-for-agent |
 
@@ -30,6 +30,7 @@ Status vocabulary: `ready-for-agent` | done (when closed by implementer)
 | 04 | Domain Session runner (timer, Response, Early Finish) | 03 | **done** |
 | 05 | Nine Domains: order, pause/resume, abandon | 04 | **done** |
 | 06 | Complete → Result Snapshot (skor + norma sintetik) | 05 | **done** |
+| 07 | Insight hybrid (Rule Payload + LLM/fallback) | 06 | **done** |
 | 07 | Insight hybrid (Rule Payload + LLM/fallback) | 06 | ready-for-agent |
 | 08 | PDF Report dari snapshot | 07 | ready-for-agent |
 | 09 | Primary, Retake Policy, Norm Sample | 06 | ready-for-agent |

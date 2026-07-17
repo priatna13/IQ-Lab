@@ -1,4 +1,5 @@
 import type { ResultSnapshotRepository } from "@/domain/assessment/ports";
+import type { RulePayload } from "@/domain/assessment/career-rules";
 import type { ResultSnapshot } from "@/domain/assessment/result-types";
 import type { Track } from "@/domain/assessment/types";
 import { createInsForgeServerClient } from "@/lib/insforge/server";
@@ -14,7 +15,7 @@ type SnapshotRow = {
   ability_profile: ResultSnapshot["abilityProfile"];
   composite_index: number;
   iq_estimate: number;
-  rule_payload: unknown | null;
+  rule_payload: RulePayload | null;
   insight_prose: string | null;
   action_plan_prose: string | null;
 };
@@ -31,7 +32,7 @@ function mapRow(row: SnapshotRow): ResultSnapshot {
     abilityProfile: row.ability_profile,
     compositeIndex: row.composite_index,
     iqEstimate: row.iq_estimate,
-    rulePayload: row.rule_payload,
+    rulePayload: (row.rule_payload as RulePayload | null) ?? null,
     insightProse: row.insight_prose,
     actionPlanProse: row.action_plan_prose,
   };
