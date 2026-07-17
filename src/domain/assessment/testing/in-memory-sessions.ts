@@ -28,6 +28,12 @@ export function createInMemoryDomainSessionRepository(): DomainSessionRepository
     async save(session) {
       byId.set(session.id, { ...session });
     },
+    async deleteByAttemptIds(attemptIds) {
+      const set = new Set(attemptIds);
+      for (const [id, s] of byId) {
+        if (set.has(s.attemptId)) byId.delete(id);
+      }
+    },
   };
 }
 
@@ -50,6 +56,12 @@ export function createInMemoryResponseRepository(): ResponseRepository {
       byKey.set(key(response.domainSessionId, response.itemId), {
         ...response,
       });
+    },
+    async deleteByAttemptIds(attemptIds) {
+      const set = new Set(attemptIds);
+      for (const [k, r] of byKey) {
+        if (set.has(r.attemptId)) byKey.delete(k);
+      }
     },
   };
 }

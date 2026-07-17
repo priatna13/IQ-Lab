@@ -5,6 +5,7 @@ import {
 } from "@/domain/assessment";
 import { createInsForgeAttemptRepository } from "./insforge-attempt-repository";
 import { createInsForgeDomainSessionRepository } from "./insforge-domain-session-repository";
+import { createInsForgeIntegrityEventRepository } from "./insforge-integrity-repository";
 import { createInsForgeNormSampleRepository } from "./insforge-norm-sample-repository";
 import { createInsForgeResponseRepository } from "./insforge-response-repository";
 import { createInsForgeResultSnapshotRepository } from "./insforge-result-snapshot-repository";
@@ -25,6 +26,7 @@ export function createServerAssessmentPorts(): AssessmentPorts {
     responses: createInsForgeResponseRepository(),
     resultSnapshots: createInsForgeResultSnapshotRepository(),
     normSamples: createInsForgeNormSampleRepository(),
+    integrityEvents: createInsForgeIntegrityEventRepository(),
     insightNarrator: createHybridInsightNarrator(llm),
   };
 }

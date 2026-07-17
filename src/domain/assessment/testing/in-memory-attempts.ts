@@ -31,5 +31,20 @@ export function createInMemoryAttemptRepository(): AttemptRepository {
         )
         .map((a) => ({ ...a }));
     },
+    async listAllByParticipant(participantId: ParticipantId) {
+      return [...byId.values()]
+        .filter((a) => a.participantId === participantId)
+        .map((a) => ({ ...a }));
+    },
+    async deleteAllByParticipant(participantId: ParticipantId) {
+      const ids: AttemptId[] = [];
+      for (const [id, attempt] of byId) {
+        if (attempt.participantId === participantId) {
+          ids.push(id);
+          byId.delete(id);
+        }
+      }
+      return ids;
+    },
   };
 }

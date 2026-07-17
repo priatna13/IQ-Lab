@@ -61,5 +61,9 @@ export function createInsForgeResponseRepository(): ResponseRepository {
       const { error } = await client.database.from("responses").upsert([row]);
       if (error) throw new Error(error.message ?? "upsert response failed");
     },
+    async deleteByAttemptIds(attemptIds) {
+      if (attemptIds.length === 0) return;
+      void attemptIds; // CASCADE from attempts delete
+    },
   };
 }

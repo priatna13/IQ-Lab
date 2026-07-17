@@ -21,6 +21,11 @@ export {
   isCoreNormSample,
 } from "./norm-sample";
 export type { NormSample, NormAgeBucket } from "./norm-sample";
+export { recordIntegrityEvent } from "./integrity";
+export { INTEGRITY_POLICY } from "./integrity-types";
+export type { IntegrityEvent, IntegrityEventType } from "./integrity-types";
+export { deleteParticipantAssessmentData } from "./delete-participant-data";
+export type { DeleteParticipantDataResult } from "./delete-participant-data";
 export {
   buildRulePayload,
   sanitizeRulePayload,

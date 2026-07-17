@@ -95,5 +95,38 @@ export function createInsForgeAttemptRepository(): AttemptRepository {
       }
       return ((data ?? []) as AttemptRow[]).map(mapRow);
     },
+
+    async listAllByParticipant(participantId: ParticipantId) {
+      const client = await createInsForgeServerClient();
+      const { data, error } = await client.database
+        .from("attempts")
+        .select("*")
+        .eq("participant_id", participantId);
+      if (error) {
+        throw new Error(error.message ?? "Failed to list Attempts");
+      }
+      return ((data ?? []) as AttemptRow[]).map(mapRow);
+    },
+
+    async deleteAllByParticipant(participantId: ParticipantId) {
+      const client = await createInsForgeServerClient();
+      const { data, error: listError } = await client.database
+        .from("attempts")
+        .select("id")
+        .eq("participant_id", participantId);
+      if (listError) {
+        throw new Error(listError.message ?? "Failed to list Attempts");
+      }
+      const ids = ((data ?? []) as Array<{ id: string }>).map((r) => r.id);
+      if (ids.length === 0) return [];
+      const { error } = await client.database
+        .from("attempts")
+        .delete()
+        .eq("participant_id", participantId);
+      if (error) {
+        throw new Error(error.message ?? "Failed to delete Attempts");
+      }
+      return ids;
+    },
   };
 }

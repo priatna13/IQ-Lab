@@ -27,6 +27,7 @@ import {
 } from "./testing/in-memory-sessions";
 import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
 import { createInMemoryNormSampleRepository } from "./testing/in-memory-norm-samples";
+import { createInMemoryIntegrityEventRepository } from "./testing/in-memory-integrity";
 
 function sampleProfile(): AbilityProfile {
   return [
@@ -51,6 +52,7 @@ function buildPorts(narrator = createHybridInsightNarrator()): AssessmentPorts {
     responses: createInMemoryResponseRepository(),
     resultSnapshots: createInMemoryResultSnapshotRepository(),
     normSamples: createInMemoryNormSampleRepository(),
+    integrityEvents: createInMemoryIntegrityEventRepository(),
     insightNarrator: narrator,
   };
 }

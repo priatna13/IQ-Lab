@@ -20,6 +20,7 @@ import {
 } from "./testing/in-memory-sessions";
 import { createInMemoryNormSampleRepository } from "./testing/in-memory-norm-samples";
 import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
+import { createInMemoryIntegrityEventRepository } from "./testing/in-memory-integrity";
 
 function buildPorts(iso = "2026-01-01T00:00:00.000Z"): AssessmentPorts & {
   setNow: (iso: string) => void;
@@ -42,6 +43,7 @@ function buildPorts(iso = "2026-01-01T00:00:00.000Z"): AssessmentPorts & {
     responses: createInMemoryResponseRepository(),
     resultSnapshots: createInMemoryResultSnapshotRepository(),
     normSamples: samples,
+    integrityEvents: createInMemoryIntegrityEventRepository(),
     samples,
   };
 }

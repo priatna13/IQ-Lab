@@ -17,6 +17,7 @@ import {
 } from "./testing/in-memory-sessions";
 import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
 import { createInMemoryNormSampleRepository } from "./testing/in-memory-norm-samples";
+import { createInMemoryIntegrityEventRepository } from "./testing/in-memory-integrity";
 import { AssessmentError } from "./types";
 
 function buildPorts(iso = "2026-07-17T12:00:00.000Z"): AssessmentPorts & {
@@ -38,6 +39,7 @@ function buildPorts(iso = "2026-07-17T12:00:00.000Z"): AssessmentPorts & {
     responses: createInMemoryResponseRepository(),
     resultSnapshots: createInMemoryResultSnapshotRepository(),
     normSamples: createInMemoryNormSampleRepository(),
+    integrityEvents: createInMemoryIntegrityEventRepository(),
     graceWindowMs: 30_000,
   };
 }

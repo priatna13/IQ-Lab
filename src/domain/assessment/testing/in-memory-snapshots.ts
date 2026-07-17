@@ -19,5 +19,14 @@ export function createInMemoryResultSnapshotRepository(): ResultSnapshotReposito
       byAttempt.set(snapshot.attemptId, copy);
       byId.set(snapshot.id, copy);
     },
+    async deleteByAttemptIds(attemptIds) {
+      for (const attemptId of attemptIds) {
+        const s = byAttempt.get(attemptId);
+        if (s) {
+          byId.delete(s.id);
+          byAttempt.delete(attemptId);
+        }
+      }
+    },
   };
 }

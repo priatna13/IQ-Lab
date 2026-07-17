@@ -92,5 +92,10 @@ export function createInsForgeDomainSessionRepository(): DomainSessionRepository
         .upsert([toRow(session)]);
       if (error) throw new Error(error.message ?? "save domain session failed");
     },
+    async deleteByAttemptIds(attemptIds) {
+      if (attemptIds.length === 0) return;
+      // Covered by ON DELETE CASCADE when attempts are deleted; no-op safe path.
+      void attemptIds;
+    },
   };
 }

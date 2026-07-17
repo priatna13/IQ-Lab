@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { PublicDomainRunnerView } from "@/domain/assessment";
 import {
   earlyFinishAction,
+  recordIntegrityEventAction,
   refreshRunnerViewAction,
   saveResponseAction,
   syncTimerCloseAction,
@@ -28,6 +29,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   const [view, setView] = useState(initialView);
   const [index, setIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [integrityWarning, setIntegrityWarning] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [nowMs, setNowMs] = useState(() => Date.now());
 
@@ -44,6 +46,44 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     const id = window.setInterval(() => setNowMs(Date.now()), 250);
     return () => window.clearInterval(id);
   }, []);
+
+  // Light integrity: blur / tab hide — record only, never auto-fail
+  useEffect(() => {
+    if (view.session.status === "closed") return;
+
+    const log = (type: "blur" | "visibility_hidden" | "focus_return") => {
+      void recordIntegrityEventAction({
+        attemptId,
+        domainSessionId: view.session.id,
+        type,
+      });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        setIntegrityWarning(
+          "Anda meninggalkan tab asesmen. Kerjakan dengan jujur — sinyal ini dicatat untuk kualitas data, bukan diskualifikasi otomatis.",
+        );
+        log("visibility_hidden");
+      } else {
+        log("focus_return");
+      }
+    };
+
+    const onBlur = () => {
+      setIntegrityWarning(
+        "Jendela asesmen kehilangan fokus. Tetap di halaman ini selama domain berlangsung.",
+      );
+      log("blur");
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, [attemptId, view.session.id, view.session.status]);
 
   const remainingMs = endsAtMs - nowMs;
   const inGrace = nowMs >= endsAtMs && nowMs < graceEndsAtMs;
@@ -204,6 +244,19 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             ))}
           </div>
         </div>
+      ) : null}
+
+      {integrityWarning ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          {integrityWarning}
+          <button
+            type="button"
+            className="ml-2 underline"
+            onClick={() => setIntegrityWarning(null)}
+          >
+            Tutup
+          </button>
+        </p>
       ) : null}
 
       {error ? (

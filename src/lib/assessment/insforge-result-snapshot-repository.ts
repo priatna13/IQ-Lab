@@ -84,5 +84,9 @@ export function createInsForgeResultSnapshotRepository(): ResultSnapshotReposito
         .upsert([row]);
       if (error) throw new Error(error.message ?? "save snapshot failed");
     },
+    async deleteByAttemptIds(attemptIds) {
+      if (attemptIds.length === 0) return;
+      void attemptIds; // CASCADE from attempts delete
+    },
   };
 }

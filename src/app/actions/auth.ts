@@ -11,6 +11,9 @@ import {
   evaluateAgeBand,
   type AgeBandChoice,
 } from "@/domain/participant/age-band";
+import { deleteParticipantAssessmentData } from "@/domain/assessment";
+import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
+import { getSessionUser } from "@/lib/auth/session";
 
 function appOrigin(): string {
   return (
@@ -177,4 +180,42 @@ export async function saveAgeBandAction(
   }
 
   redirect("/dashboard");
+}
+
+/**
+ * Delete identifiable assessment data, then sign out.
+ * Norm Samples (anonymous) are retained for internal norm science.
+ * InsForge auth identity is signed out; full auth.user purge depends on platform support.
+ */
+export async function deleteAccountAction(): Promise<AuthActionResult> {
+  const user = await getSessionUser();
+  if (!user) {
+    return { ok: false, error: "Sesi tidak valid." };
+  }
+
+  try {
+    const ports = createServerAssessmentPorts();
+    await deleteParticipantAssessmentData(ports, {
+      participantId: user.id,
+    });
+
+    // Clear age_band profile field if still present
+    try {
+      const client = await createInsForgeServerClient();
+      await client.auth.setProfile({ [AGE_BAND_PROFILE_KEY]: null });
+    } catch {
+      // non-fatal
+    }
+
+    const auth = await createInsForgeAuthActions();
+    await auth.signOut();
+  } catch (err) {
+    console.error(err);
+    return {
+      ok: false,
+      error: "Gagal menghapus data akun. Coba lagi.",
+    };
+  }
+
+  redirect("/");
 }

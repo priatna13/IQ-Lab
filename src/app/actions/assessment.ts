@@ -10,9 +10,11 @@ import {
   earlyFinishDomainSession,
   getDomainRunnerView,
   getResultSnapshotForAttempt,
+  recordIntegrityEvent,
   startDomainSession,
   toPublicResultReport,
   upsertResponse,
+  type IntegrityEventType,
   type PublicDomainRunnerView,
   type PublicResultReport,
   type Track,
@@ -289,5 +291,31 @@ export async function loadReportAction(
     }
     console.error(err);
     return { ok: false, error: "Gagal memuat hasil." };
+  }
+}
+
+export async function recordIntegrityEventAction(input: {
+  attemptId: string;
+  domainSessionId?: string | null;
+  type: IntegrityEventType;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    await recordIntegrityEvent(ports, {
+      attemptId: input.attemptId,
+      participantId: user.id,
+      domainSessionId: input.domainSessionId,
+      type: input.type,
+    });
+    return { ok: true };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal mencatat sinyal integritas." };
   }
 }

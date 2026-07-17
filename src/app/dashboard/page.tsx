@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { getSessionUser } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
+import { DeleteAccountButton } from "@/components/account/delete-account-button";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import {
   getOpenAttempt,
@@ -173,6 +174,13 @@ export default async function DashboardPage() {
                 Keluar
               </button>
             </form>
+          </div>
+
+          <div className="border-t border-slate-100 pt-6">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Privasi
+            </p>
+            <DeleteAccountButton />
           </div>
         </div>
       </main>
