@@ -18,6 +18,7 @@ import {
   createInMemoryResponseRepository,
 } from "./testing/in-memory-sessions";
 import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
+import { createInMemoryNormSampleRepository } from "./testing/in-memory-norm-samples";
 
 function buildPorts(): AssessmentPorts {
   return {
@@ -27,6 +28,7 @@ function buildPorts(): AssessmentPorts {
     domainSessions: createInMemoryDomainSessionRepository(),
     responses: createInMemoryResponseRepository(),
     resultSnapshots: createInMemoryResultSnapshotRepository(),
+    normSamples: createInMemoryNormSampleRepository(),
   };
 }
 
@@ -72,6 +74,7 @@ describe("completeAttempt → Result Snapshot", () => {
       completeAttempt(ports, {
         attemptId: attempt.id,
         participantId: "p_1",
+        ageBand: "18_45",
       }),
     ).rejects.toMatchObject({ code: "INVALID_STATE" });
   });
@@ -88,6 +91,7 @@ describe("completeAttempt → Result Snapshot", () => {
     const { attempt: completed, snapshot } = await completeAttempt(ports, {
       attemptId: attempt.id,
       participantId: "p_1",
+      ageBand: "18_45",
     });
 
     expect(completed.status).toBe("completed");
@@ -112,6 +116,7 @@ describe("completeAttempt → Result Snapshot", () => {
     const again = await completeAttempt(ports, {
       attemptId: attempt.id,
       participantId: "p_1",
+      ageBand: "18_45",
     });
     expect(again.snapshot.id).toBe(snapshot.id);
     expect(again.snapshot.compositeIndex).toBe(snapshot.compositeIndex);

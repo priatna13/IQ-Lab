@@ -4,7 +4,11 @@ import { SiteHeader } from "@/components/site-header";
 import { StartAttemptForm } from "@/components/assessment/start-attempt-form";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
-import { getOpenAttempt, toPublicContentVersion } from "@/domain/assessment";
+import {
+  getOpenAttempt,
+  getRetakeCooldownUntil,
+  toPublicContentVersion,
+} from "@/domain/assessment";
 
 export default async function StartAssessmentPage() {
   const user = await getSessionUser();
@@ -15,6 +19,12 @@ export default async function StartAssessmentPage() {
   const open = await getOpenAttempt(ports, user.id);
   if (open) {
     redirect(`/asesmen/${open.id}`);
+  }
+
+  const completed = await ports.attempts.listCompletedByParticipant(user.id);
+  const cooldownUntil = getRetakeCooldownUntil(completed, new Date());
+  if (cooldownUntil) {
+    redirect("/dashboard");
   }
 
   const cv = await ports.content.getPublished();
@@ -36,6 +46,7 @@ export default async function StartAssessmentPage() {
         <p className="mt-2 text-sm text-slate-600">
           Estimasi total ~60–90+ menit di 9 domain. Anda dapat{" "}
           <strong>jeda antar domain</strong> (bukan di tengah timer domain).
+          Setelah selesai, retake dibatasi 1 penyelesaian / 90 hari.
         </p>
 
         {pub ? (

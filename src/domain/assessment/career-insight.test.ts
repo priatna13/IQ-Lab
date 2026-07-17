@@ -26,6 +26,7 @@ import {
   createInMemoryResponseRepository,
 } from "./testing/in-memory-sessions";
 import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
+import { createInMemoryNormSampleRepository } from "./testing/in-memory-norm-samples";
 
 function sampleProfile(): AbilityProfile {
   return [
@@ -49,6 +50,7 @@ function buildPorts(narrator = createHybridInsightNarrator()): AssessmentPorts {
     domainSessions: createInMemoryDomainSessionRepository(),
     responses: createInMemoryResponseRepository(),
     resultSnapshots: createInMemoryResultSnapshotRepository(),
+    normSamples: createInMemoryNormSampleRepository(),
     insightNarrator: narrator,
   };
 }
@@ -140,6 +142,7 @@ describe("completeAttempt with hybrid insight", () => {
     const { snapshot } = await completeAttempt(ports, {
       attemptId: attempt.id,
       participantId: "p_1",
+      ageBand: "18_45",
     });
 
     expect(snapshot.rulePayload).not.toBeNull();
@@ -170,6 +173,7 @@ describe("completeAttempt with hybrid insight", () => {
     const { snapshot } = await completeAttempt(ports, {
       attemptId: attempt.id,
       participantId: "p_1",
+      ageBand: "18_45",
     });
 
     expect(snapshot.insightProse).toMatch(/^LLM insight/);

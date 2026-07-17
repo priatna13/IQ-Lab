@@ -4,7 +4,10 @@ import { SiteHeader } from "@/components/site-header";
 import { getSessionUser } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
-import { getOpenAttempt } from "@/domain/assessment";
+import {
+  getOpenAttempt,
+  getRetakeCooldownUntil,
+} from "@/domain/assessment";
 
 export default async function DashboardPage() {
   const user = await getSessionUser();
@@ -19,6 +22,10 @@ export default async function DashboardPage() {
   const openAttempt = await getOpenAttempt(ports, user.id);
   const completedAttempts =
     await ports.attempts.listCompletedByParticipant(user.id);
+  const cooldownUntil = getRetakeCooldownUntil(
+    completedAttempts,
+    new Date(),
+  );
 
   return (
     <>
@@ -86,6 +93,22 @@ export default async function DashboardPage() {
               >
                 Lanjutkan asesmen
               </Link>
+            </div>
+          ) : cooldownUntil ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-medium text-lab-navy">
+                Jeda retake 90 hari aktif
+              </p>
+              <p className="mt-1 text-sm text-slate-600">
+                Anda dapat memulai Attempt baru setelah{" "}
+                <strong>
+                  {cooldownUntil.toLocaleString("id-ID", {
+                    dateStyle: "long",
+                    timeStyle: "short",
+                  })}
+                </strong>
+                . Hasil sebelumnya tetap bisa dilihat di bawah.
+              </p>
             </div>
           ) : (
             <div className="rounded-lg border border-dashed border-slate-300 p-4">

@@ -10,6 +10,18 @@ export {
 } from "./complete-attempt";
 export type { CompleteAttemptResult } from "./complete-attempt";
 export {
+  RETAKE_COOLDOWN_MS,
+  getRetakeCooldownUntil,
+  isRetakeCooldownActive,
+  getLatestCompletedAttempt,
+} from "./retake-policy";
+export {
+  buildNormSample,
+  ageBandToNormBucket,
+  isCoreNormSample,
+} from "./norm-sample";
+export type { NormSample, NormAgeBucket } from "./norm-sample";
+export {
   buildRulePayload,
   sanitizeRulePayload,
   CAREER_RULES_VERSION,

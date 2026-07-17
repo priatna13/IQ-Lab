@@ -1,5 +1,9 @@
 import type { AssessmentPorts } from "./ports";
 import {
+  getRetakeCooldownUntil,
+  RETAKE_COOLDOWN_MS,
+} from "./retake-policy";
+import {
   AssessmentError,
   type Attempt,
   type CreateAttemptInput,
@@ -68,6 +72,21 @@ export async function createAttempt(
     throw new AssessmentError(
       "OPEN_ATTEMPT_EXISTS",
       "At most one Open Attempt is allowed per Participant",
+    );
+  }
+
+  const completed = await ports.attempts.listCompletedByParticipant(
+    input.participant.id,
+  );
+  const cooldownUntil = getRetakeCooldownUntil(
+    completed,
+    ports.clock.now(),
+    ports.retakeCooldownMs ?? RETAKE_COOLDOWN_MS,
+  );
+  if (cooldownUntil) {
+    throw new AssessmentError(
+      "RETAKE_COOLDOWN",
+      `Retake cooldown active until ${cooldownUntil.toISOString()}`,
     );
   }
 

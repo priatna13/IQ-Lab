@@ -10,8 +10,14 @@ import {
   iqEstimateFromComposite,
   NORM_VERSION_SYNTHETIC_V1,
 } from "./scoring";
+import { buildNormSample } from "./norm-sample";
 import type { AbilityProfile, ResultSnapshot } from "./result-types";
-import { AssessmentError, type Attempt, type ParticipantId } from "./types";
+import {
+  AssessmentError,
+  type AgeBand,
+  type Attempt,
+  type ParticipantId,
+} from "./types";
 
 function newSnapshotId(): string {
   return `rs_${crypto.randomUUID()}`;
@@ -28,7 +34,12 @@ export type CompleteAttemptResult = {
  */
 export async function completeAttempt(
   ports: AssessmentPorts,
-  input: { attemptId: string; participantId: ParticipantId },
+  input: {
+    attemptId: string;
+    participantId: ParticipantId;
+    /** Required for Norm Sample age bucket (not stored as PII on sample). */
+    ageBand: AgeBand;
+  },
 ): Promise<CompleteAttemptResult> {
   const attempt = await ports.attempts.findById(input.attemptId);
   if (!attempt || attempt.participantId !== input.participantId) {
@@ -134,6 +145,23 @@ export async function completeAttempt(
     isPrimary,
   };
   await ports.attempts.save(completed);
+
+  // Norm Sample only for Primary Completed — no account/attempt linkage fields
+  if (isPrimary) {
+    const sample = buildNormSample({
+      ageBand: input.ageBand,
+      contentVersionId: attempt.contentVersionId,
+      normVersion: NORM_VERSION_SYNTHETIC_V1,
+      track: attempt.track,
+      abilityProfile,
+      compositeIndex,
+      iqEstimate,
+      primaryCompletedAt: frozenAt,
+    });
+    if (sample) {
+      await ports.normSamples.save(sample);
+    }
+  }
 
   return { attempt: completed, snapshot };
 }

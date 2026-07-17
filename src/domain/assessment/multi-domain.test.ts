@@ -16,6 +16,7 @@ import {
   createInMemoryResponseRepository,
 } from "./testing/in-memory-sessions";
 import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
+import { createInMemoryNormSampleRepository } from "./testing/in-memory-norm-samples";
 
 function buildPorts(): AssessmentPorts {
   return {
@@ -25,6 +26,7 @@ function buildPorts(): AssessmentPorts {
     domainSessions: createInMemoryDomainSessionRepository(),
     responses: createInMemoryResponseRepository(),
     resultSnapshots: createInMemoryResultSnapshotRepository(),
+    normSamples: createInMemoryNormSampleRepository(),
   };
 }
 

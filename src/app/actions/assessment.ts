@@ -77,6 +77,13 @@ export async function startAttemptAction(
             "Anda masih punya Attempt berjalan. Lanjutkan yang ada, atau selesaikan dulu.",
         };
       }
+      if (err.code === "RETAKE_COOLDOWN") {
+        return {
+          ok: false,
+          error:
+            "Jeda retake 90 hari masih aktif setelah penyelesaian terakhir. Anda tetap bisa melihat hasil sebelumnya di dasbor.",
+        };
+      }
       return { ok: false, error: err.message };
     }
     if (isNextRedirect(err)) throw err;
@@ -239,9 +246,13 @@ export async function completeAttemptAction(
 
   const ports = createServerAssessmentPorts();
   try {
+    if (!user.ageBand || user.ageBand === "under_18") {
+      return { ok: false, error: "Rentang usia tidak valid untuk menyelesaikan asesmen." };
+    }
     await completeAttempt(ports, {
       attemptId,
       participantId: user.id,
+      ageBand: user.ageBand,
     });
     redirect(`/asesmen/${attemptId}/hasil`);
   } catch (err) {

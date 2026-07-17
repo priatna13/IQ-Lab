@@ -4,12 +4,12 @@
 
 **Blocked by:** 06 — Complete → Result Snapshot (skor + norma sintetik)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] First Completed Attempt is marked Primary; later Completeds after cooldown are not Primary
-- [ ] After a Completed Attempt, new Attempt is rejected for 90 days (fake clock in tests)
-- [ ] During cooldown, prior Report remains readable
-- [ ] Abandoned Attempts do not start cooldown
-- [ ] Norm Sample written only for Primary Completed, without account/PII linkage fields
-- [ ] Norm Sample stores Age Band (+ Content Version as needed); 46+ not mixed into core sample semantics
-- [ ] Boundary tests cover primary, cooldown, abandon vs complete, and sample eligibility
+- [x] First Completed Attempt is marked Primary; later Completeds after cooldown are not Primary
+- [x] After a Completed Attempt, new Attempt is rejected for 90 days (fake clock in tests)
+- [x] During cooldown, prior Report remains readable
+- [x] Abandoned Attempts do not start cooldown
+- [x] Norm Sample written only for Primary Completed, without account/PII linkage fields
+- [x] Norm Sample stores Age Band (+ Content Version as needed); 46+ not mixed into core sample semantics
+- [x] Boundary tests cover primary, cooldown, abandon vs complete, and sample eligibility

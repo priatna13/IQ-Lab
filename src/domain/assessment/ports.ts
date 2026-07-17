@@ -1,5 +1,6 @@
 import type { ContentCatalog } from "./content-catalog";
 import type { InsightNarrator } from "./insight-narrator";
+import type { NormSample } from "./norm-sample";
 import type { ResultSnapshot } from "./result-types";
 import type {
   DomainSession,
@@ -24,6 +25,11 @@ export type ResultSnapshotRepository = {
   findByAttemptId(attemptId: AttemptId): Promise<ResultSnapshot | null>;
   findById(id: string): Promise<ResultSnapshot | null>;
   save(snapshot: ResultSnapshot): Promise<void>;
+};
+
+/** Append-only anonymized samples — no PII, no participant linkage. */
+export type NormSampleRepository = {
+  save(sample: NormSample): Promise<void>;
 };
 
 export type DomainSessionRepository = {
@@ -52,8 +58,11 @@ export type AssessmentPorts = {
   domainSessions: DomainSessionRepository;
   responses: ResponseRepository;
   resultSnapshots: ResultSnapshotRepository;
+  normSamples: NormSampleRepository;
   /** Hybrid Insight narrator (rule payload → prose). Defaults to template-only if omitted in tests. */
   insightNarrator?: InsightNarrator;
   /** Grace after endsAt for in-flight answer updates only. */
   graceWindowMs?: number;
+  /** Override retake window in tests (default 90 days). */
+  retakeCooldownMs?: number;
 };
