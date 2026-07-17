@@ -1,6 +1,10 @@
 export { createAttempt, getOpenAttempt } from "./create-attempt";
 export type { CreateAttemptCommand } from "./create-attempt";
 export {
+  abandonAttempt,
+  attemptTriggersRetakeCooldown,
+} from "./abandon-attempt";
+export {
   startDomainSession,
   upsertResponse,
   earlyFinishDomainSession,

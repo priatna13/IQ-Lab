@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
+import { AbandonAttemptButton } from "@/components/assessment/abandon-attempt-button";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import { toPublicContentVersion } from "@/domain/assessment";
@@ -19,6 +20,10 @@ export default async function AttemptProgressPage({ params }: Props) {
 
   if (!attempt || attempt.participantId !== user.id) {
     notFound();
+  }
+
+  if (attempt.status === "abandoned") {
+    redirect("/dashboard");
   }
 
   const cv = await ports.content.getById(attempt.contentVersionId);
@@ -130,11 +135,29 @@ export default async function AttemptProgressPage({ params }: Props) {
               Snapshot menyusul di ticket berikutnya.
             </p>
           ) : (
-            <p className="mt-6 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
-              Kerjakan domain berurutan. Timer berlaku di dalam domain; Anda
-              boleh jeda antar domain lewat dasbor.
-            </p>
+            <div className="mt-6 space-y-3">
+              <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                Kerjakan domain berurutan. Timer hanya berlaku di dalam domain
+                aktif (sisa waktu tidak dipindah ke domain berikutnya). Anda
+                boleh keluar ke dasbor dan melanjutkan Open Attempt yang sama
+                nanti.
+              </p>
+              {nextDomainId ? (
+                <Link
+                  href={`/asesmen/${attemptId}/domain/${nextDomainId}`}
+                  className="inline-flex rounded-lg bg-lab-teal px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Lanjut domain berikutnya
+                </Link>
+              ) : null}
+            </div>
           )}
+
+          {attempt.status === "in_progress" ? (
+            <div className="mt-8 border-t border-slate-100 pt-6">
+              <AbandonAttemptButton attemptId={attempt.id} />
+            </div>
+          ) : null}
         </div>
       </main>
     </>

@@ -74,6 +74,10 @@ export default async function DashboardPage() {
                 Dimulai {openAttempt.startedAt.toLocaleString("id-ID")} · versi{" "}
                 {openAttempt.contentVersionId}
               </p>
+              <p className="mt-2 text-xs text-slate-600">
+                Progress domain tersimpan. Lanjutkan kapan saja — jeda antar
+                domain diizinkan.
+              </p>
               <Link
                 href={`/asesmen/${openAttempt.id}`}
                 className="mt-3 inline-flex rounded-lg bg-lab-teal px-4 py-2 text-sm font-semibold text-white"

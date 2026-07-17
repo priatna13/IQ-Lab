@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import {
+  abandonAttempt,
   AssessmentError,
   closeDomainSessionIfTimedOut,
   createAttempt,
@@ -200,5 +201,28 @@ export async function refreshRunnerViewAction(
     }
     console.error(err);
     return { ok: false, error: "Gagal memuat runner." };
+  }
+}
+
+export async function abandonAttemptAction(
+  attemptId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    await abandonAttempt(ports, {
+      attemptId,
+      participantId: user.id,
+    });
+    redirect("/dashboard");
+  } catch (err) {
+    if (isNextRedirect(err)) throw err;
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal membatalkan Attempt." };
   }
 }
