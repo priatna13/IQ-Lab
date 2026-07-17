@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@insforge/sdk/ssr/middleware";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/onboarding"];
+const PROTECTED_PREFIXES = ["/dashboard", "/onboarding", "/asesmen"];
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({ request });

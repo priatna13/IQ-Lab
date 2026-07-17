@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { getSessionUser } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
+import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
+import { getOpenAttempt } from "@/domain/assessment";
 
 export default async function DashboardPage() {
   const user = await getSessionUser();
@@ -12,6 +14,9 @@ export default async function DashboardPage() {
   if (!user.ageBand) {
     redirect("/onboarding/usia");
   }
+
+  const ports = createServerAssessmentPorts();
+  const openAttempt = await getOpenAttempt(ports, user.id);
 
   return (
     <>
@@ -43,7 +48,9 @@ export default async function DashboardPage() {
             <div>
               <dt className="text-slate-500">Status asesmen</dt>
               <dd className="font-medium text-lab-navy">
-                Belum ada Attempt (menyusul ticket berikutnya)
+                {openAttempt
+                  ? "Ada Attempt berjalan"
+                  : "Belum ada Open Attempt"}
               </dd>
             </div>
           </dl>
@@ -55,10 +62,39 @@ export default async function DashboardPage() {
             </p>
           ) : null}
 
-          <p className="text-sm text-slate-600">
-            Pilih Track dan mulai asesmen 9 domain akan tersedia setelah
-            Content Version & runner siap.
-          </p>
+          {openAttempt ? (
+            <div className="rounded-lg border border-lab-teal/30 bg-teal-50/50 p-4">
+              <p className="text-sm font-medium text-lab-navy">
+                Attempt{" "}
+                {openAttempt.track === "explore"
+                  ? "Jelajahi potensi"
+                  : "Rancang langkah karir"}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Dimulai {openAttempt.startedAt.toLocaleString("id-ID")} · versi{" "}
+                {openAttempt.contentVersionId}
+              </p>
+              <Link
+                href={`/asesmen/${openAttempt.id}`}
+                className="mt-3 inline-flex rounded-lg bg-lab-teal px-4 py-2 text-sm font-semibold text-white"
+              >
+                Lanjutkan asesmen
+              </Link>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-300 p-4">
+              <p className="text-sm text-slate-600">
+                Siap memulai asesmen 9 domain? Pilih Track dulu — item sama,
+                framing insight berbeda.
+              </p>
+              <Link
+                href="/asesmen/mulai"
+                className="mt-3 inline-flex rounded-lg bg-lab-teal px-4 py-2 text-sm font-semibold text-white"
+              >
+                Mulai asesmen
+              </Link>
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-3 pt-2">
             <Link

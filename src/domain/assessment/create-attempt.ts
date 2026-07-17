@@ -3,19 +3,27 @@ import {
   AssessmentError,
   type Attempt,
   type CreateAttemptInput,
+  type Track,
 } from "./types";
 
 function newAttemptId(): string {
   return `att_${crypto.randomUUID()}`;
 }
 
+export type CreateAttemptCommand = {
+  participant: CreateAttemptInput["participant"];
+  track: Track;
+  /** If omitted, pins the currently published Content Version. */
+  contentVersionId?: string;
+};
+
 /**
  * Create an Open Attempt for a Participant.
- * Foundation invariant: unauthenticated callers are rejected.
+ * Pins Track + Content Version; enforces single Open Attempt.
  */
 export async function createAttempt(
   ports: AssessmentPorts,
-  input: CreateAttemptInput,
+  input: CreateAttemptCommand,
 ): Promise<Attempt> {
   if (input.participant === null) {
     throw new AssessmentError(
@@ -29,6 +37,28 @@ export async function createAttempt(
       "AGE_NOT_ELIGIBLE",
       "Participants under 18 are not eligible for Assessment",
     );
+  }
+
+  if (input.track !== "explore" && input.track !== "career") {
+    throw new AssessmentError("INVALID_STATE", "Track must be explore or career");
+  }
+
+  const contentVersion = input.contentVersionId
+    ? await ports.content.getById(input.contentVersionId)
+    : await ports.content.getPublished();
+
+  if (!contentVersion || !contentVersion.published) {
+    throw new AssessmentError(
+      "NOT_FOUND",
+      "Published Content Version not found",
+    );
+  }
+
+  if (
+    input.contentVersionId &&
+    contentVersion.id !== input.contentVersionId
+  ) {
+    throw new AssessmentError("NOT_FOUND", "Content Version mismatch");
   }
 
   const existing = await ports.attempts.findOpenByParticipant(
@@ -45,7 +75,7 @@ export async function createAttempt(
     id: newAttemptId(),
     participantId: input.participant.id,
     track: input.track,
-    contentVersionId: input.contentVersionId,
+    contentVersionId: contentVersion.id,
     status: "in_progress",
     startedAt: ports.clock.now(),
     completedAt: null,
@@ -55,4 +85,11 @@ export async function createAttempt(
 
   await ports.attempts.save(attempt);
   return attempt;
+}
+
+export async function getOpenAttempt(
+  ports: AssessmentPorts,
+  participantId: string,
+): Promise<Attempt | null> {
+  return ports.attempts.findOpenByParticipant(participantId);
 }

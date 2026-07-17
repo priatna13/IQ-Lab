@@ -1,3 +1,4 @@
+import type { ContentCatalog } from "./content-catalog";
 import type { Attempt, AttemptId, ParticipantId } from "./types";
 
 /** Injectable clock for timers, grace windows, and retake cooldowns. */
@@ -14,4 +15,5 @@ export type AttemptRepository = {
 export type AssessmentPorts = {
   clock: Clock;
   attempts: AttemptRepository;
+  content: ContentCatalog;
 };
