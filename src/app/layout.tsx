@@ -1,0 +1,20 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "IQ-Lab",
+  description:
+    "Asesmen multi-domain untuk pengembangan diri dan arah karir. Bukan tes IST resmi.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="id">
+      <body className="min-h-screen antialiased">{children}</body>
+    </html>
+  );
+}

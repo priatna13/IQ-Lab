@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --lab-navy: #0f2744;
+  --lab-teal: #1a6b6b;
+  --lab-warm: #c4784a;
+}
+
+body {
+  color: var(--lab-navy);
+  background: #f7f9fb;
+}
