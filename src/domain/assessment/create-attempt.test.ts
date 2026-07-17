@@ -10,6 +10,7 @@ import {
   createInMemoryDomainSessionRepository,
   createInMemoryResponseRepository,
 } from "./testing/in-memory-sessions";
+import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
 import type { AssessmentPorts } from "./ports";
 
 function buildPorts(): AssessmentPorts {
@@ -19,6 +20,7 @@ function buildPorts(): AssessmentPorts {
     content: createSeedContentCatalog(),
     domainSessions: createInMemoryDomainSessionRepository(),
     responses: createInMemoryResponseRepository(),
+    resultSnapshots: createInMemoryResultSnapshotRepository(),
   };
 }
 

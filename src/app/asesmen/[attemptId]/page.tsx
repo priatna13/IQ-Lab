@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { AbandonAttemptButton } from "@/components/assessment/abandon-attempt-button";
+import { CompleteAttemptButton } from "@/components/assessment/complete-attempt-button";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import { toPublicContentVersion } from "@/domain/assessment";
@@ -24,6 +25,9 @@ export default async function AttemptProgressPage({ params }: Props) {
 
   if (attempt.status === "abandoned") {
     redirect("/dashboard");
+  }
+  if (attempt.status === "completed") {
+    redirect(`/asesmen/${attemptId}/hasil`);
   }
 
   const cv = await ports.content.getById(attempt.contentVersionId);
@@ -130,10 +134,13 @@ export default async function AttemptProgressPage({ params }: Props) {
           ) : null}
 
           {nextDomainId === null ? (
-            <p className="mt-6 rounded-lg bg-teal-50 px-3 py-2 text-sm text-lab-navy">
-              Semua 9 domain sudah ditutup. Penyelesaian Attempt + Result
-              Snapshot menyusul di ticket berikutnya.
-            </p>
+            <div className="mt-6 space-y-3 rounded-lg bg-teal-50 p-4">
+              <p className="text-sm text-lab-navy">
+                Semua 9 domain sudah ditutup. Selesaikan Attempt untuk
+                membekukan Result Snapshot (profil, indeks, estimasi IQ).
+              </p>
+              <CompleteAttemptButton attemptId={attempt.id} />
+            </div>
           ) : (
             <div className="mt-6 space-y-3">
               <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">

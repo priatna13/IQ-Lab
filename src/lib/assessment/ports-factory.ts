@@ -5,6 +5,7 @@ import {
 import { createInsForgeAttemptRepository } from "./insforge-attempt-repository";
 import { createInsForgeDomainSessionRepository } from "./insforge-domain-session-repository";
 import { createInsForgeResponseRepository } from "./insforge-response-repository";
+import { createInsForgeResultSnapshotRepository } from "./insforge-result-snapshot-repository";
 import { systemClock } from "./system-clock";
 
 export function createServerAssessmentPorts(): AssessmentPorts {
@@ -14,5 +15,6 @@ export function createServerAssessmentPorts(): AssessmentPorts {
     content: createSeedContentCatalog(),
     domainSessions: createInsForgeDomainSessionRepository(),
     responses: createInsForgeResponseRepository(),
+    resultSnapshots: createInsForgeResultSnapshotRepository(),
   };
 }

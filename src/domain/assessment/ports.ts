@@ -1,4 +1,5 @@
 import type { ContentCatalog } from "./content-catalog";
+import type { ResultSnapshot } from "./result-types";
 import type {
   DomainSession,
   DomainSessionId,
@@ -15,6 +16,13 @@ export type AttemptRepository = {
   findOpenByParticipant(participantId: ParticipantId): Promise<Attempt | null>;
   save(attempt: Attempt): Promise<void>;
   findById(id: AttemptId): Promise<Attempt | null>;
+  listCompletedByParticipant(participantId: ParticipantId): Promise<Attempt[]>;
+};
+
+export type ResultSnapshotRepository = {
+  findByAttemptId(attemptId: AttemptId): Promise<ResultSnapshot | null>;
+  findById(id: string): Promise<ResultSnapshot | null>;
+  save(snapshot: ResultSnapshot): Promise<void>;
 };
 
 export type DomainSessionRepository = {
@@ -42,6 +50,7 @@ export type AssessmentPorts = {
   content: ContentCatalog;
   domainSessions: DomainSessionRepository;
   responses: ResponseRepository;
+  resultSnapshots: ResultSnapshotRepository;
   /** Grace after endsAt for in-flight answer updates only. */
   graceWindowMs?: number;
 };

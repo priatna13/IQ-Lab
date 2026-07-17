@@ -82,5 +82,18 @@ export function createInsForgeAttemptRepository(): AttemptRepository {
         throw new Error(error.message ?? "Failed to save Attempt");
       }
     },
+
+    async listCompletedByParticipant(participantId: ParticipantId) {
+      const client = await createInsForgeServerClient();
+      const { data, error } = await client.database
+        .from("attempts")
+        .select("*")
+        .eq("participant_id", participantId)
+        .eq("status", "completed");
+      if (error) {
+        throw new Error(error.message ?? "Failed to list completed Attempts");
+      }
+      return ((data ?? []) as AttemptRow[]).map(mapRow);
+    },
   };
 }

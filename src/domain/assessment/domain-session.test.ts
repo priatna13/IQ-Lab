@@ -15,6 +15,7 @@ import {
   createInMemoryDomainSessionRepository,
   createInMemoryResponseRepository,
 } from "./testing/in-memory-sessions";
+import { createInMemoryResultSnapshotRepository } from "./testing/in-memory-snapshots";
 import { AssessmentError } from "./types";
 
 function buildPorts(iso = "2026-07-17T12:00:00.000Z"): AssessmentPorts & {
@@ -34,6 +35,7 @@ function buildPorts(iso = "2026-07-17T12:00:00.000Z"): AssessmentPorts & {
     content: createSeedContentCatalog(),
     domainSessions: createInMemoryDomainSessionRepository(),
     responses: createInMemoryResponseRepository(),
+    resultSnapshots: createInMemoryResultSnapshotRepository(),
     graceWindowMs: 30_000,
   };
 }

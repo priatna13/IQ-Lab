@@ -5,6 +5,24 @@ export {
   attemptTriggersRetakeCooldown,
 } from "./abandon-attempt";
 export {
+  completeAttempt,
+  getResultSnapshotForAttempt,
+} from "./complete-attempt";
+export type { CompleteAttemptResult } from "./complete-attempt";
+export {
+  NORM_VERSION_SYNTHETIC_V1,
+  domainScoreFromRaw,
+  compositeIndexFromDomainScores,
+  iqEstimateFromComposite,
+} from "./scoring";
+export { toPublicResultReport } from "./result-types";
+export type {
+  AbilityProfile,
+  DomainScoreEntry,
+  PublicResultReport,
+  ResultSnapshot,
+} from "./result-types";
+export {
   startDomainSession,
   upsertResponse,
   earlyFinishDomainSession,
@@ -28,6 +46,7 @@ export type {
   Clock,
   DomainSessionRepository,
   ResponseRepository,
+  ResultSnapshotRepository,
 } from "./ports";
 export {
   DEFAULT_GRACE_WINDOW_MS,

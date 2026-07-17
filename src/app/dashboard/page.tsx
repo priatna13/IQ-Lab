@@ -17,6 +17,8 @@ export default async function DashboardPage() {
 
   const ports = createServerAssessmentPorts();
   const openAttempt = await getOpenAttempt(ports, user.id);
+  const completedAttempts =
+    await ports.attempts.listCompletedByParticipant(user.id);
 
   return (
     <>
@@ -99,6 +101,31 @@ export default async function DashboardPage() {
               </Link>
             </div>
           )}
+
+          {completedAttempts.length > 0 ? (
+            <div className="rounded-lg border border-slate-200 p-4">
+              <p className="text-sm font-medium text-lab-navy">Hasil selesai</p>
+              <ul className="mt-2 space-y-2 text-sm">
+                {completedAttempts.map((a) => (
+                  <li key={a.id} className="flex justify-between gap-2">
+                    <span className="text-slate-600">
+                      {a.track === "explore" ? "Jelajahi potensi" : "Karir"}
+                      {a.isPrimary ? " · utama" : ""}
+                      {a.completedAt
+                        ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
+                        : ""}
+                    </span>
+                    <Link
+                      href={`/asesmen/${a.id}/hasil`}
+                      className="font-semibold text-lab-teal hover:underline"
+                    >
+                      Lihat hasil
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div className="flex flex-wrap gap-3 pt-2">
             <Link

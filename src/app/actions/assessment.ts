@@ -5,12 +5,16 @@ import {
   abandonAttempt,
   AssessmentError,
   closeDomainSessionIfTimedOut,
+  completeAttempt,
   createAttempt,
   earlyFinishDomainSession,
   getDomainRunnerView,
+  getResultSnapshotForAttempt,
   startDomainSession,
+  toPublicResultReport,
   upsertResponse,
   type PublicDomainRunnerView,
+  type PublicResultReport,
   type Track,
 } from "@/domain/assessment";
 import { getSessionUser } from "@/lib/auth/session";
@@ -224,5 +228,55 @@ export async function abandonAttemptAction(
     }
     console.error(err);
     return { ok: false, error: "Gagal membatalkan Attempt." };
+  }
+}
+
+export async function completeAttemptAction(
+  attemptId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    await completeAttempt(ports, {
+      attemptId,
+      participantId: user.id,
+    });
+    redirect(`/asesmen/${attemptId}/hasil`);
+  } catch (err) {
+    if (isNextRedirect(err)) throw err;
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal menyelesaikan Attempt." };
+  }
+}
+
+export async function loadReportAction(
+  attemptId: string,
+): Promise<
+  { ok: true; report: PublicResultReport } | { ok: false; error: string }
+> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+
+  const ports = createServerAssessmentPorts();
+  try {
+    const snapshot = await getResultSnapshotForAttempt(ports, {
+      attemptId,
+      participantId: user.id,
+    });
+    if (!snapshot) {
+      return { ok: false, error: "Hasil belum tersedia." };
+    }
+    return { ok: true, report: toPublicResultReport(snapshot) };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message };
+    }
+    console.error(err);
+    return { ok: false, error: "Gagal memuat hasil." };
   }
 }

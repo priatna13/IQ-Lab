@@ -23,5 +23,13 @@ export function createInMemoryAttemptRepository(): AttemptRepository {
       const found = byId.get(id);
       return found ? { ...found } : null;
     },
+    async listCompletedByParticipant(participantId: ParticipantId) {
+      return [...byId.values()]
+        .filter(
+          (a) =>
+            a.participantId === participantId && a.status === "completed",
+        )
+        .map((a) => ({ ...a }));
+    },
   };
 }

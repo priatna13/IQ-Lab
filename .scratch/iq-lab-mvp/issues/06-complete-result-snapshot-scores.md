@@ -4,11 +4,11 @@
 
 **Blocked by:** 05 — Nine Domains: order, pause/resume, abandon
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Attempt becomes `completed` only after nine Domain Sessions closed and snapshot written
-- [ ] Result Snapshot includes scores, Norm Version, Track, Content Version, timestamps
-- [ ] Web Report renders Ability Profile, Composite Index, IQ Estimate with “Estimasi · norma sementara” (or equivalent BI) labeling
-- [ ] Snapshot is immutable on subsequent reads (no silent rescore)
-- [ ] Scoring runs only on server / boundary
-- [ ] Boundary tests: complete happy path; reject complete if a Domain remains open
+- [x] Attempt becomes `completed` only after nine Domain Sessions closed and snapshot written
+- [x] Result Snapshot includes scores, Norm Version, Track, Content Version, timestamps
+- [x] Web Report renders Ability Profile, Composite Index, IQ Estimate with “Estimasi · norma sementara” (or equivalent BI) labeling
+- [x] Snapshot is immutable on subsequent reads (no silent rescore)
+- [x] Scoring runs only on server / boundary
+- [x] Boundary tests: complete happy path; reject complete if a Domain remains open
