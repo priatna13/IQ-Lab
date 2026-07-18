@@ -57,8 +57,10 @@ Config yang **bukan** ticket MVP (OAuth Google, OpenRouter, SMTP, hosting):
 
 - `PRD.md` — product scope
 - `CONTEXT.md` — domain language
+- **`docs/DESIGN.md`** — visual UI/UX system (grill-locked; implement only after `GO BUILD`)
 - `docs/adr/` — decisions
 - `docs/SOFT-LAUNCH-OPS.md` — Track A ops checklist
+- `docs/A11Y-AND-ANALYTICS.md` — a11y / analytics / PDF storage
 - `.scratch/iq-lab-mvp/` — MVP spec & tickets (done)
 - `.scratch/item-bank-v2/` — Item Bank Content Version v2
 - Active Item Bank for new Attempts: **`cv_mvp_v2`** (v1 placeholder remains loadable for old pins)

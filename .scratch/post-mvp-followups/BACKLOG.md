@@ -77,6 +77,14 @@
 
 ---
 
+## Design system (visual)
+
+| Item | Status |
+|------|--------|
+| Grill-locked UI direction + mobile plan | **`docs/DESIGN.md`** (source of truth) |
+| Implement visual R1 | Waiting owner **`GO BUILD`** |
+| Deploy | Waiting separate explicit approve |
+
 ## Non-goals tetap (Fase 4+ / PRD non-goals)
 
 Monetisasi, share card, B2B HRD, coach portal, CAT penuh, proctoring ketat, multi-bahasa bank — **jangan masuk sprint soft-launch** kecuali PO mengubah scope.
