@@ -136,6 +136,146 @@ body {
   will-change: transform, color;
 }
 
+/*
+ * Contextual nav dock (CSS :has())
+ * Hovered item rises + enlarges; immediate neighbours get a smaller lift/scale.
+ * Icons monochrome until hover/focus; short spring; settles when pointer leaves.
+ */
+.lab-dock {
+  --dock-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --dock-settle: 320ms;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.2rem;
+  padding: 0.3rem 0.35rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgb(226 232 240 / 0.9);
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: 0 4px 20px -6px rgba(15, 39, 68, 0.08);
+  backdrop-filter: blur(10px);
+  overflow: visible;
+  transition:
+    gap var(--dock-settle) var(--dock-spring),
+    padding var(--dock-settle) var(--dock-spring),
+    box-shadow var(--dock-settle) ease;
+}
+
+.lab-dock:has(.lab-dock-item:hover),
+.lab-dock:has(.lab-dock-item:focus-visible) {
+  gap: 0.35rem;
+  padding-inline: 0.45rem;
+  box-shadow: 0 8px 28px -8px rgba(13, 148, 136, 0.18);
+}
+
+.lab-dock-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.45rem;
+  border: none;
+  border-radius: 0.85rem;
+  background: transparent;
+  color: #64748b; /* monochrome slate until focus/hover */
+  font-family: inherit;
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transform: translateY(0) scale(1);
+  transform-origin: bottom center;
+  transition:
+    transform var(--dock-settle) var(--dock-spring),
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+  will-change: transform;
+}
+
+.lab-dock-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: currentColor;
+  stroke-width: 1.5;
+}
+
+.lab-dock-label {
+  max-width: 3.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .lab-dock-item {
+    min-width: 3.15rem;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .lab-dock-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+}
+
+/* Focused / hovered: rise + enlarge + accent tint */
+.lab-dock-item:hover,
+.lab-dock-item:focus-visible {
+  z-index: 2;
+  color: var(--lab-teal);
+  background: rgb(204 251 241 / 0.55);
+  outline: none;
+  transform: translateY(-12px) scale(1.16);
+  box-shadow: 0 10px 22px -10px rgba(13, 148, 136, 0.35);
+}
+
+/* Immediate neighbours — smaller lift/scale via :has() adjacency */
+.lab-dock-item:has(+ .lab-dock-item:hover),
+.lab-dock-item:has(+ .lab-dock-item:focus-visible),
+.lab-dock-item:hover + .lab-dock-item,
+.lab-dock-item:focus-visible + .lab-dock-item {
+  z-index: 1;
+  color: #475569;
+  transform: translateY(-6px) scale(1.07);
+}
+
+/* CTA (Daftar) keeps monochrome until interaction, then stronger accent */
+.lab-dock-item--cta:hover,
+.lab-dock-item--cta:focus-visible {
+  color: #fff;
+  background: linear-gradient(135deg, var(--lab-teal), var(--lab-teal-deep));
+  box-shadow: 0 12px 24px -10px rgba(13, 148, 136, 0.45);
+}
+
+.lab-dock-item:active {
+  transform: translateY(-4px) scale(1.05);
+  transition-duration: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-dock,
+  .lab-dock-item {
+    transition: color 120ms ease, background-color 120ms ease !important;
+  }
+
+  .lab-dock-item:hover,
+  .lab-dock-item:focus-visible,
+  .lab-dock-item:has(+ .lab-dock-item:hover),
+  .lab-dock-item:has(+ .lab-dock-item:focus-visible),
+  .lab-dock-item:hover + .lab-dock-item,
+  .lab-dock-item:focus-visible + .lab-dock-item,
+  .lab-dock-item:active {
+    transform: none !important;
+  }
+}
+
 @layer components {
   /* Soft solid cards — rounded 1.25rem (DESIGN.md §5) */
   .lab-card {
