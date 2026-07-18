@@ -276,6 +276,107 @@ body {
   }
 }
 
+/* —— Brutalist button (fx-59) — pure CSS, themeable via custom properties —— */
+.btn {
+  /* Theme tokens — override these to recolour the button */
+  --primary: #f4ff2b;
+  --secondary: #0f191e;
+  --surface: #e2f1f2;
+  --bink: var(--secondary); /* ink / foreground */
+  --bsurf: var(--surface); /* surface / background */
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-family: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 24px;
+  border: 1px solid var(--bink);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--bink);
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-label {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  transition: inherit;
+}
+
+/* Shared sliding panel used by many fill effects */
+.btn::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: var(--bink);
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease;
+}
+
+.fx-59 {
+  overflow: visible;
+  box-shadow: 4px 4px 0 0 var(--bink);
+  background: var(--primary);
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+.fx-59::before {
+  display: none;
+}
+
+.fx-59:hover,
+.fx-59:focus-visible {
+  box-shadow: 0 0 0 0 var(--bink);
+  transform: translate(4px, 4px);
+  outline: none;
+}
+
+/* Secondary CTA — same brutalist motion, alternate tokens */
+.btn.fx-59--alt {
+  --primary: var(--surface);
+  --secondary: #0f191e;
+}
+
+/* Mobile full-width hero CTAs */
+.lab-actions .btn {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .lab-actions .btn {
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn::before,
+  .btn-label {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .fx-59:hover,
+  .fx-59:focus-visible {
+    transform: none;
+    box-shadow: 4px 4px 0 0 var(--bink);
+  }
+}
+
 @layer components {
   /* Soft solid cards — rounded 1.25rem (DESIGN.md §5) */
   .lab-card {

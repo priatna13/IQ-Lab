@@ -2,7 +2,6 @@ import Link from "next/link";
 import { PageShell } from "@/components/ui/page-shell";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import {
-  IconArrowRight,
   IconGift,
   IconGrid,
   IconPath,
@@ -63,18 +62,16 @@ export default async function HomePage() {
           </p>
           <div className="lab-actions">
             {user ? (
-              <Link href="/dashboard" className="lab-btn-primary lab-btn-block">
-                Buka dasbor
-                <IconArrowRight />
+              <Link href="/dashboard" className="btn fx-59">
+                <span className="btn-label">Buka dasbor</span>
               </Link>
             ) : (
               <>
-                <Link href="/daftar" className="lab-btn-primary lab-btn-block">
-                  Mulai gratis
-                  <IconArrowRight />
+                <Link href="/daftar" className="btn fx-59">
+                  <span className="btn-label">Mulai gratis</span>
                 </Link>
-                <Link href="/masuk" className="lab-btn-secondary lab-btn-block">
-                  Sudah punya akun
+                <Link href="/masuk" className="btn fx-59 fx-59--alt">
+                  <span className="btn-label">Sudah punya akun</span>
                 </Link>
               </>
             )}
@@ -286,18 +283,19 @@ export default async function HomePage() {
           {user ? (
             <Link
               href="/dashboard"
-              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-soft transition hover:bg-lab-mint sm:w-auto"
+              className="btn fx-59 shrink-0"
+              style={
+                {
+                  "--primary": "#ffffff",
+                  "--secondary": "#0f191e",
+                } as React.CSSProperties
+              }
             >
-              Ke dasbor
-              <IconArrowRight />
+              <span className="btn-label">Ke dasbor</span>
             </Link>
           ) : (
-            <Link
-              href="/daftar"
-              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-soft transition hover:bg-lab-mint sm:w-auto"
-            >
-              Mulai gratis
-              <IconArrowRight />
+            <Link href="/daftar" className="btn fx-59 shrink-0">
+              <span className="btn-label">Mulai gratis</span>
             </Link>
           )}
         </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -7,6 +7,13 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: "swap",
   variable: "--font-plus-jakarta",
   weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-jetbrains-mono",
+  weight: ["600"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +32,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={plusJakarta.variable}>
+    <html
+      lang="id"
+      className={`${plusJakarta.variable} ${jetbrainsMono.variable}`}
+    >
       <body className="flex min-h-[100dvh] max-w-[100vw] flex-col overflow-x-clip font-sans antialiased">
         <a href="#main-content" className="skip-link">
           Langsung ke konten utama
