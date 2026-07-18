@@ -19,7 +19,7 @@ export function LegalPageShell({
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-3xl px-6 py-12">
         <p className="text-sm font-medium uppercase tracking-wide text-lab-teal">
           Kebijakan produk
         </p>

@@ -24,7 +24,7 @@ export default async function SignUpPage({ searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-md px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-md px-6 py-12">
         <h1 className="text-2xl font-semibold text-lab-navy">Buat akun</h1>
         <p className="mt-2 text-sm text-slate-600">
           Gratis. Account wajib sebelum memulai asesmen.

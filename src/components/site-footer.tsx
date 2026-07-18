@@ -7,7 +7,7 @@ export function SiteFooter() {
         <p>
           © {new Date().getFullYear()} IQ-Lab · Pengembangan diri multi-domain
         </p>
-        <nav className="flex flex-wrap gap-4">
+        <nav className="flex flex-wrap gap-4" aria-label="Tautan footer">
           <Link href="/faq" className="hover:text-lab-navy hover:underline">
             FAQ & metodologi
           </Link>

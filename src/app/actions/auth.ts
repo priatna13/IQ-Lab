@@ -14,6 +14,8 @@ import {
 import { deleteParticipantAssessmentData } from "@/domain/assessment";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import { getSessionUser } from "@/lib/auth/session";
+import { trackProductEvent } from "@/lib/analytics/track";
+import { removeReportPdfsForParticipant } from "@/lib/assessment/report-pdf-storage";
 
 function appOrigin(): string {
   return (
@@ -62,6 +64,12 @@ export async function signUpAction(
     };
   }
 
+  const userId =
+    data && "user" in data && data.user && typeof data.user === "object"
+      ? String((data.user as { id?: string }).id ?? "unknown")
+      : "unknown";
+  trackProductEvent("signup_succeeded", { method: "email" }, { distinctId: userId });
+
   redirect("/onboarding/usia");
 }
 
@@ -91,6 +99,12 @@ export async function signInAction(
   const ageBand = profileData
     ? (profileData as Record<string, unknown>)[AGE_BAND_PROFILE_KEY]
     : null;
+
+  trackProductEvent(
+    "sign_in_succeeded",
+    { method: "email" },
+    { distinctId: data.user.id },
+  );
 
   if (!ageBand) {
     redirect("/onboarding/usia");
@@ -196,9 +210,23 @@ export async function deleteAccountAction(): Promise<AuthActionResult> {
 
   try {
     const ports = createServerAssessmentPorts();
+    const attempts = await ports.attempts.listAllByParticipant(user.id);
+    const pdfKeys: string[] = [];
+    for (const a of attempts) {
+      const snap = await ports.resultSnapshots.findByAttemptId(a.id);
+      if (snap?.pdfKey) pdfKeys.push(snap.pdfKey);
+    }
+    await removeReportPdfsForParticipant(user.id, pdfKeys);
+
     await deleteParticipantAssessmentData(ports, {
       participantId: user.id,
     });
+
+    trackProductEvent(
+      "account_data_deleted",
+      { attemptCount: attempts.length, pdfRemoved: pdfKeys.length },
+      { distinctId: user.id },
+    );
 
     // Clear age_band profile field if still present
     try {

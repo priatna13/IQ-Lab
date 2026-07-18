@@ -8,10 +8,17 @@ export async function SiteHeader() {
   return (
     <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-4">
-        <Link href="/" className="font-semibold text-lab-navy">
+        <Link
+          href="/"
+          className="font-semibold text-lab-navy"
+          aria-label="IQ-Lab beranda"
+        >
           IQ-Lab
         </Link>
-        <nav className="flex items-center gap-3 text-sm">
+        <nav
+          className="flex items-center gap-3 text-sm"
+          aria-label="Navigasi utama"
+        >
           <Link href="/faq" className="text-slate-600 hover:text-lab-navy">
             FAQ
           </Link>

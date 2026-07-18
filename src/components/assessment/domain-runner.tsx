@@ -204,6 +204,14 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             className={`font-mono text-xl font-semibold ${
               remainingMs < 60_000 ? "text-red-600" : "text-lab-navy"
             }`}
+            role="timer"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label={
+              inGrace
+                ? "Jendela grace aktif"
+                : `Sisa waktu ${formatRemaining(remainingMs)}`
+            }
           >
             {inGrace ? "Grace" : formatRemaining(remainingMs)}
           </p>
@@ -216,14 +224,23 @@ export function DomainRunner({ attemptId, initialView }: Props) {
       </div>
 
       <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-        <p className="font-medium text-lab-navy">Petunjuk domain</p>
-        <p className="mt-1">{view.domain.instruction}</p>
+        <p className="font-medium text-lab-navy" id="domain-instruction-title">
+          Petunjuk domain
+        </p>
+        <p className="mt-1" id="domain-instruction">
+          {view.domain.instruction}
+        </p>
       </div>
 
       {item ? (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-lab-navy">{item.prompt}</p>
-          <div className="mt-4 space-y-2">
+        <fieldset
+          className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          aria-describedby="domain-instruction"
+        >
+          <legend className="text-sm font-medium text-lab-navy">
+            Soal {index + 1} dari {view.totalItems}: {item.prompt}
+          </legend>
+          <div className="mt-4 space-y-2" role="radiogroup" aria-label="Pilihan jawaban">
             {item.choices.map((choice) => (
               <label
                 key={choice.id}
@@ -250,11 +267,14 @@ export function DomainRunner({ attemptId, initialView }: Props) {
               </label>
             ))}
           </div>
-        </div>
+        </fieldset>
       ) : null}
 
       {integrityWarning ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+        <p
+          role="status"
+          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+        >
           {integrityWarning}
           <button
             type="button"
@@ -267,7 +287,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
       ) : null}
 
       {error ? (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
         </p>
       ) : null}

@@ -50,6 +50,7 @@ Asesmen multi-domain untuk pengembangan diri & arah karir (inspired-by kerangka 
 Config yang **bukan** ticket MVP (OAuth Google, OpenRouter, SMTP, hosting):  
 → **[`docs/SOFT-LAUNCH-OPS.md`](./docs/SOFT-LAUNCH-OPS.md)**  
 → Readiness: `GET /api/ops/readiness`  
+→ A11y / analytics / PDF storage: **[`docs/A11Y-AND-ANALYTICS.md`](./docs/A11Y-AND-ANALYTICS.md)**  
 → Backlog: [`.scratch/post-mvp-followups/BACKLOG.md`](./.scratch/post-mvp-followups/BACKLOG.md)
 
 ## Docs

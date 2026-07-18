@@ -6,9 +6,49 @@
   --lab-navy: #0f2744;
   --lab-teal: #1a6b6b;
   --lab-warm: #c4784a;
+  --lab-focus: #0f766e;
 }
 
 body {
   color: var(--lab-navy);
   background: #f7f9fb;
+}
+
+/* C1: visible keyboard focus (WCAG-friendly) */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lab-focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -100%;
+  z-index: 100;
+  border-radius: 0.5rem;
+  background: var(--lab-navy);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

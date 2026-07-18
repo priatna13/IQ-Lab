@@ -7,6 +7,7 @@ import {
   getOpenRouterChatModel,
   isOpenRouterConfigured,
 } from "@/lib/assessment/openrouter-config";
+import { isAnalyticsConfigured } from "@/lib/analytics/track";
 
 /**
  * Soft-launch readiness (no secrets). Safe to expose in internal staging.
@@ -35,6 +36,8 @@ export async function GET() {
     openRouterConfigured: openRouter,
     openRouterModel: openRouter ? getOpenRouterChatModel() : null,
     insightMode: openRouter ? ("llm_or_template_fallback" as const) : ("template_only" as const),
+    analyticsConfigured: isAnalyticsConfigured(),
+    reportPdfBucket: "reports",
   };
 
   const requiredOk =

@@ -21,6 +21,7 @@ import {
 } from "@/domain/assessment";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
+import { trackProductEvent } from "@/lib/analytics/track";
 
 function isNextRedirect(err: unknown): boolean {
   return (
@@ -69,6 +70,14 @@ export async function startAttemptAction(
       participant: { id: user.id, ageBand: user.ageBand },
       track,
     });
+    trackProductEvent(
+      "attempt_started",
+      {
+        track: attempt.track,
+        contentVersionId: attempt.contentVersionId,
+      },
+      { distinctId: user.id },
+    );
     redirect(`/asesmen/${attempt.id}`);
   } catch (err) {
     if (err instanceof AssessmentError) {
@@ -155,10 +164,19 @@ export async function earlyFinishAction(
 
   const ports = createServerAssessmentPorts();
   try {
-    await earlyFinishDomainSession(ports, {
+    const session = await earlyFinishDomainSession(ports, {
       sessionId,
       participantId: user.id,
     });
+    trackProductEvent(
+      "domain_session_closed",
+      {
+        domainId: session.domainId,
+        closeReason: session.closeReason ?? "early_finish",
+        attemptId: session.attemptId,
+      },
+      { distinctId: user.id },
+    );
     return { ok: true };
   } catch (err) {
     if (err instanceof AssessmentError) {
@@ -177,10 +195,21 @@ export async function syncTimerCloseAction(
 
   const ports = createServerAssessmentPorts();
   try {
-    await closeDomainSessionIfTimedOut(ports, {
+    const closed = await closeDomainSessionIfTimedOut(ports, {
       sessionId,
       participantId: user.id,
     });
+    if (closed.status === "closed" && closed.closeReason === "timer") {
+      trackProductEvent(
+        "domain_session_closed",
+        {
+          domainId: closed.domainId,
+          closeReason: "timer",
+          attemptId: closed.attemptId,
+        },
+        { distinctId: user.id },
+      );
+    }
     const view = await getDomainRunnerView(ports, {
       sessionId,
       participantId: user.id,
@@ -251,11 +280,21 @@ export async function completeAttemptAction(
     if (!user.ageBand || user.ageBand === "under_18") {
       return { ok: false, error: "Rentang usia tidak valid untuk menyelesaikan asesmen." };
     }
-    await completeAttempt(ports, {
+    const { attempt, snapshot } = await completeAttempt(ports, {
       attemptId,
       participantId: user.id,
       ageBand: user.ageBand,
     });
+    trackProductEvent(
+      "attempt_completed",
+      {
+        track: attempt.track,
+        isPrimary: attempt.isPrimary,
+        contentVersionId: snapshot.contentVersionId,
+        compositeIndex: snapshot.compositeIndex,
+      },
+      { distinctId: user.id },
+    );
     redirect(`/asesmen/${attemptId}/hasil`);
   } catch (err) {
     if (isNextRedirect(err)) throw err;

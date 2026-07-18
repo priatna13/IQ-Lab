@@ -31,7 +31,7 @@ export default async function DashboardPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-3xl px-6 py-12">
         <h1 className="text-2xl font-semibold text-lab-navy">Dasbor</h1>
         <p className="mt-2 text-slate-600">
           Halo{user.name ? `, ${user.name}` : ""}

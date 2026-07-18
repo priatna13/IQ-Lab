@@ -24,7 +24,7 @@ export default async function SignInPage({ searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-md px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-md px-6 py-12">
         <h1 className="text-2xl font-semibold text-lab-navy">Masuk</h1>
         <p className="mt-2 text-sm text-slate-600">
           Lanjutkan asesmen dan lihat hasil Anda.

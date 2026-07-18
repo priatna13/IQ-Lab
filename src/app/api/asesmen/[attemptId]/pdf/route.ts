@@ -1,16 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
-  buildReportPdfBytes,
   getResultSnapshotForAttempt,
-  toPublicResultReport,
 } from "@/domain/assessment";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import { getSessionUser } from "@/lib/auth/session";
+import { trackProductEvent } from "@/lib/analytics/track";
+import { ensureReportPdfStored } from "@/lib/assessment/report-pdf-storage";
 
 type Params = { params: Promise<{ attemptId: string }> };
 
 /**
  * PDF download: loads frozen Result Snapshot only — never recomputes scores.
+ * C4: first download stores PDF in InsForge Storage (pdf_url + pdf_key).
  */
 export async function GET(_request: NextRequest, { params }: Params) {
   const user = await getSessionUser();
@@ -39,16 +40,32 @@ export async function GET(_request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Snapshot missing" }, { status: 404 });
   }
 
-  // Snapshot → public report DTO → PDF (no live scoring)
-  const report = toPublicResultReport(snapshot);
-  const bytes = await buildReportPdfBytes(report);
+  const stored = await ensureReportPdfStored(snapshot);
 
-  return new NextResponse(Buffer.from(bytes), {
+  trackProductEvent(
+    stored.fromCache ? "pdf_downloaded" : "pdf_stored",
+    {
+      attemptId,
+      contentVersionId: snapshot.contentVersionId,
+      stored: Boolean(stored.key),
+    },
+    { distinctId: user.id },
+  );
+  if (!stored.fromCache && stored.key) {
+    trackProductEvent(
+      "pdf_downloaded",
+      { attemptId, firstStore: true },
+      { distinctId: user.id },
+    );
+  }
+
+  return new NextResponse(Buffer.from(stored.bytes), {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="iq-lab-hasil-${attemptId}.pdf"`,
       "Cache-Control": "private, no-store",
+      ...(stored.key ? { "X-IQ-Lab-Pdf-Key": stored.key } : {}),
     },
   });
 }

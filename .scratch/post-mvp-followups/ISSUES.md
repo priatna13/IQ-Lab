@@ -24,10 +24,10 @@ Runbook Track A: [`docs/SOFT-LAUNCH-OPS.md`](../../docs/SOFT-LAUNCH-OPS.md)
 
 | ID | Title | Status |
 |----|--------|--------|
-| C3 | ToS + Privasi | **done** (`/privasi`, `/syarat`) |
-| C1 | Lighthouse + a11y | open |
-| C2 | Analytics | open |
-| C4 | PDF storage | open |
+| C3 | ToS + Privasi | **done** |
+| C1 | Lighthouse + a11y | partial — code baseline; run Lighthouse manually |
+| C2 | Analytics | **done** |
+| C4 | PDF storage | **done** (bucket reports) |
 
 ## Other
 

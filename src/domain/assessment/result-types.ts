@@ -28,6 +28,9 @@ export type ResultSnapshot = {
   rulePayload: RulePayload | null;
   insightProse: string | null;
   actionPlanProse: string | null;
+  /** Durable PDF archive in Storage (content ≡ snapshot). */
+  pdfUrl?: string | null;
+  pdfKey?: string | null;
 };
 
 /** Public report DTO (immutable view of snapshot). */

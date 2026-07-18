@@ -42,10 +42,10 @@
 
 | ID | Item | Tipe | Status | Effort | Catatan |
 |----|------|------|--------|--------|---------|
-| C1 | **Lighthouse + a11y audit** | eng | open | M | NFR report; perbaiki blocker |
-| C2 | **Analytics activation/completion** | eng | open | M | Instrument event: signup, start attempt, domain complete, complete attempt |
+| C1 | **Lighthouse + a11y audit** | eng | **partial** | M | Skip link, landmarks, focus, form/runner a11y done; Lighthouse manual checklist di docs |
+| C2 | **Analytics activation/completion** | eng | **done** | M | `trackProductEvent` + hooks; PostHog/webhook optional |
 | C3 | **ToS + Privasi formal** | legal/content | **done** | M | `/privasi` + `/syarat` + footer, daftar, FAQ, landing, dasbor |
-| C4 | **PDF storage permanen (opsional)** | eng | open | M | On-demand OK secara setara snapshot; simpan R2 hanya jika perlu audit file |
+| C4 | **PDF storage permanen** | eng | **done** | M | Bucket `reports` + `pdf_url`/`pdf_key`; first download stores |
 
 ### D. Keputusan terbuka PRD §18 (belum digaransi)
 

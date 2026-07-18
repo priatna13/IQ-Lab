@@ -17,45 +17,64 @@ const initial: AuthActionResult = { ok: false };
 export function AuthForm({ action, submitLabel, includeName }: Props) {
   const [state, formAction, pending] = useActionState(action, initial);
 
+  const errorId = "auth-form-error";
+
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-4" noValidate>
       {includeName ? (
-        <label className="block space-y-1 text-sm">
-          <span className="font-medium text-lab-navy">Nama (opsional)</span>
+        <div className="space-y-1 text-sm">
+          <label htmlFor="auth-name" className="font-medium text-lab-navy">
+            Nama (opsional)
+          </label>
           <input
+            id="auth-name"
             name="name"
             type="text"
             autoComplete="name"
             className="w-full rounded-lg border border-slate-300 px-3 py-2"
           />
-        </label>
+        </div>
       ) : null}
 
-      <label className="block space-y-1 text-sm">
-        <span className="font-medium text-lab-navy">Email</span>
+      <div className="space-y-1 text-sm">
+        <label htmlFor="auth-email" className="font-medium text-lab-navy">
+          Email
+        </label>
         <input
+          id="auth-email"
           name="email"
           type="email"
           required
           autoComplete="email"
+          aria-invalid={state?.error ? true : undefined}
+          aria-describedby={state?.error ? errorId : undefined}
           className="w-full rounded-lg border border-slate-300 px-3 py-2"
         />
-      </label>
+      </div>
 
-      <label className="block space-y-1 text-sm">
-        <span className="font-medium text-lab-navy">Kata sandi</span>
+      <div className="space-y-1 text-sm">
+        <label htmlFor="auth-password" className="font-medium text-lab-navy">
+          Kata sandi
+        </label>
         <input
+          id="auth-password"
           name="password"
           type="password"
           required
           minLength={6}
           autoComplete={includeName ? "new-password" : "current-password"}
+          aria-invalid={state?.error ? true : undefined}
+          aria-describedby={state?.error ? errorId : undefined}
           className="w-full rounded-lg border border-slate-300 px-3 py-2"
         />
-      </label>
+      </div>
 
       {state?.error ? (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          id={errorId}
+          role="alert"
+          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
           {state.error}
         </p>
       ) : null}
@@ -63,6 +82,7 @@ export function AuthForm({ action, submitLabel, includeName }: Props) {
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="w-full rounded-lg bg-lab-teal px-4 py-2.5 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-60"
       >
         {pending ? "Memproses…" : submitLabel}

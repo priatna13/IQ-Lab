@@ -33,7 +33,7 @@ export default async function StartAssessmentPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-lg px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-lg px-6 py-12">
         <Link
           href="/dashboard"
           className="text-sm font-medium text-lab-teal hover:underline"

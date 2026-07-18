@@ -15,7 +15,7 @@ export default async function AgeOnboardingPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-lg px-6 py-12">
+      <main id="main-content" className="mx-auto max-w-lg px-6 py-12">
         <h1 className="text-2xl font-semibold text-lab-navy">
           Satu langkah lagi
         </h1>

@@ -38,7 +38,7 @@ export default async function DomainRunnerPage({ params }: Props) {
       return (
         <>
           <SiteHeader />
-          <main className="mx-auto max-w-lg px-6 py-12">
+          <main id="main-content" className="mx-auto max-w-lg px-6 py-12">
             <p className="text-sm text-red-700">{err.message}</p>
             <Link
               href={`/asesmen/${attemptId}`}
@@ -61,7 +61,7 @@ export default async function DomainRunnerPage({ params }: Props) {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-6 py-10">
+      <main id="main-content" className="mx-auto max-w-2xl px-6 py-10">
         <Link
           href={`/asesmen/${attemptId}`}
           className="text-sm font-medium text-lab-teal hover:underline"

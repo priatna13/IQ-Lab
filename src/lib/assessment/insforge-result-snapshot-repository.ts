@@ -18,6 +18,8 @@ type SnapshotRow = {
   rule_payload: RulePayload | null;
   insight_prose: string | null;
   action_plan_prose: string | null;
+  pdf_url?: string | null;
+  pdf_key?: string | null;
 };
 
 function mapRow(row: SnapshotRow): ResultSnapshot {
@@ -35,6 +37,8 @@ function mapRow(row: SnapshotRow): ResultSnapshot {
     rulePayload: (row.rule_payload as RulePayload | null) ?? null,
     insightProse: row.insight_prose,
     actionPlanProse: row.action_plan_prose,
+    pdfUrl: row.pdf_url ?? null,
+    pdfKey: row.pdf_key ?? null,
   };
 }
 
@@ -78,6 +82,8 @@ export function createInsForgeResultSnapshotRepository(): ResultSnapshotReposito
         rule_payload: snapshot.rulePayload,
         insight_prose: snapshot.insightProse,
         action_plan_prose: snapshot.actionPlanProse,
+        pdf_url: snapshot.pdfUrl ?? null,
+        pdf_key: snapshot.pdfKey ?? null,
       };
       const { error } = await client.database
         .from("result_snapshots")

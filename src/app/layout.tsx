@@ -14,7 +14,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="flex min-h-screen flex-col antialiased">
+        <a href="#main-content" className="skip-link">
+          Langsung ke konten utama
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

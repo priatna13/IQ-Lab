@@ -11,7 +11,7 @@ export default async function HomePage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14">
+      <main id="main-content" className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14">
         <section className="space-y-5">
           <p className="text-sm font-medium uppercase tracking-wide text-lab-teal">
             Pengembangan diri · multi-domain
