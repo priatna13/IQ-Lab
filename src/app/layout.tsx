@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   description:
     "Asesmen multi-domain untuk pengembangan diri dan arah karir. Bukan tes IST resmi.",
   icons: {
-    icon: "/brand/logo.jpg",
-    apple: "/brand/logo.jpg",
+    icon: "/brand/logo.png",
+    apple: "/brand/logo.png",
   },
 };
 

@@ -3,11 +3,12 @@ import Link from "next/link";
 
 type Size = "sm" | "md" | "lg" | "hero";
 
+/** Larger mark sizes — no chrome box, logo only */
 const SIZES: Record<Size, { box: string; img: number; text: string }> = {
-  sm: { box: "h-8 w-8", img: 32, text: "text-base sm:text-lg" },
-  md: { box: "h-9 w-9", img: 36, text: "text-lg" },
-  lg: { box: "h-11 w-11", img: 44, text: "text-xl" },
-  hero: { box: "h-14 w-14 sm:h-16 sm:w-16", img: 64, text: "text-2xl sm:text-3xl" },
+  sm: { box: "h-10 w-10 sm:h-11 sm:w-11", img: 44, text: "text-lg sm:text-xl" },
+  md: { box: "h-12 w-12", img: 48, text: "text-xl" },
+  lg: { box: "h-14 w-14", img: 56, text: "text-2xl" },
+  hero: { box: "h-24 w-24 sm:h-28 sm:w-28", img: 112, text: "text-2xl sm:text-3xl" },
 };
 
 type Props = {
@@ -32,15 +33,13 @@ export function BrandLogo({
     <span
       className={`inline-flex items-center gap-2.5 font-bold tracking-tight text-lab-navy ${className}`}
     >
-      <span
-        className={`relative ${s.box} shrink-0 overflow-hidden rounded-xl bg-white shadow-soft ring-1 ring-slate-200/80`}
-      >
+      <span className={`relative ${s.box} shrink-0`}>
         <Image
-          src="/brand/logo.jpg"
+          src="/brand/logo.png"
           alt={withWordmark ? "" : "IQ-Lab"}
           width={s.img}
           height={s.img}
-          className="h-full w-full object-contain p-0.5"
+          className="h-full w-full object-contain"
           priority={priority}
         />
       </span>
