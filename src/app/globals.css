@@ -4,17 +4,21 @@
 
 :root {
   --lab-navy: #0f2744;
-  --lab-teal: #1a6b6b;
-  --lab-warm: #c4784a;
+  --lab-teal: #0d9488;
   --lab-focus: #0f766e;
 }
 
 body {
   color: var(--lab-navy);
-  background: #f7f9fb;
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse 100% 80% at 0% -20%, rgba(45, 212, 191, 0.14), transparent 50%),
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(139, 92, 246, 0.1), transparent 45%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(56, 189, 248, 0.1), transparent 40%);
+  background-attachment: fixed;
+  min-height: 100dvh;
 }
 
-/* C1: visible keyboard focus (WCAG-friendly) */
 :focus {
   outline: none;
 }
@@ -22,6 +26,7 @@ body {
 :focus-visible {
   outline: 2px solid var(--lab-focus);
   outline-offset: 2px;
+  border-radius: 0.375rem;
 }
 
 .skip-link {
@@ -29,12 +34,13 @@ body {
   left: 0.75rem;
   top: -100%;
   z-index: 100;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   background: var(--lab-navy);
   color: #fff;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
+  box-shadow: 0 8px 24px rgba(15, 39, 68, 0.2);
 }
 
 .skip-link:focus {
@@ -51,4 +57,52 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .lab-card {
+    @apply rounded-2.5xl border border-white/80 bg-white/95 shadow-soft backdrop-blur-[2px];
+  }
+
+  .lab-card-hover {
+    @apply lab-card transition duration-200 hover:-translate-y-0.5 hover:border-lab-teal/25 hover:shadow-lift;
+  }
+
+  .lab-btn-primary {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lab-teal to-lab-teal-deep px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition duration-200 hover:brightness-110 hover:shadow-lift active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .lab-btn-secondary {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-sm transition duration-200 hover:border-lab-teal/40 hover:bg-lab-mint/30 active:scale-[0.98];
+  }
+
+  .lab-btn-ghost {
+    @apply inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-white/80 hover:text-lab-navy;
+  }
+
+  .lab-input {
+    @apply w-full min-h-11 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-lab-navy shadow-sm transition placeholder:text-slate-400 focus:border-lab-teal focus:shadow-glow;
+  }
+
+  .lab-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .lab-section-label {
+    @apply text-sm font-semibold uppercase tracking-wider text-lab-teal;
+  }
+
+  .lab-orb {
+    @apply pointer-events-none absolute rounded-full blur-3xl;
+  }
 }

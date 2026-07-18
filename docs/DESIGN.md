@@ -1,6 +1,6 @@
 # IQ-Lab — Design System & Visual Spec
 
-**Status:** Approved direction (grill complete); **implementation only after explicit `GO BUILD`**  
+**Status:** Grill locked · **R1 implemented in code** (await separate deploy approve)  
 **Last updated:** 2026-07-18  
 **Product:** IQ-Lab — asesmen multi-domain (self-dev / karir), UI Bahasa Indonesia  
 **Stack UI:** Next.js App Router + Tailwind CSS  
@@ -336,8 +336,8 @@ Apply DESIGN.md tokens to shell, landing, auth, dashboard, and results with mobi
 | Date | Decision |
 |------|----------|
 | 2026-07-18 | Grill locked rows §2; mobile plan §6; this file created as durable design context |
-| — | Implementation pending `GO BUILD` |
-| — | Deploy pending separate approve |
+| 2026-07-18 | Owner `GO BUILD` — visual R1 implemented (shell, landing, auth, dashboard, results) |
+| — | Deploy pending separate explicit approve |
 
 ---
 

@@ -82,7 +82,7 @@
 | Item | Status |
 |------|--------|
 | Grill-locked UI direction + mobile plan | **`docs/DESIGN.md`** (source of truth) |
-| Implement visual R1 | Waiting owner **`GO BUILD`** |
+| Implement visual R1 | **done** (after `GO BUILD`) |
 | Deploy | Waiting separate explicit approve |
 
 ## Non-goals tetap (Fase 4+ / PRD non-goals)

@@ -6,50 +6,44 @@ export async function SiteHeader() {
   const user = await getSessionUser();
 
   return (
-    <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-4">
+    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <Link
           href="/"
-          className="font-semibold text-lab-navy"
+          className="group flex items-center gap-2 font-bold tracking-tight text-lab-navy"
           aria-label="IQ-Lab beranda"
         >
-          IQ-Lab
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-lab-teal to-lab-violet text-xs font-bold text-white shadow-soft transition group-hover:shadow-lift">
+            IQ
+          </span>
+          <span className="text-base sm:text-lg">IQ-Lab</span>
         </Link>
         <nav
-          className="flex items-center gap-3 text-sm"
+          className="flex flex-wrap items-center justify-end gap-1 sm:gap-2"
           aria-label="Navigasi utama"
         >
-          <Link href="/faq" className="text-slate-600 hover:text-lab-navy">
+          <Link href="/faq" className="lab-btn-ghost text-xs sm:text-sm">
             FAQ
           </Link>
           {user ? (
             <>
-              <Link
-                href="/dashboard"
-                className="text-slate-600 hover:text-lab-navy"
-              >
+              <Link href="/dashboard" className="lab-btn-ghost text-xs sm:text-sm">
                 Dasbor
               </Link>
               <form action={signOutAction}>
-                <button
-                  type="submit"
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium text-lab-navy hover:bg-slate-50"
-                >
+                <button type="submit" className="lab-btn-secondary !min-h-9 !px-3 !py-1.5 text-xs sm:text-sm">
                   Keluar
                 </button>
               </form>
             </>
           ) : (
             <>
-              <Link
-                href="/masuk"
-                className="text-slate-600 hover:text-lab-navy"
-              >
+              <Link href="/masuk" className="lab-btn-ghost text-xs sm:text-sm">
                 Masuk
               </Link>
               <Link
                 href="/daftar"
-                className="rounded-lg bg-lab-teal px-3 py-1.5 font-semibold text-white"
+                className="lab-btn-primary !min-h-9 !px-3 !py-1.5 text-xs sm:text-sm"
               >
                 Daftar
               </Link>

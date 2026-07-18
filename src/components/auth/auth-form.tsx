@@ -16,13 +16,12 @@ const initial: AuthActionResult = { ok: false };
 
 export function AuthForm({ action, submitLabel, includeName }: Props) {
   const [state, formAction, pending] = useActionState(action, initial);
-
   const errorId = "auth-form-error";
 
   return (
     <form action={formAction} className="space-y-4" noValidate>
       {includeName ? (
-        <div className="space-y-1 text-sm">
+        <div className="space-y-1.5 text-sm">
           <label htmlFor="auth-name" className="font-medium text-lab-navy">
             Nama (opsional)
           </label>
@@ -31,12 +30,12 @@ export function AuthForm({ action, submitLabel, includeName }: Props) {
             name="name"
             type="text"
             autoComplete="name"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="lab-input"
           />
         </div>
       ) : null}
 
-      <div className="space-y-1 text-sm">
+      <div className="space-y-1.5 text-sm">
         <label htmlFor="auth-email" className="font-medium text-lab-navy">
           Email
         </label>
@@ -48,11 +47,11 @@ export function AuthForm({ action, submitLabel, includeName }: Props) {
           autoComplete="email"
           aria-invalid={state?.error ? true : undefined}
           aria-describedby={state?.error ? errorId : undefined}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2"
+          className="lab-input"
         />
       </div>
 
-      <div className="space-y-1 text-sm">
+      <div className="space-y-1.5 text-sm">
         <label htmlFor="auth-password" className="font-medium text-lab-navy">
           Kata sandi
         </label>
@@ -65,7 +64,7 @@ export function AuthForm({ action, submitLabel, includeName }: Props) {
           autoComplete={includeName ? "new-password" : "current-password"}
           aria-invalid={state?.error ? true : undefined}
           aria-describedby={state?.error ? errorId : undefined}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2"
+          className="lab-input"
         />
       </div>
 
@@ -73,7 +72,7 @@ export function AuthForm({ action, submitLabel, includeName }: Props) {
         <p
           id={errorId}
           role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-700 ring-1 ring-red-100"
         >
           {state.error}
         </p>
@@ -83,7 +82,7 @@ export function AuthForm({ action, submitLabel, includeName }: Props) {
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="w-full rounded-lg bg-lab-teal px-4 py-2.5 text-sm font-semibold text-white hover:opacity-95 disabled:opacity-60"
+        className="lab-btn-primary w-full"
       >
         {pending ? "Memproses…" : submitLabel}
       </button>

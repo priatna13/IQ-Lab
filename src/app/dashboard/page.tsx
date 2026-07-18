@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { MeshOrbs } from "@/components/ui/mesh-orbs";
+import { IconArrowRight, IconSparkle } from "@/components/ui/icons";
 import { getSessionUser } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { DeleteAccountButton } from "@/components/account/delete-account-button";
@@ -31,168 +34,183 @@ export default async function DashboardPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main-content" className="mx-auto max-w-3xl px-6 py-12">
-        <h1 className="text-2xl font-semibold text-lab-navy">Dasbor</h1>
-        <p className="mt-2 text-slate-600">
-          Halo{user.name ? `, ${user.name}` : ""}
-          {user.email ? (
-            <>
-              {" "}
-              <span className="text-slate-400">({user.email})</span>
-            </>
-          ) : null}
-        </p>
+      <main
+        id="main-content"
+        className="relative mx-auto w-full max-w-3xl flex-1 overflow-hidden px-4 py-10 sm:px-6 sm:py-12"
+      >
+        <MeshOrbs />
+        <div className="relative animate-fade-up">
+          <p className="lab-section-label">Ruang Anda</p>
+          <h1 className="mt-2 text-2xl font-bold text-lab-navy sm:text-3xl">
+            Dasbor
+          </h1>
+          <p className="mt-2 text-slate-600">
+            Halo{user.name ? `, ${user.name}` : ""}
+            {user.email ? (
+              <>
+                {" "}
+                <span className="text-slate-400">({user.email})</span>
+              </>
+            ) : null}
+          </p>
 
-        <div className="mt-8 space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-slate-500">Rentang usia</dt>
-              <dd className="font-medium text-lab-navy">
-                {user.ageBand === "18_45"
-                  ? "18–45 tahun"
-                  : user.ageBand === "46_plus"
-                    ? "46+ tahun"
-                    : user.ageBand}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-500">Status asesmen</dt>
-              <dd className="font-medium text-lab-navy">
-                {openAttempt
-                  ? "Ada Attempt berjalan"
-                  : "Belum ada Open Attempt"}
-              </dd>
-            </div>
-          </dl>
+          <div className="lab-card mt-8 space-y-5 p-5 sm:p-6">
+            <dl className="grid gap-4 text-sm sm:grid-cols-2">
+              <div className="rounded-xl bg-lab-mist/80 px-4 py-3">
+                <dt className="text-slate-500">Rentang usia</dt>
+                <dd className="mt-1 font-semibold text-lab-navy">
+                  {user.ageBand === "18_45"
+                    ? "18–45 tahun"
+                    : user.ageBand === "46_plus"
+                      ? "46+ tahun"
+                      : user.ageBand}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-lab-mint/40 px-4 py-3">
+                <dt className="text-slate-500">Status asesmen</dt>
+                <dd className="mt-1 font-semibold text-lab-navy">
+                  {openAttempt
+                    ? "Ada Attempt berjalan"
+                    : "Belum ada Open Attempt"}
+                </dd>
+              </div>
+            </dl>
 
-          {user.ageBand === "46_plus" ? (
-            <p className="rounded-lg bg-orange-50 px-3 py-2 text-sm text-slate-700">
-              Anda mendaftar dengan disclaimer 46+: norma & saran karir fase
-              awal dioptimalkan untuk 18–45.
-            </p>
-          ) : null}
+            {user.ageBand === "46_plus" ? (
+              <p className="rounded-xl bg-orange-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-orange-100">
+                Anda mendaftar dengan disclaimer 46+: norma &amp; saran karir
+                fase awal dioptimalkan untuk 18–45.
+              </p>
+            ) : null}
 
-          {openAttempt ? (
-            <div className="rounded-lg border border-lab-teal/30 bg-teal-50/50 p-4">
-              <p className="text-sm font-medium text-lab-navy">
-                Attempt{" "}
-                {openAttempt.track === "explore"
-                  ? "Jelajahi potensi"
-                  : "Rancang langkah karir"}
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                Dimulai {openAttempt.startedAt.toLocaleString("id-ID")} · versi{" "}
-                {openAttempt.contentVersionId}
-              </p>
-              <p className="mt-2 text-xs text-slate-600">
-                Progress domain tersimpan. Lanjutkan kapan saja — jeda antar
-                domain diizinkan.
-              </p>
-              <Link
-                href={`/asesmen/${openAttempt.id}`}
-                className="mt-3 inline-flex rounded-lg bg-lab-teal px-4 py-2 text-sm font-semibold text-white"
-              >
-                Lanjutkan asesmen
+            {openAttempt ? (
+              <div className="rounded-2xl border border-lab-teal/25 bg-gradient-to-br from-lab-mint/50 to-white p-4 sm:p-5">
+                <span className="lab-badge bg-white text-lab-teal-deep ring-1 ring-lab-teal/20">
+                  <IconSparkle className="h-3.5 w-3.5" />
+                  Sedang berjalan
+                </span>
+                <p className="mt-3 text-sm font-semibold text-lab-navy">
+                  Track{" "}
+                  {openAttempt.track === "explore"
+                    ? "Jelajahi potensi"
+                    : "Rancang langkah karir"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Dimulai {openAttempt.startedAt.toLocaleString("id-ID")} ·{" "}
+                  {openAttempt.contentVersionId}
+                </p>
+                <p className="mt-2 text-sm text-slate-600">
+                  Progress domain tersimpan. Lanjutkan kapan saja — jeda antar
+                  domain diizinkan.
+                </p>
+                <Link
+                  href={`/asesmen/${openAttempt.id}`}
+                  className="lab-btn-primary mt-4 w-full sm:w-auto"
+                >
+                  Lanjutkan asesmen
+                  <IconArrowRight />
+                </Link>
+              </div>
+            ) : cooldownUntil ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
+                <p className="text-sm font-semibold text-lab-navy">
+                  Jeda retake 90 hari aktif
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Attempt baru setelah{" "}
+                  <strong>
+                    {cooldownUntil.toLocaleString("id-ID", {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                    })}
+                  </strong>
+                  . Hasil sebelumnya tetap bisa dilihat di bawah.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-lab-teal/30 bg-white/60 p-4 sm:p-5">
+                <p className="text-sm text-slate-600">
+                  Siap memulai asesmen 9 domain? Pilih Track dulu — item sama,
+                  framing insight berbeda.
+                </p>
+                <Link
+                  href="/asesmen/mulai"
+                  className="lab-btn-primary mt-4 w-full sm:w-auto"
+                >
+                  Mulai asesmen
+                  <IconArrowRight />
+                </Link>
+              </div>
+            )}
+
+            {completedAttempts.length > 0 ? (
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 sm:p-5">
+                <p className="text-sm font-semibold text-lab-navy">
+                  Hasil selesai
+                </p>
+                <ul className="mt-3 space-y-3">
+                  {completedAttempts.map((a) => (
+                    <li
+                      key={a.id}
+                      className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <span className="text-sm text-slate-600">
+                        {a.track === "explore" ? "Jelajahi potensi" : "Karir"}
+                        {a.isPrimary ? " · utama" : ""}
+                        {a.completedAt
+                          ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
+                          : ""}
+                      </span>
+                      <span className="flex gap-2">
+                        <Link
+                          href={`/asesmen/${a.id}/hasil`}
+                          className="lab-btn-secondary !min-h-9 flex-1 !px-3 !py-1.5 text-xs sm:flex-none"
+                        >
+                          Lihat
+                        </Link>
+                        <a
+                          href={`/api/asesmen/${a.id}/pdf`}
+                          className="lab-btn-ghost !min-h-9 flex-1 border border-slate-200 text-xs sm:flex-none"
+                        >
+                          PDF
+                        </a>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            <div className="flex w-full flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
+              <Link href="/" className="lab-btn-secondary w-full sm:w-auto">
+                Beranda
               </Link>
+              <form action={signOutAction} className="w-full sm:w-auto">
+                <button type="submit" className="lab-btn-ghost w-full border border-slate-200 sm:w-auto">
+                  Keluar
+                </button>
+              </form>
             </div>
-          ) : cooldownUntil ? (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-medium text-lab-navy">
-                Jeda retake 90 hari aktif
-              </p>
-              <p className="mt-1 text-sm text-slate-600">
-                Anda dapat memulai Attempt baru setelah{" "}
-                <strong>
-                  {cooldownUntil.toLocaleString("id-ID", {
-                    dateStyle: "long",
-                    timeStyle: "short",
-                  })}
-                </strong>
-                . Hasil sebelumnya tetap bisa dilihat di bawah.
-              </p>
-            </div>
-          ) : (
-            <div className="rounded-lg border border-dashed border-slate-300 p-4">
-              <p className="text-sm text-slate-600">
-                Siap memulai asesmen 9 domain? Pilih Track dulu — item sama,
-                framing insight berbeda.
-              </p>
-              <Link
-                href="/asesmen/mulai"
-                className="mt-3 inline-flex rounded-lg bg-lab-teal px-4 py-2 text-sm font-semibold text-white"
-              >
-                Mulai asesmen
-              </Link>
-            </div>
-          )}
 
-          {completedAttempts.length > 0 ? (
-            <div className="rounded-lg border border-slate-200 p-4">
-              <p className="text-sm font-medium text-lab-navy">Hasil selesai</p>
-              <ul className="mt-2 space-y-2 text-sm">
-                {completedAttempts.map((a) => (
-                  <li key={a.id} className="flex justify-between gap-2">
-                    <span className="text-slate-600">
-                      {a.track === "explore" ? "Jelajahi potensi" : "Karir"}
-                      {a.isPrimary ? " · utama" : ""}
-                      {a.completedAt
-                        ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
-                        : ""}
-                    </span>
-                    <span className="flex gap-3">
-                      <Link
-                        href={`/asesmen/${a.id}/hasil`}
-                        className="font-semibold text-lab-teal hover:underline"
-                      >
-                        Lihat
-                      </Link>
-                      <a
-                        href={`/api/asesmen/${a.id}/pdf`}
-                        className="font-semibold text-lab-navy hover:underline"
-                      >
-                        PDF
-                      </a>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            <div className="border-t border-slate-100 pt-6">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Privasi &amp; kebijakan
+              </p>
+              <p className="mb-3 text-xs text-slate-500">
+                <Link href="/privasi" className="font-medium text-lab-teal hover:underline">
+                  Kebijakan Privasi
+                </Link>
+                {" · "}
+                <Link href="/syarat" className="font-medium text-lab-teal hover:underline">
+                  Syarat Penggunaan
+                </Link>
+              </p>
+              <DeleteAccountButton />
             </div>
-          ) : null}
-
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href="/"
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-lab-navy"
-            >
-              Beranda
-            </Link>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white"
-              >
-                Keluar
-              </button>
-            </form>
-          </div>
-
-          <div className="border-t border-slate-100 pt-6">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Privasi & kebijakan
-            </p>
-            <p className="mb-3 text-xs text-slate-500">
-              <Link href="/privasi" className="text-lab-teal hover:underline">
-                Kebijakan Privasi
-              </Link>
-              {" · "}
-              <Link href="/syarat" className="text-lab-teal hover:underline">
-                Syarat Penggunaan
-              </Link>
-            </p>
-            <DeleteAccountButton />
           </div>
         </div>
       </main>
+      <SiteFooter />
     </>
   );
 }
