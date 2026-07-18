@@ -33,7 +33,8 @@ const config: Config = {
         glow: "0 0 0 4px rgba(13, 148, 136, 0.15)",
       },
       borderRadius: {
-        "2.5xl": "1.25rem",
+        /** Prefer rounded-card or rounded-[1.25rem] in @apply (dots break PostCSS). */
+        card: "1.25rem",
       },
       keyframes: {
         "fade-up": {

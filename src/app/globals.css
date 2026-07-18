@@ -70,8 +70,9 @@ body {
 }
 
 @layer components {
+  /* Avoid dotted scale names (2.5xl) and hyphenated nested colors in @apply — PostCSS rejects them. */
   .lab-card {
-    @apply rounded-2.5xl border border-white/80 bg-white/95 shadow-soft backdrop-blur-[2px];
+    @apply rounded-[1.25rem] border border-white/80 bg-white/95 shadow-soft backdrop-blur-[2px];
   }
 
   .lab-card-hover {
@@ -79,7 +80,7 @@ body {
   }
 
   .lab-btn-primary {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lab-teal to-lab-teal-deep px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition duration-200 hover:brightness-110 hover:shadow-lift active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-lab-teal to-[#0f766e] px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition duration-200 hover:brightness-110 hover:shadow-lift active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .lab-btn-secondary {
