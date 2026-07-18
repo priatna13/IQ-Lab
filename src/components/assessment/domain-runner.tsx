@@ -189,22 +189,26 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   return (
     <div className="space-y-5">
       {/* Calm chrome header */}
-      <div className="lab-card px-4 py-3 sm:px-5">
+      <div className="lab-card px-3 py-3 sm:px-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-lab-navy">{view.domain.label}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-lab-navy break-words">
+              {view.domain.label}
+            </p>
             {view.domain.shortBlurb ? (
-              <p className="text-xs text-slate-500">{view.domain.shortBlurb}</p>
+              <p className="text-xs text-slate-500 break-words">
+                {view.domain.shortBlurb}
+              </p>
             ) : null}
             <p className="mt-1 text-xs text-slate-500">
               {view.answeredCount}/{view.totalItems} dijawab · soal {index + 1}/
-              {view.totalItems} · batas ±
+              {view.totalItems} · ±
               {Math.round(view.domain.timeLimitSeconds / 60)} mnt
             </p>
           </div>
-          <div className="text-right">
+          <div className="shrink-0 text-right">
             <p
-              className={`font-mono text-2xl font-semibold tabular-nums ${
+              className={`font-mono text-xl font-semibold tabular-nums sm:text-2xl ${
                 remainingMs < 60_000 ? "text-red-600" : "text-lab-navy"
               }`}
               role="timer"
@@ -218,9 +222,9 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             >
               {inGrace ? "Grace" : formatRemaining(remainingMs)}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="max-w-[9rem] text-xs text-slate-500 sm:max-w-none">
               {inGrace
-                ? "Hanya perbarui jawaban yang sudah tersimpan"
+                ? "Hanya perbarui jawaban tersimpan"
                 : "Sisa waktu (server)"}
             </p>
           </div>
@@ -308,13 +312,13 @@ export function DomainRunner({ attemptId, initialView }: Props) {
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2">
+      <div className="lab-actions sm:justify-between">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
           <button
             type="button"
             disabled={index === 0}
             onClick={() => setIndex((i) => Math.max(0, i - 1))}
-            className="lab-btn-secondary !min-h-10 !px-3 text-sm disabled:opacity-40"
+            className="lab-btn-secondary min-h-11 disabled:opacity-40"
           >
             Sebelumnya
           </button>
@@ -324,7 +328,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             onClick={() =>
               setIndex((i) => Math.min(view.items.length - 1, i + 1))
             }
-            className="lab-btn-secondary !min-h-10 !px-3 text-sm disabled:opacity-40"
+            className="lab-btn-secondary min-h-11 disabled:opacity-40"
           >
             Berikutnya
           </button>
@@ -334,7 +338,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
           type="button"
           disabled={!view.canEarlyFinish || pending}
           onClick={onEarlyFinish}
-          className="lab-btn-navy"
+          className="lab-btn-navy lab-btn-block"
         >
           Selesai domain
         </button>

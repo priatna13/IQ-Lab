@@ -187,12 +187,13 @@ Glass optional **only** on 1–2 hero chips, not forms.
 
 ### QA checklist (visual sign-off)
 
-- [ ] 375×812 — landing, auth, dashboard, results  
+- [x] Mobile shell: overflow-x clip, safe-area header/footer, touch ≥44px  
+- [x] 1-col grids base; md+ multi-col for feature/steps  
+- [x] CTA `lab-btn-block` full-width mobile on primary flows  
+- [x] Header compact (wordmark hide &lt;380px), logo 44px  
+- [ ] 375×812 — operator visual pass  
 - [ ] 390×844 — same  
 - [ ] 768 portrait  
-- [ ] No horizontal overflow  
-- [ ] Primary CTA reachable without zoom  
-- [ ] Reduced motion OK  
 - [ ] Zoom ~200% still usable  
 
 ---

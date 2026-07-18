@@ -47,7 +47,7 @@ export default async function ResultPage({ params }: Props) {
         ← Dasbor
       </Link>
       <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="lab-section-label">Profil Anda</p>
           <h1 className="mt-1 text-2xl font-bold text-lab-navy sm:text-3xl">
             Hasil asesmen
@@ -58,7 +58,7 @@ export default async function ResultPage({ params }: Props) {
         </div>
         <a
           href={`/api/asesmen/${attemptId}/pdf`}
-          className="lab-btn-primary w-full shrink-0 sm:w-auto"
+          className="lab-btn-primary lab-btn-block shrink-0"
         >
           Unduh PDF
         </a>

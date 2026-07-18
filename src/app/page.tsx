@@ -42,14 +42,14 @@ export default async function HomePage() {
 
   return (
     <PageShell width="xl" orbs="full" mainClassName="sm:py-14">
-      {/* Hero */}
-      <section className="animate-fade-up grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="space-y-6">
-          <span className="lab-badge bg-white/90 text-lab-teal-deep shadow-soft ring-1 ring-lab-teal/20">
-            <IconSparkle className="h-3.5 w-3.5" />
-            Pengembangan diri · multi-domain
+      {/* Hero — stack on mobile, 2-col from lg (DESIGN.md §6) */}
+      <section className="animate-fade-up grid items-center gap-8 md:gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="min-w-0 space-y-5 sm:space-y-6">
+          <span className="lab-badge max-w-full bg-white/90 text-lab-teal-deep shadow-soft ring-1 ring-lab-teal/20">
+            <IconSparkle className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">Pengembangan diri · multi-domain</span>
           </span>
-          <h1 className="max-w-2xl text-3xl font-bold leading-[1.12] tracking-tight text-lab-navy sm:text-4xl md:text-5xl">
+          <h1 className="max-w-2xl text-3xl font-bold leading-[1.15] tracking-tight text-lab-navy sm:text-4xl md:text-5xl">
             Kenali struktur kemampuan Anda — lalu rancang langkah belajar &amp;
             karir
           </h1>
@@ -61,45 +61,45 @@ export default async function HomePage() {
             lewat asesmen 9 domain, plus insight arah potensi. Dirancang untuk
             mahasiswa, fresh graduate, dan profesional mid-career.
           </p>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
+          <div className="lab-actions">
             {user ? (
-              <Link href="/dashboard" className="lab-btn-primary w-full sm:w-auto">
+              <Link href="/dashboard" className="lab-btn-primary lab-btn-block">
                 Buka dasbor
                 <IconArrowRight />
               </Link>
             ) : (
               <>
-                <Link href="/daftar" className="lab-btn-primary w-full sm:w-auto">
+                <Link href="/daftar" className="lab-btn-primary lab-btn-block">
                   Mulai gratis
                   <IconArrowRight />
                 </Link>
-                <Link href="/masuk" className="lab-btn-secondary w-full sm:w-auto">
+                <Link href="/masuk" className="lab-btn-secondary lab-btn-block">
                   Sudah punya akun
                 </Link>
               </>
             )}
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs leading-relaxed text-slate-500">
             Gratis di fase MVP · ~60–90 menit · jeda antar domain diizinkan
           </p>
         </div>
 
-        {/* Hero visual panel */}
-        <div className="relative animate-fade-up-1 mx-auto w-full max-w-sm lg:max-w-none">
-          <div className="lab-card relative overflow-hidden p-6 sm:p-7">
+        {/* Hero visual — below copy on mobile */}
+        <div className="relative mx-auto w-full max-w-sm animate-fade-up-1 min-w-0 lg:max-w-none">
+          <div className="lab-card relative overflow-hidden p-5 sm:p-7">
             <div
               className="absolute inset-0 bg-gradient-to-br from-lab-mint/50 via-white to-lab-mist/80"
               aria-hidden
             />
             <div className="relative flex flex-col items-center text-center">
               <BrandLogo size="hero" href={null} withWordmark={false} priority />
-              <p className="mt-4 text-sm font-semibold text-lab-navy">
+              <p className="mt-3 text-sm font-semibold text-lab-navy sm:mt-4">
                 9 domain · 1 profil jujur
               </p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 px-1 text-xs text-slate-500">
                 Bukan satu angka absolut — peta kemampuan Anda
               </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-1.5">
+              <div className="mt-4 flex flex-wrap justify-center gap-1.5 sm:mt-5">
                 {DOMAINS.map((d, i) => (
                   <span
                     key={d}
@@ -109,20 +109,20 @@ export default async function HomePage() {
                   </span>
                 ))}
               </div>
-              <div className="mt-6 grid w-full grid-cols-2 gap-3 text-left">
-                <div className="rounded-xl bg-white/90 p-3 shadow-sm ring-1 ring-white">
+              <div className="mt-5 grid w-full grid-cols-2 gap-2 sm:mt-6 sm:gap-3 text-left">
+                <div className="rounded-xl bg-white/90 p-2.5 shadow-sm ring-1 ring-white sm:p-3">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     Indeks
                   </p>
-                  <p className="font-mono text-2xl font-bold tabular-nums text-lab-navy">
+                  <p className="font-mono text-xl font-bold tabular-nums text-lab-navy sm:text-2xl">
                     ··
                   </p>
                 </div>
-                <div className="rounded-xl bg-white/90 p-3 shadow-sm ring-1 ring-white">
+                <div className="rounded-xl bg-white/90 p-2.5 shadow-sm ring-1 ring-white sm:p-3">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                     Estimasi IQ
                   </p>
-                  <p className="font-mono text-2xl font-bold tabular-nums text-lab-teal">
+                  <p className="font-mono text-xl font-bold tabular-nums text-lab-teal sm:text-2xl">
                     ··
                   </p>
                 </div>
@@ -133,12 +133,12 @@ export default async function HomePage() {
       </section>
 
       {/* Honesty */}
-      <section className="relative mt-12 animate-fade-up-1 lab-card p-5 sm:p-6">
+      <section className="relative mt-10 animate-fade-up-1 lab-card p-4 sm:mt-12 sm:p-6">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-lab-warm">
             <IconShield className="h-4 w-4" />
           </span>
-          <div>
+          <div className="min-w-0">
             <h2 className="font-semibold text-lab-navy">Penting dibaca</h2>
             <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-700">
               <li>
@@ -158,13 +158,22 @@ export default async function HomePage() {
               </li>
             </ul>
             <p className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold">
-              <Link href="/faq" className="text-lab-teal hover:underline">
+              <Link
+                href="/faq"
+                className="inline-flex min-h-11 items-center text-lab-teal hover:underline"
+              >
                 FAQ &amp; metodologi
               </Link>
-              <Link href="/privasi" className="text-lab-teal hover:underline">
+              <Link
+                href="/privasi"
+                className="inline-flex min-h-11 items-center text-lab-teal hover:underline"
+              >
                 Privasi
               </Link>
-              <Link href="/syarat" className="text-lab-teal hover:underline">
+              <Link
+                href="/syarat"
+                className="inline-flex min-h-11 items-center text-lab-teal hover:underline"
+              >
                 Syarat
               </Link>
             </p>
@@ -172,13 +181,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Feature bento */}
+      {/* Feature bento — 1 col → md:3 (not cramped sm) */}
       <section className="relative mt-8">
         <p className="lab-section-label">Kenapa IQ-Lab</p>
         <h2 className="mt-2 text-xl font-bold text-lab-navy sm:text-2xl">
           Profil utuh, insight yang bisa ditindaklanjuti
         </h2>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
           {[
             {
               title: "9 domain",
@@ -224,13 +233,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="relative mt-12 animate-fade-up-2">
+      {/* How it works — 1 col until md */}
+      <section className="relative mt-10 animate-fade-up-2 sm:mt-12">
         <p className="lab-section-label">Alur singkat</p>
         <h2 className="mt-2 text-xl font-bold text-lab-navy sm:text-2xl">
           Tiga langkah, satu peta kemampuan
         </h2>
-        <ol className="mt-5 grid gap-4 sm:grid-cols-3">
+        <ol className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
           {[
             {
               step: "01",
@@ -260,13 +269,13 @@ export default async function HomePage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="relative mt-12 animate-fade-up-3 overflow-hidden rounded-[1.25rem] bg-gradient-to-br from-lab-navy via-lab-navy-soft to-lab-teal p-6 text-white shadow-lift sm:p-8">
+      <section className="relative mt-10 animate-fade-up-3 overflow-hidden rounded-[1.25rem] bg-gradient-to-br from-lab-navy via-lab-navy-soft to-lab-teal p-5 text-white shadow-lift sm:mt-12 sm:p-8">
         <div
           className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-lab-sky/20 blur-2xl"
           aria-hidden
         />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className="min-w-0">
             <h2 className="text-xl font-bold sm:text-2xl">
               Siap memetakan kemampuan Anda?
             </h2>
@@ -277,7 +286,7 @@ export default async function HomePage() {
           {user ? (
             <Link
               href="/dashboard"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-soft transition hover:bg-lab-mint"
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-soft transition hover:bg-lab-mint sm:w-auto"
             >
               Ke dasbor
               <IconArrowRight />
@@ -285,7 +294,7 @@ export default async function HomePage() {
           ) : (
             <Link
               href="/daftar"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-soft transition hover:bg-lab-mint"
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-soft transition hover:bg-lab-mint sm:w-auto"
             >
               Mulai gratis
               <IconArrowRight />
@@ -294,7 +303,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <p className="relative mt-10 text-xs text-slate-400">
+      <p className="relative mt-8 text-xs text-slate-400 sm:mt-10">
         Backend: InsForge{" "}
         {insforge.isConfigured ? "terhubung" : "belum dikonfigurasi"}.
       </p>

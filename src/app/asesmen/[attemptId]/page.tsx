@@ -79,7 +79,7 @@ export default async function AttemptProgressPage({ params }: Props) {
         </code>
       </p>
 
-      <div className="lab-card mt-6 p-5 sm:p-6">
+      <div className="lab-card mt-6 p-4 sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -202,7 +202,7 @@ export default async function AttemptProgressPage({ params }: Props) {
             </p>
             <Link
               href={`/asesmen/${attemptId}/domain/${nextDomainId}`}
-              className="lab-btn-primary w-full sm:w-auto"
+              className="lab-btn-primary lab-btn-block"
             >
               Lanjut domain berikutnya
             </Link>

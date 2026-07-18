@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={plusJakarta.variable}>
-      <body className="flex min-h-screen flex-col font-sans antialiased">
+      <body className="flex min-h-[100dvh] max-w-[100vw] flex-col overflow-x-clip font-sans antialiased">
         <a href="#main-content" className="skip-link">
           Langsung ke konten utama
         </a>

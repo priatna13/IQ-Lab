@@ -84,7 +84,11 @@ export function StartAttemptForm() {
         </p>
       ) : null}
 
-      <button type="submit" disabled={pending} className="lab-btn-primary w-full">
+      <button
+        type="submit"
+        disabled={pending}
+        className="lab-btn-primary lab-btn-block w-full"
+      >
         {pending ? "Membuat Attempt…" : "Mulai asesmen"}
       </button>
     </form>

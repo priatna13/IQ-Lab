@@ -82,7 +82,7 @@ export function AuthForm({ action, submitLabel, includeName }: Props) {
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="lab-btn-primary w-full"
+        className="lab-btn-primary lab-btn-block w-full"
       >
         {pending ? "Memproses…" : submitLabel}
       </button>

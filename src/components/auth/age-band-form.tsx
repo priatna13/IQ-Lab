@@ -86,7 +86,11 @@ export function AgeBandForm() {
         </p>
       ) : null}
 
-      <button type="submit" disabled={pending} className="lab-btn-primary w-full">
+      <button
+        type="submit"
+        disabled={pending}
+        className="lab-btn-primary lab-btn-block w-full"
+      >
         {pending ? "Menyimpan…" : "Lanjut ke dasbor"}
       </button>
     </form>

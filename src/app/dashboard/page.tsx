@@ -36,18 +36,20 @@ export default async function DashboardPage() {
         <h1 className="mt-2 text-2xl font-bold text-lab-navy sm:text-3xl">
           Dasbor
         </h1>
-        <p className="mt-2 text-slate-600">
+        <p className="mt-2 break-words text-slate-600">
           Halo{user.name ? `, ${user.name}` : ""}
           {user.email ? (
             <>
               {" "}
-              <span className="text-slate-400">({user.email})</span>
+              <span className="block text-slate-400 sm:inline">
+                ({user.email})
+              </span>
             </>
           ) : null}
         </p>
 
-        <div className="lab-card mt-8 space-y-5 p-5 sm:p-6">
-          <dl className="grid gap-4 text-sm sm:grid-cols-2">
+        <div className="lab-card mt-6 space-y-5 p-4 sm:mt-8 sm:p-6">
+          <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 sm:gap-4">
             <div className="rounded-xl bg-lab-mist/80 px-4 py-3 ring-1 ring-white">
               <dt className="text-slate-500">Rentang usia</dt>
               <dd className="mt-1 font-semibold text-lab-navy">
@@ -97,7 +99,7 @@ export default async function DashboardPage() {
               </p>
               <Link
                 href={`/asesmen/${openAttempt.id}`}
-                className="lab-btn-primary mt-4 w-full sm:w-auto"
+                className="lab-btn-primary lab-btn-block mt-4"
               >
                 Lanjutkan asesmen
                 <IconArrowRight />
@@ -129,7 +131,7 @@ export default async function DashboardPage() {
               </p>
               <Link
                 href="/asesmen/mulai"
-                className="lab-btn-primary mt-4 w-full sm:w-auto"
+                className="lab-btn-primary lab-btn-block mt-4"
               >
                 Mulai asesmen
                 <IconArrowRight />
@@ -148,23 +150,23 @@ export default async function DashboardPage() {
                     key={a.id}
                     className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <span className="text-sm text-slate-600">
+                    <span className="min-w-0 text-sm text-slate-600">
                       {a.track === "explore" ? "Jelajahi potensi" : "Karir"}
                       {a.isPrimary ? " · utama" : ""}
                       {a.completedAt
                         ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
                         : ""}
                     </span>
-                    <span className="flex gap-2">
+                    <span className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
                       <Link
                         href={`/asesmen/${a.id}/hasil`}
-                        className="lab-btn-secondary !min-h-9 flex-1 !px-3 !py-1.5 text-xs sm:flex-none"
+                        className="lab-btn-secondary min-h-11 px-3 text-xs sm:text-sm"
                       >
                         Lihat profil
                       </Link>
                       <a
                         href={`/api/asesmen/${a.id}/pdf`}
-                        className="lab-btn-ghost !min-h-9 flex-1 border border-slate-200 text-xs sm:flex-none"
+                        className="lab-btn-ghost min-h-11 border border-slate-200 px-3 text-xs sm:text-sm"
                       >
                         PDF
                       </a>
@@ -175,8 +177,8 @@ export default async function DashboardPage() {
             </div>
           ) : null}
 
-          <div className="flex w-full flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
-            <Link href="/" className="lab-btn-secondary w-full sm:w-auto">
+          <div className="lab-actions pt-1">
+            <Link href="/" className="lab-btn-secondary lab-btn-block">
               Beranda
             </Link>
             <form action={signOutAction} className="w-full sm:w-auto">

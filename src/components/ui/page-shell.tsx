@@ -27,6 +27,7 @@ type Props = {
 
 /**
  * Shared page chrome — header + main#main-content + footer (DESIGN.md §9).
+ * Mobile-first: px-4, single column, overflow clip, safe-area aware.
  */
 export function PageShell({
   children,
@@ -38,15 +39,17 @@ export function PageShell({
   mainClassName = "",
 }: Props) {
   return (
-    <div className={`flex min-h-screen flex-col ${className}`}>
+    <div
+      className={`flex min-h-[100dvh] w-full max-w-[100vw] flex-col overflow-x-clip ${className}`}
+    >
       {header ? <SiteHeader /> : null}
       <main
         id="main-content"
-        className={`relative mx-auto w-full flex-1 overflow-hidden px-4 py-10 sm:px-6 sm:py-12 ${WIDTH[width]} ${mainClassName}`}
+        className={`relative mx-auto w-full min-w-0 flex-1 overflow-x-clip px-4 py-8 sm:px-6 sm:py-12 ${WIDTH[width]} ${mainClassName}`}
       >
         {orbs === "full" ? <MeshOrbs /> : null}
         {orbs === "calm" ? <MeshOrbs calm /> : null}
-        <div className="relative">{children}</div>
+        <div className="relative min-w-0">{children}</div>
       </main>
       {footer ? <SiteFooter /> : null}
     </div>

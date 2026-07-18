@@ -3,7 +3,7 @@ import { signInWithGoogleAction } from "@/app/actions/auth";
 export function GoogleButton({ label }: { label: string }) {
   return (
     <form action={signInWithGoogleAction}>
-      <button type="submit" className="lab-btn-secondary w-full">
+      <button type="submit" className="lab-btn-secondary lab-btn-block w-full">
         <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
           <path
             fill="#4285F4"
