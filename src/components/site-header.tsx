@@ -7,8 +7,8 @@ export async function SiteHeader() {
   const user = await getSessionUser();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/70 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-2 px-4 sm:h-16 sm:gap-3 sm:px-6">
+    <header className="sticky top-0 z-40 overflow-visible border-b border-white/70 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
+      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-2 overflow-visible px-4 sm:h-16 sm:gap-3 sm:px-6">
         <BrandLogo size="sm" compactWordmark priority />
         <nav
           className="flex shrink-0 items-center justify-end gap-0.5 sm:gap-1.5"

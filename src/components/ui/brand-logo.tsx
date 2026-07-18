@@ -18,6 +18,29 @@ const SIZES: Record<Size, { box: string; img: number; text: string }> = {
   },
 };
 
+const WORDMARK = "IQ-Lab";
+
+/**
+ * Wave of motion across letters: 1.5s ease-in-out, lift ~13px + accent at crest,
+ * negative delay step ~0.09s so the peak ripples left→right forever.
+ */
+function WaveWordmark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`lab-wordmark ${className}`} aria-label="IQ-Lab">
+      {Array.from(WORDMARK).map((char, i) => (
+        <span
+          key={`${char}-${i}`}
+          className="lab-wordmark-char"
+          style={{ animationDelay: `${i * -0.09}s` }}
+          aria-hidden="true"
+        >
+          {char === " " ? "\u00a0" : char}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 type Props = {
   size?: Size;
   /** Show wordmark “IQ-Lab” next to mark */
@@ -58,11 +81,9 @@ export function BrandLogo({
         />
       </span>
       {withWordmark ? (
-        <span
-          className={`${s.text} ${compactWordmark ? "hidden min-[380px]:inline" : ""}`}
-        >
-          IQ<span className="text-lab-teal">-</span>Lab
-        </span>
+        <WaveWordmark
+          className={`${s.text} ${compactWordmark ? "hidden min-[380px]:inline-flex" : ""}`}
+        />
       ) : null}
     </span>
   );

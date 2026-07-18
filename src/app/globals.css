@@ -100,6 +100,40 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  .lab-wordmark-char {
+    animation: none !important;
+    transform: none !important;
+    color: inherit !important;
+  }
+}
+
+/* Wave across brand wordmark — continuous LTR crest (DESIGN motion.calm + accent) */
+@keyframes lab-letter-wave {
+  0%,
+  100% {
+    transform: translateY(0);
+    color: var(--lab-navy);
+  }
+  50% {
+    transform: translateY(-13px);
+    color: var(--lab-teal);
+  }
+}
+
+.lab-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  overflow: visible;
+  line-height: 1.2;
+  /* room for 13px lift so header does not clip mid-glyph */
+  padding-block: 2px;
+}
+
+.lab-wordmark-char {
+  display: inline-block;
+  animation: lab-letter-wave 1.5s ease-in-out infinite;
+  will-change: transform, color;
 }
 
 @layer components {
