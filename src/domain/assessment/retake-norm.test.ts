@@ -3,7 +3,7 @@ import { abandonAttempt } from "./abandon-attempt";
 import { completeAttempt } from "./complete-attempt";
 import { createAttempt, getOpenAttempt } from "./create-attempt";
 import { createSeedContentCatalog } from "./content-catalog";
-import { MVP_CONTENT_VERSION_ID } from "./content-seed";
+import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import {
   earlyFinishDomainSession,
   startDomainSession,
@@ -53,7 +53,7 @@ async function finishAll(
   attemptId: string,
   participantId = "p_1",
 ) {
-  const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+  const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
   for (const domainId of cv!.domainOrder) {
     const session = await startDomainSession(ports, {
       attemptId,

@@ -3,7 +3,7 @@ import { completeAttempt } from "./complete-attempt";
 import { createAttempt, getOpenAttempt } from "./create-attempt";
 import { deleteParticipantAssessmentData } from "./delete-participant-data";
 import { createSeedContentCatalog } from "./content-catalog";
-import { MVP_CONTENT_VERSION_ID } from "./content-seed";
+import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import {
   earlyFinishDomainSession,
   startDomainSession,
@@ -43,7 +43,7 @@ function buildPorts(): AssessmentPorts & {
 }
 
 async function finishAll(ports: AssessmentPorts, attemptId: string) {
-  const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+  const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
   for (const domainId of cv!.domainOrder) {
     const session = await startDomainSession(ports, {
       attemptId,
@@ -76,7 +76,7 @@ describe("Integrity Events", () => {
       participant: { id: "p_1", ageBand: "18_45" },
       track: "explore",
     });
-    const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+    const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
     const session = await startDomainSession(ports, {
       attemptId: attempt.id,
       participantId: "p_1",

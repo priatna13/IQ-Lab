@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createAttempt, getOpenAttempt } from "./create-attempt";
 import { createSeedContentCatalog } from "./content-catalog";
 import { toPublicContentVersion } from "./content-types";
-import { MVP_CONTENT_VERSION_ID } from "./content-seed";
+import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import { AssessmentError } from "./types";
 import { createFixedClock } from "./testing/fixed-clock";
 import { createInMemoryAttemptRepository } from "./testing/in-memory-attempts";
@@ -61,13 +61,13 @@ describe("Assessment application boundary — createAttempt", () => {
     expect(attempt.status).toBe("in_progress");
     expect(attempt.participantId).toBe("p_1");
     expect(attempt.track).toBe("career");
-    expect(attempt.contentVersionId).toBe(MVP_CONTENT_VERSION_ID);
+    expect(attempt.contentVersionId).toBe(V2_CONTENT_VERSION_ID);
     expect(attempt.startedAt.toISOString()).toBe("2026-07-17T12:00:00.000Z");
     expect(attempt.isPrimary).toBe(false);
 
     const open = await getOpenAttempt(ports, "p_1");
     expect(open?.id).toBe(attempt.id);
-    expect(open?.contentVersionId).toBe(MVP_CONTENT_VERSION_ID);
+    expect(open?.contentVersionId).toBe(V2_CONTENT_VERSION_ID);
   });
 
   it("pins an explicit Content Version id when it exists and is published", async () => {
@@ -76,10 +76,10 @@ describe("Assessment application boundary — createAttempt", () => {
     const attempt = await createAttempt(ports, {
       participant: { id: "p_2", ageBand: "46_plus" },
       track: "explore",
-      contentVersionId: MVP_CONTENT_VERSION_ID,
+      contentVersionId: V2_CONTENT_VERSION_ID,
     });
 
-    expect(attempt.contentVersionId).toBe(MVP_CONTENT_VERSION_ID);
+    expect(attempt.contentVersionId).toBe(V2_CONTENT_VERSION_ID);
     expect(attempt.track).toBe("explore");
   });
 

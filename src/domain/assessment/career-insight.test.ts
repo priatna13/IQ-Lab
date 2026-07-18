@@ -9,7 +9,7 @@ import {
 import { completeAttempt } from "./complete-attempt";
 import { createAttempt } from "./create-attempt";
 import { createSeedContentCatalog } from "./content-catalog";
-import { MVP_CONTENT_VERSION_ID } from "./content-seed";
+import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import {
   earlyFinishDomainSession,
   startDomainSession,
@@ -58,7 +58,7 @@ function buildPorts(narrator = createHybridInsightNarrator()): AssessmentPorts {
 }
 
 async function finishAllPerfect(ports: AssessmentPorts, attemptId: string) {
-  const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+  const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
   for (const domainId of cv!.domainOrder) {
     const session = await startDomainSession(ports, {
       attemptId,

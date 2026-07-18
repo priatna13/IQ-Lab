@@ -33,11 +33,6 @@ Status vocabulary: `ready-for-agent` | done (when closed by implementer)
 | 09 | Primary, Retake Policy, Norm Sample | 06 | **done** |
 | 10 | Integrity Events + Account Deletion | 06, 09 | **done** |
 | 11 | FAQ metodologi inspired-by | 02 | **done** |
-| 07 | Insight hybrid (Rule Payload + LLM/fallback) | 06 | ready-for-agent |
-| 08 | PDF Report dari snapshot | 07 | ready-for-agent |
-| 09 | Primary, Retake Policy, Norm Sample | 06 | ready-for-agent |
-| 10 | Integrity Events + Account Deletion | 06, 09 | ready-for-agent |
-| 11 | FAQ metodologi inspired-by | 02 | ready-for-agent |
 
-Work the frontier with `/implement` (or equivalent), one ticket per clean context.  
-**Build gate:** owner must still explicitly approve coding before implementation starts (PRD v1.1).
+**Completion report:** [`docs/MVP-COMPLETION-REPORT.md`](../../docs/MVP-COMPLETION-REPORT.md)
+

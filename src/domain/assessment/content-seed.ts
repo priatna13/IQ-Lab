@@ -94,15 +94,18 @@ function buildDomains(): DomainDefinition[] {
   }));
 }
 
-/** Published Content Version for MVP (pinned on Attempt create). */
+/**
+ * Historical Content Version (placeholder items).
+ * Kept loadable for Attempts that pinned v1; not published for new Attempts.
+ */
 export const MVP_CONTENT_VERSION_ID = "cv_mvp_v1";
 
 export function getMvpContentVersion(): ContentVersion {
   const domains = buildDomains();
   return {
     id: MVP_CONTENT_VERSION_ID,
-    label: "IQ-Lab MVP v1",
-    published: true,
+    label: "IQ-Lab MVP v1 (placeholder)",
+    published: false,
     domainOrder: domains.map((d) => d.id),
     domains,
   };

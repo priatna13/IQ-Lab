@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createAttempt } from "./create-attempt";
 import { createSeedContentCatalog } from "./content-catalog";
-import { MVP_CONTENT_VERSION_ID } from "./content-seed";
+import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import {
   earlyFinishDomainSession,
   getDomainRunnerView,
@@ -48,9 +48,9 @@ async function openFirstDomain(ports: AssessmentPorts) {
   const attempt = await createAttempt(ports, {
     participant: { id: "p_1", ageBand: "18_45" },
     track: "explore",
-    contentVersionId: MVP_CONTENT_VERSION_ID,
+    contentVersionId: V2_CONTENT_VERSION_ID,
   });
-  const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+  const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
   const domainId = cv!.domainOrder[0];
   const session = await startDomainSession(ports, {
     attemptId: attempt.id,

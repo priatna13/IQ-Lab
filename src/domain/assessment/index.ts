@@ -69,6 +69,11 @@ export type {
   Item,
 } from "./content-types";
 export { MVP_CONTENT_VERSION_ID, getMvpContentVersion } from "./content-seed";
+export {
+  V2_CONTENT_VERSION_ID,
+  CURRENT_CONTENT_VERSION_ID,
+  getV2ContentVersion,
+} from "./content/v2";
 export type {
   AssessmentPorts,
   AttemptRepository,

@@ -50,7 +50,9 @@ Asesmen multi-domain untuk pengembangan diri & arah karir (inspired-by kerangka 
 - `PRD.md` — product scope
 - `CONTEXT.md` — domain language
 - `docs/adr/` — decisions
-- `.scratch/iq-lab-mvp/` — spec & tickets
+- `.scratch/iq-lab-mvp/` — MVP spec & tickets (done)
+- `.scratch/item-bank-v2/` — Item Bank Content Version v2
+- Active Item Bank for new Attempts: **`cv_mvp_v2`** (v1 placeholder remains loadable for old pins)
 
 ## Security
 

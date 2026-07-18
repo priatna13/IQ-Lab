@@ -7,7 +7,7 @@ function sampleReport(): PublicResultReport {
   return {
     attemptId: "att_test_pdf",
     track: "career",
-    contentVersionId: "cv_mvp_v1",
+    contentVersionId: "cv_mvp_v2",
     normVersion: "norm_synthetic_v1",
     frozenAt: "2026-07-17T12:00:00.000Z",
     abilityProfile: [

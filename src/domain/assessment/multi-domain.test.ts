@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { abandonAttempt, attemptTriggersRetakeCooldown } from "./abandon-attempt";
 import { createAttempt, getOpenAttempt } from "./create-attempt";
 import { createSeedContentCatalog } from "./content-catalog";
-import { MVP_CONTENT_VERSION_ID } from "./content-seed";
+import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import {
   earlyFinishDomainSession,
   startDomainSession,
@@ -37,7 +37,7 @@ async function answerAllAndFinish(
   sessionId: string,
   domainId: string,
 ) {
-  const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+  const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
   const domain = cv!.domains.find((d) => d.id === domainId)!;
   for (const item of domain.items) {
     await upsertResponse(ports, {
@@ -60,7 +60,7 @@ describe("Nine Domains — order, pause/resume, abandon", () => {
       participant: { id: "p_1", ageBand: "18_45" },
       track: "explore",
     });
-    const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+    const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
     const [d0, d1] = cv!.domainOrder;
 
     await expect(
@@ -84,7 +84,7 @@ describe("Nine Domains — order, pause/resume, abandon", () => {
       participant: { id: "p_1", ageBand: "18_45" },
       track: "career",
     });
-    const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+    const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
     const d0 = cv!.domainOrder[0];
 
     const session1 = await startDomainSession(ports, {
@@ -114,7 +114,7 @@ describe("Nine Domains — order, pause/resume, abandon", () => {
       participant: { id: "p_1", ageBand: "18_45" },
       track: "explore",
     });
-    const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+    const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
     const d0 = cv!.domainOrder[0];
 
     const session = await startDomainSession(ports, {
@@ -139,7 +139,7 @@ describe("Nine Domains — order, pause/resume, abandon", () => {
       participant: { id: "p_1", ageBand: "18_45" },
       track: "explore",
     });
-    const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+    const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
     const [d0, d1] = cv!.domainOrder;
     const domain0 = cv!.domains.find((d) => d.id === d0)!;
     const domain1 = cv!.domains.find((d) => d.id === d1)!;
@@ -199,7 +199,7 @@ describe("Nine Domains — order, pause/resume, abandon", () => {
       participant: { id: "p_1", ageBand: "18_45" },
       track: "explore",
     });
-    const cv = await ports.content.getById(MVP_CONTENT_VERSION_ID);
+    const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
     const [d0, d1] = cv!.domainOrder;
 
     const s0 = await startDomainSession(ports, {
