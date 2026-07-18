@@ -178,65 +178,48 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Feature bento — 1 col → md:3 (not cramped sm) */}
+      {/* Feature bento — Lift (fx-9) cards */}
       <section className="relative mt-8">
         <p className="lab-section-label">Kenapa IQ-Lab</p>
         <h2 className="mt-2 text-xl font-bold text-lab-navy sm:text-2xl">
           Profil utuh, insight yang bisa ditindaklanjuti
         </h2>
-        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="lab-lift-grid mt-5">
           {[
             {
               title: "9 domain",
               body: "Profil verbal, numerik, spasial, memori, logika, dan area terkait — bukan satu angka saja.",
               icon: IconGrid,
-              delay: "animate-fade-up-1",
-              tint: "from-lab-teal/20 to-lab-mint/50",
             },
             {
               title: "Dua jalur",
               body: "Jelajahi potensi atau rancang langkah karir — item sama, framing insight berbeda.",
               icon: IconPath,
-              delay: "animate-fade-up-2",
-              tint: "from-lab-violet/15 to-white",
             },
             {
               title: "Gratis (MVP)",
               body: "Laporan web & PDF tanpa paywall di fase validasi produk.",
               icon: IconGift,
-              delay: "animate-fade-up-3",
-              tint: "from-lab-sky/15 to-white",
             },
           ].map((card) => (
-            <article
-              key={card.title}
-              className={`lab-card-hover relative overflow-hidden p-5 ${card.delay}`}
-            >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${card.tint} opacity-90`}
-                aria-hidden
-              />
-              <div className="relative">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/95 text-lab-teal shadow-sm ring-1 ring-white">
-                  <card.icon className="h-5 w-5" />
-                </span>
-                <h3 className="mt-3 font-semibold text-lab-navy">{card.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  {card.body}
-                </p>
-              </div>
-            </article>
+            <button key={card.title} type="button" className="btn fx-9 lab-lift-card">
+              <span className="lab-lift-card-icon" aria-hidden>
+                <card.icon className="h-5 w-5" />
+              </span>
+              <span className="btn-label">{card.title}</span>
+              <span className="lab-lift-card-desc">{card.body}</span>
+            </button>
           ))}
         </div>
       </section>
 
-      {/* How it works — 1 col until md */}
-      <section className="relative mt-10 animate-fade-up-2 sm:mt-12">
+      {/* How it works — Lift (fx-9) cards */}
+      <section className="relative mt-10 sm:mt-12">
         <p className="lab-section-label">Alur singkat</p>
         <h2 className="mt-2 text-xl font-bold text-lab-navy sm:text-2xl">
           Tiga langkah, satu peta kemampuan
         </h2>
-        <ol className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="lab-lift-grid mt-5">
           {[
             {
               step: "01",
@@ -254,15 +237,15 @@ export default async function HomePage() {
               body: "Indeks, estimasi, bar domain, insight, action plan, dan unduh PDF.",
             },
           ].map((s) => (
-            <li key={s.step} className="lab-card p-5">
-              <span className="font-mono text-xs font-bold tabular-nums text-lab-teal">
+            <button key={s.step} type="button" className="btn fx-9 lab-lift-card">
+              <span className="lab-lift-card-step" aria-hidden>
                 {s.step}
               </span>
-              <h3 className="mt-2 font-semibold text-lab-navy">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{s.body}</p>
-            </li>
+              <span className="btn-label">{s.title}</span>
+              <span className="lab-lift-card-desc">{s.body}</span>
+            </button>
           ))}
-        </ol>
+        </div>
       </section>
 
       {/* Bottom CTA */}

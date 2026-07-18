@@ -351,6 +351,105 @@ body {
   --secondary: #0f191e;
 }
 
+/* Lift effect (fx-9) */
+.fx-9 {
+  overflow: visible;
+  background: var(--bsurf);
+  border-color: var(--bink);
+  color: var(--bink);
+}
+
+.fx-9::before {
+  display: none;
+}
+
+.fx-9:hover,
+.fx-9:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 0 -2px color-mix(in srgb, var(--bink) 30%, transparent);
+  outline: none;
+}
+
+/*
+ * Info cards using Lift — same .btn.fx-9 motion; multi-line content layout.
+ * Core title stays in .btn-label per required markup.
+ */
+.btn.fx-9.lab-lift-card {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  padding: 1.15rem 1.2rem;
+  text-align: left;
+  white-space: normal;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  background: #fff;
+  box-shadow: 0 2px 0 0 color-mix(in srgb, var(--bink) 8%, transparent);
+}
+
+.btn.fx-9.lab-lift-card .btn-label {
+  font-family: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bink);
+}
+
+.lab-lift-card-icon {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.35rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--primary) 35%, #fff);
+  color: var(--lab-teal, #0d9488);
+}
+
+.lab-lift-card-step {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--lab-teal, #0d9488);
+}
+
+.lab-lift-card-desc {
+  position: relative;
+  z-index: 2;
+  margin-top: 0.15rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #475569;
+  white-space: normal;
+}
+
+.lab-lift-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .lab-lift-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* Mobile full-width hero CTAs */
 .lab-actions .btn {
   width: 100%;
@@ -374,6 +473,12 @@ body {
   .fx-59:focus-visible {
     transform: none;
     box-shadow: 4px 4px 0 0 var(--bink);
+  }
+
+  .fx-9:hover,
+  .fx-9:focus-visible {
+    transform: none;
+    box-shadow: none;
   }
 }
 
