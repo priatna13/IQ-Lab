@@ -249,14 +249,14 @@ export default async function HomePage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="relative mt-10 animate-fade-up-3 overflow-hidden rounded-[1.25rem] bg-gradient-to-br from-lab-navy via-lab-navy-soft to-lab-teal p-5 text-white shadow-lift sm:mt-12 sm:p-8">
+      <section className="lab-bottom-cta relative mt-10 overflow-hidden rounded-[1.25rem] bg-gradient-to-br from-lab-navy via-lab-navy-soft to-lab-teal p-5 text-white shadow-lift sm:mt-12 sm:p-8">
         <div
           className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-lab-sky/20 blur-2xl"
           aria-hidden
         />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h2 className="text-xl font-bold sm:text-2xl">
+            <h2 className="text-xl font-bold leading-snug sm:text-2xl">
               Siap memetakan kemampuan Anda?
             </h2>
             <p className="mt-2 max-w-md text-sm text-white/80">

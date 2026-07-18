@@ -45,7 +45,7 @@ export function PageShell({
       {header ? <SiteHeader /> : null}
       <main
         id="main-content"
-        className={`relative mx-auto w-full min-w-0 flex-1 overflow-x-clip px-4 py-8 sm:px-6 sm:py-12 ${WIDTH[width]} ${mainClassName}`}
+        className={`relative mx-auto w-full min-w-0 flex-1 overflow-x-clip px-4 py-7 sm:px-6 sm:py-12 ${WIDTH[width]} ${mainClassName}`}
       >
         {orbs === "full" ? <MeshOrbs /> : null}
         {orbs === "calm" ? <MeshOrbs calm /> : null}

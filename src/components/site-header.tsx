@@ -15,12 +15,12 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 overflow-visible border-b border-white/70 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
-      <div className="mx-auto flex h-16 max-w-4xl items-end justify-between gap-2 overflow-visible px-4 pb-2.5 sm:h-[4.25rem] sm:gap-3 sm:px-6 sm:pb-3">
-        <div className="flex min-h-11 items-center self-center">
+      <div className="mx-auto flex min-h-14 max-w-4xl items-center justify-between gap-2 overflow-visible px-3 py-2 sm:min-h-16 sm:gap-3 sm:px-6 sm:py-2.5">
+        <div className="flex min-w-0 shrink items-center">
           <BrandLogo size="sm" compactWordmark priority />
         </div>
 
-        <nav className="lab-dock" aria-label="Navigasi utama">
+        <nav className="lab-dock shrink-0" aria-label="Navigasi utama">
           <Link href="/faq" className="lab-dock-item">
             <IconHelp className="lab-dock-icon" />
             <span className="lab-dock-label">FAQ</span>
