@@ -43,4 +43,13 @@ describe("Item Bank v2 — key review invariants", () => {
       }
     }
   });
+
+  it("each domain has participant microcopy (label, shortBlurb, instruction)", () => {
+    for (const domain of v2.domains) {
+      expect(domain.label.length).toBeGreaterThan(3);
+      expect(domain.shortBlurb?.length ?? 0).toBeGreaterThan(5);
+      expect(domain.instruction.length).toBeGreaterThan(40);
+      expect(domain.timeLimitSeconds).toBeGreaterThanOrEqual(300);
+    }
+  });
 });

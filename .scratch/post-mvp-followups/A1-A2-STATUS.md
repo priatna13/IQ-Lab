@@ -28,7 +28,7 @@
 
 - [x] Key provisioned ke `.env.local` (server-only; jangan `NEXT_PUBLIC_*`)
 - [x] Model default ADR 0016
-- [ ] Restart `npm run dev` lalu `GET /api/ops/readiness` → harapkan `openRouterConfigured: true`
+- [x] Restart `npm run dev` (port **3000**) + `GET /api/ops/readiness` → `openRouterConfigured: true`, model `openai/gpt-4o-mini`
 - [ ] Complete 1 Attempt test → insight mode LLM (atau fallback jika API gagal)
 - [ ] Production: tambah `OPENROUTER_API_KEY` di host secrets
 

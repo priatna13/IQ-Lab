@@ -5,7 +5,7 @@ const DRAFTS: ItemDraft[] = [
   {
     n: "01",
     prompt:
-      "Materi: KODE = 7, 2, 9, 4. Pertanyaan: Angka pertama pada kode adalah…",
+      "Materi (ingat): KODE = 7, 2, 9, 4.\nPertanyaan: Angka pertama pada kode adalah…",
     choices: ["7", "2", "9", "4"],
     correctKey: "a",
     difficulty: 1,

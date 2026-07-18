@@ -20,6 +20,8 @@ export type Item = {
 export type DomainDefinition = {
   id: DomainId;
   label: string;
+  /** Optional one-line purpose for progress UI. */
+  shortBlurb?: string;
   instruction: string;
   timeLimitSeconds: number;
   items: Item[];
@@ -42,6 +44,7 @@ export type PublicContentVersion = {
   domains: Array<{
     id: DomainId;
     label: string;
+    shortBlurb?: string;
     instruction: string;
     timeLimitSeconds: number;
     itemCount: number;
@@ -56,6 +59,7 @@ export function toPublicContentVersion(cv: ContentVersion): PublicContentVersion
     domains: cv.domains.map((d) => ({
       id: d.id,
       label: d.label,
+      shortBlurb: d.shortBlurb,
       instruction: d.instruction,
       timeLimitSeconds: d.timeLimitSeconds,
       itemCount: d.items.length,

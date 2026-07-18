@@ -106,15 +106,23 @@ export default async function AttemptProgressPage({ params }: Props) {
                         <span className="font-medium">
                           {domain?.label ?? domainId}
                         </span>
+                        {domain?.shortBlurb ? (
+                          <span className="mt-0.5 block text-xs text-slate-500">
+                            {domain.shortBlurb}
+                          </span>
+                        ) : null}
                         <span className="text-slate-400">
                           {" "}
                           · {domain?.itemCount ?? 0} soal
+                          {domain?.timeLimitSeconds
+                            ? ` · ±${Math.round(domain.timeLimitSeconds / 60)} mnt`
+                            : ""}
                           {closed
                             ? ` · selesai (${session?.closeReason === "early_finish" ? "awal" : "timer"}) ${session?.rawCorrect ?? "?"}/${session?.rawTotal ?? "?"}`
                             : inProgress
                               ? " · sedang dikerjakan"
                               : locked
-                                ? " · terkunci (urut dulu)"
+                                ? " · terkunci (kerjakan berurutan)"
                                 : " · siap"}
                         </span>
                       </div>

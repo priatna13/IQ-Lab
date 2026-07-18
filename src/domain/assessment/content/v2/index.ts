@@ -40,7 +40,14 @@ function buildDomains(): DomainDefinition[] {
         `Domain ${spec.id} must have 8 items, got ${items.length}`,
       );
     }
-    return { ...spec, items };
+    return {
+      id: spec.id,
+      label: spec.label,
+      shortBlurb: spec.shortBlurb,
+      instruction: spec.instruction,
+      timeLimitSeconds: spec.timeLimitSeconds,
+      items,
+    };
   });
 }
 

@@ -32,8 +32,8 @@
 
 | ID | Item | Tipe | Status | Effort | Catatan |
 |----|------|------|--------|--------|---------|
-| B1 | **Review psikometrik / pilot item** | human process | open | L | Kunci sudah di-review logika; butuh data kesulitan/diskriminasi dari pilot |
-| B2 | **Microcopy final 9 Domain** | content | open | S | Label/instruksi di `domain-specs.ts` — polish BI final |
+| B1 | **Review psikometrik / pilot item** | human process | **partial** | L | Protokol + desk review + revisi P1 (`PILOT-B1.md`, `PILOT-LOG.md`); **pilot manusia live** masih open |
+| B2 | **Microcopy final 9 Domain** | content | **done** | S | Label, shortBlurb, instruction BI; UI mulai/progress/runner |
 | B3 | **Timer exact + grace** | product decision | open | S | Grace 30s fixed; timer per domain di specs — konfirmasi angka final |
 | B4 | **Figural gambar / memori multi-fase** | feature | open | L | Saat ini teks/simbol + stimulus in-prompt |
 | B5 | **Re-norm empiris** | data science | open | XL | Fase 4+; butuh Norm Samples + volume; Norm Version baru |

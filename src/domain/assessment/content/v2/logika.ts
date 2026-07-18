@@ -86,12 +86,12 @@ const DRAFTS: ItemDraft[] = [
   {
     n: "08",
     prompt:
-      "Tiga kotak berisi: (1) hanya apel, (2) kosong, (3) apel+jeruk. Setiap kotak berlabel, dan SEMUA label salah. Kotak berlabel “Hanya apel”…",
+      "Ada tiga isi kotak yang berbeda: hanya apel; kosong; apel+jeruk. Setiap kotak punya label, dan SEMUA label salah. Untuk kotak yang berlabel “Hanya apel”, manakah yang pasti benar?",
     choices: [
-      "Pasti berisi hanya apel",
-      "Pasti kosong",
-      "Pasti berisi apel+jeruk",
-      "Bukan “hanya apel” (bisa kosong atau apel+jeruk)",
+      "Isinya pasti hanya apel",
+      "Isinya pasti kosong",
+      "Isinya pasti apel+jeruk",
+      "Isinya bukan hanya apel (bisa kosong atau apel+jeruk)",
     ],
     correctKey: "d",
     difficulty: 3,

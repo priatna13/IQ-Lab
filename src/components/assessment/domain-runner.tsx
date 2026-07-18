@@ -190,9 +190,13 @@ export function DomainRunner({ attemptId, initialView }: Props) {
           <p className="text-sm font-semibold text-lab-navy">
             {view.domain.label}
           </p>
+          {view.domain.shortBlurb ? (
+            <p className="text-xs text-slate-500">{view.domain.shortBlurb}</p>
+          ) : null}
           <p className="text-xs text-slate-500">
             {view.answeredCount}/{view.totalItems} dijawab · soal {index + 1}/
-            {view.totalItems}
+            {view.totalItems} · batas ±
+            {Math.round(view.domain.timeLimitSeconds / 60)} mnt
           </p>
         </div>
         <div className="text-right">
@@ -205,13 +209,16 @@ export function DomainRunner({ attemptId, initialView }: Props) {
           </p>
           <p className="text-xs text-slate-500">
             {inGrace
-              ? "Hanya update jawaban yang sudah ada"
-              : "Timer server (tampilan lokal)"}
+              ? "Hanya perbarui jawaban yang sudah tersimpan"
+              : "Sisa waktu (server)"}
           </p>
         </div>
       </div>
 
-      <p className="text-sm text-slate-600">{view.domain.instruction}</p>
+      <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+        <p className="font-medium text-lab-navy">Petunjuk domain</p>
+        <p className="mt-1">{view.domain.instruction}</p>
+      </div>
 
       {item ? (
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

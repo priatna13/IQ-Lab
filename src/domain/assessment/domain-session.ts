@@ -347,6 +347,7 @@ export type PublicDomainRunnerView = {
   domain: {
     id: string;
     label: string;
+    shortBlurb?: string;
     instruction: string;
     timeLimitSeconds: number;
   };
@@ -407,6 +408,7 @@ export async function getDomainRunnerView(
     domain: {
       id: domain.id,
       label: domain.label,
+      shortBlurb: domain.shortBlurb,
       instruction: domain.instruction,
       timeLimitSeconds: domain.timeLimitSeconds,
     },

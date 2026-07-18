@@ -13,10 +13,16 @@ Runbook Track A: [`docs/SOFT-LAUNCH-OPS.md`](../../docs/SOFT-LAUNCH-OPS.md)
 | A4 | Hosting front final | open — checklist in runbook |
 | A5 | Purge auth.users | open — documented gap |
 
-## Other tracks (not started this sprint)
+## Track B — Konten (active)
+
+| ID | Title | Status |
+|----|--------|--------|
+| B1 | Pilot internal | partial — protokol + desk review done; live humans open |
+| B2 | Microcopy 9 Domain | **done** |
+
+## Other tracks
 
 | Track | Focus |
 |-------|--------|
-| B | Konten & norma |
 | C | NFR, analytics, ToS |
 | D | PRD §18 sisa |

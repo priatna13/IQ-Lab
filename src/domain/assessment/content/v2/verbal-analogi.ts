@@ -4,7 +4,7 @@ import { buildDomainItems, type ItemDraft } from "../item-helpers";
 const DRAFTS: ItemDraft[] = [
   {
     n: "01",
-    prompt: "BUKU : MEMBACA = PENA : ?",
+    prompt: "BUKU : MEMBACA = PENA : ?  (hubungan: alat/bahan → aktivitas utamanya)",
     choices: ["Menulis", "Menghapus", "Mendengar", "Melukis dinding"],
     correctKey: "a",
     difficulty: 1,

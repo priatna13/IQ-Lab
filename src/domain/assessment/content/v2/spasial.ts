@@ -49,7 +49,7 @@ const DRAFTS: ItemDraft[] = [
   {
     n: "06",
     prompt:
-      "Huruf “b” dicerminkan pada sumbu vertikal (kaca di kanan-kiri huruf). Hasil paling mirip…",
+      "Huruf “b” dicerminkan kiri–kanan (seperti cermin berdiri di samping huruf). Bentuk paling mirip…",
     choices: ["q", "p", "d", "b (tidak berubah)"],
     correctKey: "c",
     difficulty: 3,
