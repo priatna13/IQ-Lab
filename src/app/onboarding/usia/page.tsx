@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { SiteHeader } from "@/components/site-header";
+import { PageShell } from "@/components/ui/page-shell";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { AgeBandForm } from "@/components/auth/age-band-form";
 import { getSessionUser } from "@/lib/auth/session";
 
@@ -13,20 +14,21 @@ export default async function AgeOnboardingPage() {
   }
 
   return (
-    <>
-      <SiteHeader />
-      <main id="main-content" className="mx-auto max-w-lg px-6 py-12">
-        <h1 className="text-2xl font-semibold text-lab-navy">
+    <PageShell width="sm" orbs="calm" footer={false}>
+      <div className="animate-fade-up">
+        <BrandLogo size="md" href="/" />
+        <p className="lab-section-label mt-6">Onboarding</p>
+        <h1 className="mt-2 text-2xl font-bold text-lab-navy sm:text-3xl">
           Satu langkah lagi
         </h1>
         <p className="mt-2 text-sm text-slate-600">
           Rentang usia membantu kelayakan asesmen dan kalibrasi norma internal
           (tanpa data sensitif berlebih).
         </p>
-        <div className="mt-8">
+        <div className="lab-card mt-8 p-5 sm:p-6">
           <AgeBandForm />
         </div>
-      </main>
-    </>
+      </div>
+    </PageShell>
   );
 }

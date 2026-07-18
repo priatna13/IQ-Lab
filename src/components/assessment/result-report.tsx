@@ -1,12 +1,12 @@
 import type { PublicResultReport } from "@/domain/assessment";
 
 const BAR_HUES = [
-  "from-lab-teal to-lab-teal-deep",
+  "from-lab-teal to-[#0f766e]",
   "from-lab-sky to-lab-teal",
   "from-lab-violet to-lab-teal",
   "from-lab-teal to-lab-sky",
   "from-lab-violet/90 to-lab-violet",
-  "from-lab-teal-deep to-lab-navy-soft",
+  "from-[#0f766e] to-lab-navy-soft",
   "from-lab-sky to-lab-violet",
   "from-lab-teal to-emerald-600",
   "from-lab-navy-soft to-lab-teal",
@@ -26,7 +26,10 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
 
       <section className="grid animate-fade-up-1 gap-4 sm:grid-cols-2">
         <div className="lab-card relative overflow-hidden p-5">
-          <div className="absolute inset-0 bg-gradient-to-br from-lab-mint/40 to-transparent" aria-hidden />
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-lab-mint/50 to-transparent"
+            aria-hidden
+          />
           <div className="relative">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               {report.labels.composite}
@@ -38,7 +41,10 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
           </div>
         </div>
         <div className="lab-card relative overflow-hidden p-5">
-          <div className="absolute inset-0 bg-gradient-to-br from-lab-teal/10 to-lab-violet/10" aria-hidden />
+          <div
+            className="absolute inset-0 bg-gradient-to-br from-lab-teal/15 to-lab-violet/15"
+            aria-hidden
+          />
           <div className="relative">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               {report.labels.iqEstimate}
@@ -80,9 +86,9 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
                   </span>
                 </span>
               </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-100">
+              <div className="lab-progress-track">
                 <div
-                  className={`h-full origin-left rounded-full bg-gradient-to-r ${BAR_HUES[i % BAR_HUES.length]} animate-bar-in`}
+                  className={`lab-progress-fill bg-gradient-to-r ${BAR_HUES[i % BAR_HUES.length]} animate-bar-in`}
                   style={{
                     width: `${Math.max(4, Math.min(100, entry.score))}%`,
                   }}

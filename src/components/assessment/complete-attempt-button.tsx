@@ -24,7 +24,7 @@ export function CompleteAttemptButton({ attemptId }: { attemptId: string }) {
             if (result && !result.ok) setError(result.error);
           });
         }}
-        className="rounded-lg bg-lab-teal px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+        className="lab-btn-primary"
       >
         {pending ? "Memproses hasil…" : "Selesaikan & lihat hasil"}
       </button>

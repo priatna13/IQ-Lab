@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { PageShell } from "@/components/ui/page-shell";
 
 export const metadata: Metadata = {
   title: "FAQ & Metodologi — IQ-Lab",
@@ -150,57 +149,46 @@ const FAQ_ITEMS: Array<{ q: string; a: ReactNode }> = [
 
 export default function FaqPage() {
   return (
-    <>
-      <SiteHeader />
-      <main id="main-content" className="mx-auto max-w-3xl px-6 py-12">
-        <p className="text-sm font-medium uppercase tracking-wide text-lab-teal">
-          FAQ & metodologi
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold text-lab-navy">
-          Memahami IQ-Lab dengan jujur
-        </h1>
-        <p className="mt-3 text-slate-600">
-          Halaman ini menjelaskan posisi produk, batasan, dan cara membaca
-          hasil — selaras dengan komitmen kami: transparan, bukan overclaim.
-        </p>
+    <PageShell width="lg" orbs="calm">
+      <p className="lab-section-label">FAQ & metodologi</p>
+      <h1 className="mt-2 text-3xl font-bold text-lab-navy">
+        Memahami IQ-Lab dengan jujur
+      </h1>
+      <p className="mt-3 text-slate-600">
+        Halaman ini menjelaskan posisi produk, batasan, dan cara membaca
+        hasil — selaras dengan komitmen kami: transparan, bukan overclaim.
+      </p>
 
-        <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-slate-700">
-          <strong className="text-lab-navy">Ringkas:</strong> multi-domain
-          inspired-by · item original ·{" "}
-          <strong>bukan IST resmi</strong> ·{" "}
-          <strong>bukan rekrutmen/klinis</strong> · estimasi norma internal
-          sementara · untuk pengembangan diri.
-        </div>
+      <div className="mt-6 rounded-[1.25rem] border border-amber-200 bg-amber-50 p-4 text-sm text-slate-700">
+        <strong className="text-lab-navy">Ringkas:</strong> multi-domain
+        inspired-by · item original ·{" "}
+        <strong>bukan IST resmi</strong> ·{" "}
+        <strong>bukan rekrutmen/klinis</strong> · estimasi norma internal
+        sementara · untuk pengembangan diri.
+      </div>
 
-        <div className="mt-10 space-y-6">
-          {FAQ_ITEMS.map((item) => (
-            <section
-              key={item.q}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <h2 className="text-base font-semibold text-lab-navy">
-                {item.q}
-              </h2>
-              <div className="mt-3 text-sm leading-relaxed text-slate-700">
-                {item.a}
-              </div>
-            </section>
-          ))}
-        </div>
+      <div className="mt-10 space-y-4">
+        {FAQ_ITEMS.map((item) => (
+          <section key={item.q} className="lab-card p-5">
+            <h2 className="text-base font-semibold text-lab-navy">{item.q}</h2>
+            <div className="mt-3 text-sm leading-relaxed text-slate-700">
+              {item.a}
+            </div>
+          </section>
+        ))}
+      </div>
 
-        <p className="mt-10 text-center text-sm text-slate-600">
-          Siap mencoba?{" "}
-          <Link href="/daftar" className="font-semibold text-lab-teal">
-            Buat akun gratis
-          </Link>{" "}
-          atau kembali ke{" "}
-          <Link href="/" className="font-semibold text-lab-teal">
-            beranda
-          </Link>
-          .
-        </p>
-      </main>
-      <SiteFooter />
-    </>
+      <p className="mt-10 text-center text-sm text-slate-600">
+        Siap mencoba?{" "}
+        <Link href="/daftar" className="font-semibold text-lab-teal hover:underline">
+          Buat akun gratis
+        </Link>{" "}
+        atau kembali ke{" "}
+        <Link href="/" className="font-semibold text-lab-teal hover:underline">
+          beranda
+        </Link>
+        .
+      </p>
+    </PageShell>
   );
 }

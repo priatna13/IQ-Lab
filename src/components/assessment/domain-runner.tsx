@@ -24,6 +24,7 @@ function formatRemaining(ms: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+/** Calm focus chrome for domain runner (DESIGN.md R2 / motion.calm). */
 export function DomainRunner({ attemptId, initialView }: Props) {
   const router = useRouter();
   const [view, setView] = useState(initialView);
@@ -47,7 +48,6 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     return () => window.clearInterval(id);
   }, []);
 
-  // Light integrity: blur / tab hide — record only, never auto-fail
   useEffect(() => {
     if (view.session.status === "closed") return;
 
@@ -108,11 +108,13 @@ export function DomainRunner({ attemptId, initialView }: Props) {
 
   const item = view.items[index];
   const selected = item ? view.responses[item.id] : undefined;
+  const answerProgress = Math.round(
+    (view.answeredCount / Math.max(1, view.totalItems)) * 100,
+  );
 
   function selectAnswer(answer: string) {
     if (!item || view.session.status === "closed") return;
     setError(null);
-    // Optimistic local update
     setView((v) => ({
       ...v,
       responses: { ...v.responses, [item.id]: answer },
@@ -153,10 +155,11 @@ export function DomainRunner({ attemptId, initialView }: Props) {
 
   if (view.session.status === "closed") {
     return (
-      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-lab-navy">
-          Domain selesai: {view.domain.label}
-        </h2>
+      <div className="lab-card space-y-4 p-6">
+        <p className="lab-badge bg-lab-mint/70 text-lab-teal-deep ring-1 ring-lab-teal/15">
+          Domain selesai
+        </p>
+        <h2 className="text-lg font-bold text-lab-navy">{view.domain.label}</h2>
         <p className="text-sm text-slate-600">
           Alasan tutup:{" "}
           <strong>
@@ -175,7 +178,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             router.push(`/asesmen/${attemptId}`);
             router.refresh();
           }}
-          className="rounded-lg bg-lab-teal px-4 py-2 text-sm font-semibold text-white"
+          className="lab-btn-primary"
         >
           Kembali ke daftar domain
         </button>
@@ -185,45 +188,52 @@ export function DomainRunner({ attemptId, initialView }: Props) {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <div>
-          <p className="text-sm font-semibold text-lab-navy">
-            {view.domain.label}
-          </p>
-          {view.domain.shortBlurb ? (
-            <p className="text-xs text-slate-500">{view.domain.shortBlurb}</p>
-          ) : null}
-          <p className="text-xs text-slate-500">
-            {view.answeredCount}/{view.totalItems} dijawab · soal {index + 1}/
-            {view.totalItems} · batas ±
-            {Math.round(view.domain.timeLimitSeconds / 60)} mnt
-          </p>
+      {/* Calm chrome header */}
+      <div className="lab-card px-4 py-3 sm:px-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-lab-navy">{view.domain.label}</p>
+            {view.domain.shortBlurb ? (
+              <p className="text-xs text-slate-500">{view.domain.shortBlurb}</p>
+            ) : null}
+            <p className="mt-1 text-xs text-slate-500">
+              {view.answeredCount}/{view.totalItems} dijawab · soal {index + 1}/
+              {view.totalItems} · batas ±
+              {Math.round(view.domain.timeLimitSeconds / 60)} mnt
+            </p>
+          </div>
+          <div className="text-right">
+            <p
+              className={`font-mono text-2xl font-semibold tabular-nums ${
+                remainingMs < 60_000 ? "text-red-600" : "text-lab-navy"
+              }`}
+              role="timer"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label={
+                inGrace
+                  ? "Jendela grace aktif"
+                  : `Sisa waktu ${formatRemaining(remainingMs)}`
+              }
+            >
+              {inGrace ? "Grace" : formatRemaining(remainingMs)}
+            </p>
+            <p className="text-xs text-slate-500">
+              {inGrace
+                ? "Hanya perbarui jawaban yang sudah tersimpan"
+                : "Sisa waktu (server)"}
+            </p>
+          </div>
         </div>
-        <div className="text-right">
-          <p
-            className={`font-mono text-xl font-semibold ${
-              remainingMs < 60_000 ? "text-red-600" : "text-lab-navy"
-            }`}
-            role="timer"
-            aria-live="polite"
-            aria-atomic="true"
-            aria-label={
-              inGrace
-                ? "Jendela grace aktif"
-                : `Sisa waktu ${formatRemaining(remainingMs)}`
-            }
-          >
-            {inGrace ? "Grace" : formatRemaining(remainingMs)}
-          </p>
-          <p className="text-xs text-slate-500">
-            {inGrace
-              ? "Hanya perbarui jawaban yang sudah tersimpan"
-              : "Sisa waktu (server)"}
-          </p>
+        <div className="lab-progress-track mt-3">
+          <div
+            className="lab-progress-fill"
+            style={{ width: `${Math.max(3, answerProgress)}%` }}
+          />
         </div>
       </div>
 
-      <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+      <div className="rounded-xl border border-slate-100 bg-lab-mist/50 px-4 py-3 text-sm text-slate-700">
         <p className="font-medium text-lab-navy" id="domain-instruction-title">
           Petunjuk domain
         </p>
@@ -234,20 +244,22 @@ export function DomainRunner({ attemptId, initialView }: Props) {
 
       {item ? (
         <fieldset
-          className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="lab-card p-5"
           aria-describedby="domain-instruction"
         >
-          <legend className="text-sm font-medium text-lab-navy">
+          <legend className="text-sm font-medium leading-relaxed text-lab-navy">
             Soal {index + 1} dari {view.totalItems}: {item.prompt}
           </legend>
-          <div className="mt-4 space-y-2" role="radiogroup" aria-label="Pilihan jawaban">
+          <div
+            className="mt-4 space-y-2"
+            role="radiogroup"
+            aria-label="Pilihan jawaban"
+          >
             {item.choices.map((choice) => (
               <label
                 key={choice.id}
-                className={`flex cursor-pointer gap-3 rounded-lg border px-3 py-2 text-sm ${
-                  selected === choice.id
-                    ? "border-lab-teal bg-teal-50"
-                    : "border-slate-200 hover:bg-slate-50"
+                className={`lab-choice min-h-11 items-center ${
+                  selected === choice.id ? "lab-choice-selected" : ""
                 }`}
               >
                 <input
@@ -257,6 +269,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
                   checked={selected === choice.id}
                   onChange={() => selectAnswer(choice.id)}
                   disabled={pending && !inGrace && pastGrace}
+                  className="shrink-0"
                 />
                 <span>
                   <span className="font-semibold uppercase text-slate-400">
@@ -273,12 +286,12 @@ export function DomainRunner({ attemptId, initialView }: Props) {
       {integrityWarning ? (
         <p
           role="status"
-          className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+          className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
         >
           {integrityWarning}
           <button
             type="button"
-            className="ml-2 underline"
+            className="ml-2 font-medium underline"
             onClick={() => setIntegrityWarning(null)}
           >
             Tutup
@@ -287,7 +300,10 @@ export function DomainRunner({ attemptId, initialView }: Props) {
       ) : null}
 
       {error ? (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-100"
+        >
           {error}
         </p>
       ) : null}
@@ -298,7 +314,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             type="button"
             disabled={index === 0}
             onClick={() => setIndex((i) => Math.max(0, i - 1))}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium disabled:opacity-40"
+            className="lab-btn-secondary !min-h-10 !px-3 text-sm disabled:opacity-40"
           >
             Sebelumnya
           </button>
@@ -308,7 +324,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             onClick={() =>
               setIndex((i) => Math.min(view.items.length - 1, i + 1))
             }
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium disabled:opacity-40"
+            className="lab-btn-secondary !min-h-10 !px-3 text-sm disabled:opacity-40"
           >
             Berikutnya
           </button>
@@ -318,7 +334,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
           type="button"
           disabled={!view.canEarlyFinish || pending}
           onClick={onEarlyFinish}
-          className="rounded-lg bg-lab-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          className="lab-btn-navy"
         >
           Selesai domain
         </button>

@@ -22,7 +22,9 @@ export function StartAttemptForm() {
           Pilih Track
         </legend>
 
-        <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white p-4">
+        <label
+          className={`lab-choice ${track === "explore" ? "lab-choice-selected" : ""}`}
+        >
           <input
             type="radio"
             name="track"
@@ -30,6 +32,7 @@ export function StartAttemptForm() {
             required
             checked={track === "explore"}
             onChange={() => setTrack("explore")}
+            className="mt-1 shrink-0"
           />
           <span className="text-sm">
             <span className="font-medium text-lab-navy">Jelajahi potensi</span>
@@ -40,13 +43,16 @@ export function StartAttemptForm() {
           </span>
         </label>
 
-        <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white p-4">
+        <label
+          className={`lab-choice ${track === "career" ? "lab-choice-selected" : ""}`}
+        >
           <input
             type="radio"
             name="track"
             value="career"
             checked={track === "career"}
             onChange={() => setTrack("career")}
+            className="mt-1 shrink-0"
           />
           <span className="text-sm">
             <span className="font-medium text-lab-navy">
@@ -60,7 +66,7 @@ export function StartAttemptForm() {
         </label>
       </fieldset>
 
-      <label className="flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+      <label className="flex items-start gap-2 rounded-xl bg-lab-mist/80 p-3 text-sm text-slate-700 ring-1 ring-slate-100">
         <input type="checkbox" name="confirm_track" className="mt-1" />
         <span>
           Saya memahami Track <strong>tidak dapat diganti</strong> setelah
@@ -70,16 +76,15 @@ export function StartAttemptForm() {
       </label>
 
       {state?.error ? (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-100"
+        >
           {state.error}
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-lg bg-lab-teal px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="lab-btn-primary w-full">
         {pending ? "Membuat Attempt…" : "Mulai asesmen"}
       </button>
     </form>

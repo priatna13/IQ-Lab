@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { redirect } from "next/navigation";
+import { PageShell } from "@/components/ui/page-shell";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { AuthForm } from "@/components/auth/auth-form";
 import { GoogleButton } from "@/components/auth/google-button";
-import { MeshOrbs } from "@/components/ui/mesh-orbs";
 import { signInAction } from "@/app/actions/auth";
 import { getSessionUser } from "@/lib/auth/session";
-import { redirect } from "next/navigation";
 
 type Props = {
   searchParams: Promise<{ error?: string }>;
@@ -24,55 +23,50 @@ export default async function SignInPage({ searchParams }: Props) {
     : null;
 
   return (
-    <>
-      <SiteHeader />
-      <main
-        id="main-content"
-        className="relative mx-auto w-full max-w-md flex-1 overflow-hidden px-4 py-10 sm:px-6 sm:py-12"
-      >
-        <MeshOrbs calm />
-        <div className="relative animate-fade-up">
-          <p className="lab-section-label">Selamat datang kembali</p>
-          <h1 className="mt-2 text-2xl font-bold text-lab-navy sm:text-3xl">
-            Masuk
-          </h1>
-          <p className="mt-2 text-sm text-slate-600">
-            Lanjutkan asesmen dan lihat hasil Anda.
-          </p>
+    <PageShell width="sm" orbs="calm">
+      <div className="animate-fade-up">
+        <div className="mb-6 flex justify-center sm:justify-start">
+          <BrandLogo size="md" href="/" />
+        </div>
+        <p className="lab-section-label">Selamat datang kembali</p>
+        <h1 className="mt-2 text-2xl font-bold text-lab-navy sm:text-3xl">
+          Masuk
+        </h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Lanjutkan asesmen dan lihat hasil Anda.
+        </p>
 
-          <div className="lab-card relative mt-8 space-y-6 p-5 sm:p-6">
-            {oauthError ? (
-              <p
-                role="alert"
-                className="rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-700 ring-1 ring-red-100"
-              >
-                {oauthError === "oauth_failed" ||
-                oauthError === "exchange_failed" ||
-                oauthError === "missing_verifier"
-                  ? "Login Google gagal. Coba lagi atau gunakan email."
-                  : oauthError}
-              </p>
-            ) : null}
+        <div className="lab-card relative mt-8 space-y-6 p-5 sm:p-6">
+          {oauthError ? (
+            <p
+              role="alert"
+              className="rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-700 ring-1 ring-red-100"
+            >
+              {oauthError === "oauth_failed" ||
+              oauthError === "exchange_failed" ||
+              oauthError === "missing_verifier"
+                ? "Login Google gagal. Coba lagi atau gunakan email."
+                : oauthError}
+            </p>
+          ) : null}
 
-            <GoogleButton label="Lanjut dengan Google" />
+          <GoogleButton label="Lanjut dengan Google" />
 
-            <div className="relative text-center text-xs text-slate-400">
-              <span className="relative z-10 bg-white px-2">atau email</span>
-              <div className="absolute inset-x-0 top-1/2 -z-0 border-t border-slate-100" />
-            </div>
-
-            <AuthForm action={signInAction} submitLabel="Masuk" />
+          <div className="relative text-center text-xs text-slate-400">
+            <span className="relative z-10 bg-white px-2">atau email</span>
+            <div className="absolute inset-x-0 top-1/2 -z-0 border-t border-slate-100" />
           </div>
 
-          <p className="mt-6 text-center text-sm text-slate-600">
-            Belum punya akun?{" "}
-            <Link href="/daftar" className="font-semibold text-lab-teal hover:underline">
-              Daftar
-            </Link>
-          </p>
+          <AuthForm action={signInAction} submitLabel="Masuk" />
         </div>
-      </main>
-      <SiteFooter />
-    </>
+
+        <p className="mt-6 text-center text-sm text-slate-600">
+          Belum punya akun?{" "}
+          <Link href="/daftar" className="font-semibold text-lab-teal hover:underline">
+            Daftar
+          </Link>
+        </p>
+      </div>
+    </PageShell>
   );
 }

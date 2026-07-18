@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   title: "IQ-Lab",
   description:
     "Asesmen multi-domain untuk pengembangan diri dan arah karir. Bukan tes IST resmi.",
+  icons: {
+    icon: "/brand/logo.jpg",
+    apple: "/brand/logo.jpg",
+  },
 };
 
 export default function RootLayout({

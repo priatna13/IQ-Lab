@@ -1,6 +1,6 @@
 # IQ-Lab — Design System & Visual Spec
 
-**Status:** Grill locked · **R1 implemented in code** (await separate deploy approve)  
+**Status:** Grill locked · **R1 + R2 light chrome implemented** · brand logo `/brand/logo.jpg` · await deploy approve  
 **Last updated:** 2026-07-18  
 **Product:** IQ-Lab — asesmen multi-domain (self-dev / karir), UI Bahasa Indonesia  
 **Stack UI:** Next.js App Router + Tailwind CSS  
@@ -337,6 +337,7 @@ Apply DESIGN.md tokens to shell, landing, auth, dashboard, and results with mobi
 |------|----------|
 | 2026-07-18 | Grill locked rows §2; mobile plan §6; this file created as durable design context |
 | 2026-07-18 | Owner `GO BUILD` — visual R1 implemented (shell, landing, auth, dashboard, results) |
+| 2026-07-18 | Full DESIGN.md depth pass: PageShell, richer mesh/orbs, landing hero+journey, FAQ/legal tokens, attempt/mulai/onboarding, calm domain runner; brand mark `logo.jpg` → `public/brand/logo.jpg` |
 | — | Deploy pending separate explicit approve |
 
 ---

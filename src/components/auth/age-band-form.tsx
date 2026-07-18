@@ -19,55 +19,47 @@ export function AgeBandForm() {
           Rentang usia Anda
         </legend>
 
-        <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white p-3">
-          <input
-            type="radio"
-            name="age_band"
-            value="under_18"
-            required
-            onChange={() => setChoice("under_18")}
-          />
-          <span className="text-sm">
-            <span className="font-medium">Di bawah 18 tahun</span>
-            <span className="block text-slate-500">
-              MVP tidak mendukung asesmen untuk usia ini
+        {(
+          [
+            {
+              value: "under_18",
+              title: "Di bawah 18 tahun",
+              hint: "MVP tidak mendukung asesmen untuk usia ini",
+            },
+            {
+              value: "18_45",
+              title: "18–45 tahun",
+              hint: "Segmen utama norma & insight karir",
+            },
+            {
+              value: "46_plus",
+              title: "46 tahun ke atas",
+              hint: "Boleh mengikuti dengan disclaimer tambahan",
+            },
+          ] as const
+        ).map((opt) => (
+          <label
+            key={opt.value}
+            className={`lab-choice ${choice === opt.value ? "lab-choice-selected" : ""}`}
+          >
+            <input
+              type="radio"
+              name="age_band"
+              value={opt.value}
+              required
+              onChange={() => setChoice(opt.value)}
+              className="mt-1 shrink-0"
+            />
+            <span className="text-sm">
+              <span className="font-medium text-lab-navy">{opt.title}</span>
+              <span className="mt-0.5 block text-slate-500">{opt.hint}</span>
             </span>
-          </span>
-        </label>
-
-        <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white p-3">
-          <input
-            type="radio"
-            name="age_band"
-            value="18_45"
-            onChange={() => setChoice("18_45")}
-          />
-          <span className="text-sm">
-            <span className="font-medium">18–45 tahun</span>
-            <span className="block text-slate-500">
-              Segmen utama norma & insight karir
-            </span>
-          </span>
-        </label>
-
-        <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white p-3">
-          <input
-            type="radio"
-            name="age_band"
-            value="46_plus"
-            onChange={() => setChoice("46_plus")}
-          />
-          <span className="text-sm">
-            <span className="font-medium">46 tahun ke atas</span>
-            <span className="block text-slate-500">
-              Boleh mengikuti dengan disclaimer tambahan
-            </span>
-          </span>
-        </label>
+          </label>
+        ))}
       </fieldset>
 
       {choice === "46_plus" ? (
-        <div className="space-y-3 rounded-lg border border-lab-warm/40 bg-orange-50 p-4 text-sm text-slate-700">
+        <div className="space-y-3 rounded-xl border border-lab-warm/40 bg-orange-50 p-4 text-sm text-slate-700">
           <p>
             <strong>Disclaimer 46+:</strong> Norma internal IQ-Lab dan saran
             karir di fase awal dioptimalkan untuk usia 18–45. Hasil Anda tetap
@@ -86,16 +78,15 @@ export function AgeBandForm() {
       ) : null}
 
       {state?.error ? (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-100"
+        >
           {state.error}
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-lg bg-lab-teal px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="lab-btn-primary w-full">
         {pending ? "Menyimpan…" : "Lanjut ke dasbor"}
       </button>
     </form>

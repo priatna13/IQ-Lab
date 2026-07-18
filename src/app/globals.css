@@ -4,17 +4,29 @@
 
 :root {
   --lab-navy: #0f2744;
+  --lab-navy-soft: #1a3a5c;
   --lab-teal: #0d9488;
+  --lab-teal-deep: #0f766e;
+  --lab-mint: #ccfbf1;
+  --lab-violet: #8b5cf6;
+  --lab-sky: #38bdf8;
+  --lab-coral: #fb7185;
+  --lab-sun: #fbbf24;
+  --lab-cream: #fff7ed;
+  --lab-mist: #f0f9ff;
   --lab-focus: #0f766e;
+  --lab-destructive: #dc2626;
 }
 
 body {
   color: var(--lab-navy);
   background-color: #f8fafc;
+  /* Hero mesh: radial teal + coral + sky at low opacity (DESIGN.md §3.2) */
   background-image:
-    radial-gradient(ellipse 100% 80% at 0% -20%, rgba(45, 212, 191, 0.14), transparent 50%),
-    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(139, 92, 246, 0.1), transparent 45%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(56, 189, 248, 0.1), transparent 40%);
+    radial-gradient(ellipse 110% 90% at 0% -25%, rgba(45, 212, 191, 0.18), transparent 52%),
+    radial-gradient(ellipse 90% 70% at 100% -10%, rgba(139, 92, 246, 0.12), transparent 48%),
+    radial-gradient(ellipse 70% 50% at 80% 100%, rgba(56, 189, 248, 0.12), transparent 45%),
+    radial-gradient(ellipse 50% 40% at 20% 90%, rgba(251, 113, 133, 0.06), transparent 50%);
   background-attachment: fixed;
   min-height: 100dvh;
 }
@@ -70,7 +82,7 @@ body {
 }
 
 @layer components {
-  /* Avoid dotted scale names (2.5xl) and hyphenated nested colors in @apply — PostCSS rejects them. */
+  /* Soft solid cards — rounded 1.25rem (DESIGN.md §5) */
   .lab-card {
     @apply rounded-[1.25rem] border border-white/80 bg-white/95 shadow-soft backdrop-blur-[2px];
   }
@@ -84,11 +96,15 @@ body {
   }
 
   .lab-btn-secondary {
-    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-sm transition duration-200 hover:border-lab-teal/40 hover:bg-lab-mint/30 active:scale-[0.98];
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-lab-navy shadow-sm transition duration-200 hover:border-lab-teal/40 hover:bg-lab-mint/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .lab-btn-ghost {
     @apply inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-white/80 hover:text-lab-navy;
+  }
+
+  .lab-btn-navy {
+    @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-lab-navy px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition duration-200 hover:bg-lab-navy-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   .lab-input {
@@ -105,5 +121,22 @@ body {
 
   .lab-orb {
     @apply pointer-events-none absolute rounded-full blur-3xl;
+  }
+
+  /* Choice / radio surface (auth age, track, runner) */
+  .lab-choice {
+    @apply flex cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm transition duration-200 hover:border-lab-teal/35 hover:bg-lab-mint/20;
+  }
+
+  .lab-choice-selected {
+    @apply border-lab-teal bg-lab-mint/40 shadow-glow ring-1 ring-lab-teal/20;
+  }
+
+  .lab-progress-track {
+    @apply h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-100;
+  }
+
+  .lab-progress-fill {
+    @apply h-full origin-left rounded-full bg-gradient-to-r from-lab-teal to-[#0f766e];
   }
 }
