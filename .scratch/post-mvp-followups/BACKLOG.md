@@ -44,7 +44,7 @@
 |----|------|------|--------|--------|---------|
 | C1 | **Lighthouse + a11y audit** | eng | open | M | NFR report; perbaiki blocker |
 | C2 | **Analytics activation/completion** | eng | open | M | Instrument event: signup, start attempt, domain complete, complete attempt |
-| C3 | **ToS + Privasi formal** | legal/content | open | M | Halaman `/kebijakan` atau `/syarat` + link footer |
+| C3 | **ToS + Privasi formal** | legal/content | **done** | M | `/privasi` + `/syarat` + footer, daftar, FAQ, landing, dasbor |
 | C4 | **PDF storage permanen (opsional)** | eng | open | M | On-demand OK secara setara snapshot; simpan R2 hanya jika perlu audit file |
 
 ### D. Keputusan terbuka PRD §18 (belum digaransi)

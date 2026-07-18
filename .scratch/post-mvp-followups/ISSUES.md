@@ -20,9 +20,17 @@ Runbook Track A: [`docs/SOFT-LAUNCH-OPS.md`](../../docs/SOFT-LAUNCH-OPS.md)
 | B1 | Pilot internal | partial — protokol + desk review done; live humans open |
 | B2 | Microcopy 9 Domain | **done** |
 
-## Other tracks
+## Track C
+
+| ID | Title | Status |
+|----|--------|--------|
+| C3 | ToS + Privasi | **done** (`/privasi`, `/syarat`) |
+| C1 | Lighthouse + a11y | open |
+| C2 | Analytics | open |
+| C4 | PDF storage | open |
+
+## Other
 
 | Track | Focus |
 |-------|--------|
-| C | NFR, analytics, ToS |
 | D | PRD §18 sisa |

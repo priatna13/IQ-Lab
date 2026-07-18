@@ -72,12 +72,24 @@ export default async function HomePage() {
               tradisi asesmen struktur inteligensi.
             </li>
           </ul>
-          <p className="mt-3">
+          <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
             <Link
               href="/faq"
               className="font-semibold text-lab-teal hover:underline"
             >
-              Baca FAQ & metodologi lengkap →
+              FAQ & metodologi
+            </Link>
+            <Link
+              href="/privasi"
+              className="font-semibold text-lab-teal hover:underline"
+            >
+              Privasi
+            </Link>
+            <Link
+              href="/syarat"
+              className="font-semibold text-lab-teal hover:underline"
+            >
+              Syarat
             </Link>
           </p>
         </section>

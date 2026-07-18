@@ -178,7 +178,16 @@ export default async function DashboardPage() {
 
           <div className="border-t border-slate-100 pt-6">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Privasi
+              Privasi & kebijakan
+            </p>
+            <p className="mb-3 text-xs text-slate-500">
+              <Link href="/privasi" className="text-lab-teal hover:underline">
+                Kebijakan Privasi
+              </Link>
+              {" · "}
+              <Link href="/syarat" className="text-lab-teal hover:underline">
+                Syarat Penggunaan
+              </Link>
             </p>
             <DeleteAccountButton />
           </div>

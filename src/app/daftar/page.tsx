@@ -56,8 +56,16 @@ export default async function SignUpPage({ searchParams }: Props) {
         </div>
 
         <p className="mt-4 text-xs text-slate-500">
-          Dengan mendaftar, Anda memahami IQ-Lab bukan tes IST resmi dan bukan
-          alat rekrutmen/klinis.
+          Dengan mendaftar, Anda menyetujui{" "}
+          <Link href="/syarat" className="font-medium text-lab-teal hover:underline">
+            Syarat Penggunaan
+          </Link>{" "}
+          dan{" "}
+          <Link href="/privasi" className="font-medium text-lab-teal hover:underline">
+            Kebijakan Privasi
+          </Link>
+          , serta memahami IQ-Lab bukan tes IST resmi dan bukan alat
+          rekrutmen/klinis.
         </p>
 
         <p className="mt-6 text-center text-sm text-slate-600">

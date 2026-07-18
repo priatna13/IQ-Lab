@@ -11,6 +11,12 @@ export function SiteFooter() {
           <Link href="/faq" className="hover:text-lab-navy hover:underline">
             FAQ & metodologi
           </Link>
+          <Link href="/privasi" className="hover:text-lab-navy hover:underline">
+            Privasi
+          </Link>
+          <Link href="/syarat" className="hover:text-lab-navy hover:underline">
+            Syarat
+          </Link>
           <Link href="/daftar" className="hover:text-lab-navy hover:underline">
             Daftar
           </Link>

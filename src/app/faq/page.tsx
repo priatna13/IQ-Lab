@@ -128,7 +128,21 @@ const FAQ_ITEMS: Array<{ q: string; a: ReactNode }> = [
         Hasil individual bersifat pribadi (hanya akun Anda). Anda dapat menghapus
         data asesmen teridentifikasi dari dasbor. Sampel agregat anonim (tanpa
         identitas) dapat dipakai untuk memperbaiki norma internal — tanpa
-        menautkan kembali ke akun Anda.
+        menautkan kembali ke akun Anda. Detail lengkap:{" "}
+        <Link
+          href="/privasi"
+          className="font-semibold text-lab-teal hover:underline"
+        >
+          Kebijakan Privasi
+        </Link>{" "}
+        dan{" "}
+        <Link
+          href="/syarat"
+          className="font-semibold text-lab-teal hover:underline"
+        >
+          Syarat Penggunaan
+        </Link>
+        .
       </>
     ),
   },
