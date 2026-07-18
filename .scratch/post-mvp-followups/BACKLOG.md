@@ -22,8 +22,8 @@
 
 | ID | Item | Tipe | Status | Effort | Catatan |
 |----|------|------|--------|--------|---------|
-| A1 | **Google OAuth live** | ops | **ops-only** | S | Runbook di `docs/SOFT-LAUNCH-OPS.md`; kode + error UI ready; operator aktifkan di dashboard |
-| A2 | **LLM Insight production** | ops + code | **partial** | S | ADR 0016 model default; readiness API; operator set `OPENROUTER_API_KEY` |
+| A1 | **Google OAuth live** | ops | **partial** | S | Metadata: `oAuthProviders` includes **google** (+ github). Endpoint `/api/auth/oauth/google` responds (400 tanpa params = ada). **Uji browser** tombol Google di `/masuk` masih wajib |
+| A2 | **LLM Insight production** | ops + code | **done (local)** | S | `npx @insforge/cli ai setup` menulis `OPENROUTER_API_KEY` ke `.env.local`; model `openai/gpt-4o-mini` di-set. Production host masih perlu secret yang sama |
 | A3 | **Email verification / SMTP** | ops | open | M | Runbook A3; tetap `false` untuk soft-launch internal |
 | A4 | **Hosting front final** | ops | open | M | Checklist deploy di runbook; keputusan host belum final |
 | A5 | **Purge auth.users penuh** | research + code | open | M | Documented; product delete data OK tanpa purge platform |
