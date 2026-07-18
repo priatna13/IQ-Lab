@@ -115,8 +115,9 @@ export async function signInWithGoogleAction(): Promise<void> {
   });
 
   if (error || !data?.url || !data.codeVerifier) {
+    // Surface on /masuk (shared OAuth entry); /daftar also reads ?error=
     redirect(
-      `/masuk?error=${encodeURIComponent(error?.message ?? "OAuth Google gagal. Pastikan Google diaktifkan di dashboard InsForge.")}`,
+      `/masuk?error=${encodeURIComponent(error?.message ?? "OAuth Google gagal. Pastikan Google diaktifkan di dashboard InsForge (Auth Methods). Lihat docs/SOFT-LAUNCH-OPS.md.")}`,
     );
   }
 

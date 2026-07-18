@@ -6,11 +6,20 @@ import { GoogleButton } from "@/components/auth/google-button";
 import { signUpAction } from "@/app/actions/auth";
 import { getSessionUser } from "@/lib/auth/session";
 
-export default async function SignUpPage() {
+type Props = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function SignUpPage({ searchParams }: Props) {
   const user = await getSessionUser();
   if (user) {
     redirect(user.ageBand ? "/dashboard" : "/onboarding/usia");
   }
+
+  const params = await searchParams;
+  const oauthError = params.error
+    ? decodeURIComponent(params.error)
+    : null;
 
   return (
     <>
@@ -22,6 +31,16 @@ export default async function SignUpPage() {
         </p>
 
         <div className="mt-8 space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          {oauthError ? (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {oauthError === "oauth_failed" ||
+              oauthError === "exchange_failed" ||
+              oauthError === "missing_verifier"
+                ? "Daftar Google gagal. Coba lagi atau gunakan email. Pastikan Google OAuth aktif di InsForge."
+                : oauthError}
+            </p>
+          ) : null}
+
           <GoogleButton label="Daftar dengan Google" />
 
           <div className="relative text-center text-xs text-slate-400">

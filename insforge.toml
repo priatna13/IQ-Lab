@@ -1,4 +1,6 @@
 [auth]
+# Soft-launch: tambah URL production (https://<domain>/api/auth/callback, /masuk, /dashboard)
+# lalu config apply. Google OAuth juga butuh redirect URI di Google Cloud + InsForge Auth Methods.
 allowed_redirect_urls = [
   "http://localhost:3000/api/auth/callback",
   "http://localhost:3000/masuk",
@@ -6,9 +8,14 @@ allowed_redirect_urls = [
   "http://localhost:3000/dashboard",
   "http://127.0.0.1:3000/api/auth/callback",
   "http://127.0.0.1:3000/masuk",
+  # "https://YOUR_PRODUCTION_DOMAIN/api/auth/callback",
+  # "https://YOUR_PRODUCTION_DOMAIN/masuk",
+  # "https://YOUR_PRODUCTION_DOMAIN/daftar",
+  # "https://YOUR_PRODUCTION_DOMAIN/dashboard",
 ]
 # MVP lokal: verifikasi email dimatikan agar daftar bisa diuji tanpa SMTP.
-# Nyalakan kembali + SMTP sebelum production.
+# Production public: pertimbangkan require_email_verification = true + [auth.smtp] enabled.
+# Soft-launch internal: boleh tetap false. Lihat docs/SOFT-LAUNCH-OPS.md (A3).
 require_email_verification = false
 verify_email_method = "code"
 reset_password_method = "code"

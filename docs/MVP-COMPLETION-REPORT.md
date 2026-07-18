@@ -162,24 +162,25 @@ IQ-Lab MVP web telah diimplementasikan end-to-end sesuai PRD v1.1 dan domain mod
 
 | Area | Catatan |
 |------|---------|
-| **Konten item** | **v2 shipped** (`cv_mvp_v2`, 8 soal/domain original BI); masih butuh human review psikometrik & iterasi bank |
-| **Google OAuth** | Kode siap; provider harus diaktifkan di dashboard InsForge |
-| **LLM insight** | Template default; OpenRouter jika `OPENROUTER_API_KEY` di-set |
-| **Email verification** | Dimatikan di `insforge.toml` untuk MVP lokal (tanpa SMTP) |
-| **Purge auth.users penuh** | Hapus data asesmen + sign-out; hapus total identitas platform tergantung API InsForge |
-| **PDF storage InsForge** | PDF digenerate on-demand (bukan simpan R2 permanen) — setara konten snapshot |
-| **NFR performance/a11y** | Responsive dasar ada; audit Lighthouse/a11y formal belum |
-| **Metrik produk** | Activation/completion analytics belum diinstrumentasi |
-| **ToS/Privasi legal full** | Copy privasi di UI/FAQ; dokumen legal formal terpisah bisa ditambah |
-| **ISSUES.md** | Ada baris duplikat status lama di index (perlu rapikan — status sumber kebenaran = file issue per nomor) |
+| **Konten item** | **v2 shipped** (`cv_mvp_v2`); sisa psikometrik lapangan = Track B |
+| **Google OAuth** | Kode siap; **ops A1** — aktifkan di InsForge (`docs/SOFT-LAUNCH-OPS.md`) |
+| **LLM insight** | Template default; OpenRouter + **ADR 0016** model `openai/gpt-4o-mini`; **ops A2** set key |
+| **Email verification** | Dimatikan lokal; **ops A3** SMTP + flag production |
+| **Purge auth.users penuh** | Data asesmen dihapus; **ops A5** purge platform masih research |
+| **PDF storage InsForge** | PDF on-demand (setara snapshot) — R2 opsional |
+| **NFR performance/a11y** | Track C — audit formal belum |
+| **Metrik produk** | Track C — analytics belum |
+| **ToS/Privasi legal full** | Track C — dokumen formal belum |
+| **ISSUES.md** | Index MVP dirapikan |
+| **Soft-launch pack** | Runbook + `GET /api/ops/readiness` (Track A) |
 
 ### PRD §18 — keputusan terbuka (belum digaransi di build)
 
 - Microcopy final 9 Domain  
 - Detik timer exact / grace (grace di-set 30s)  
-- Model OpenRouter konkret  
+- Model OpenRouter konkret → **default ADR 0016** (`openai/gpt-4o-mini`)  
 - Hosting front final  
-- Representasi pin Content Version di DB (saat ini seed kode `cv_mvp_v1`)  
+- Representasi pin Content Version di DB (seed aktif **`cv_mvp_v2`**)  
 
 ---
 

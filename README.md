@@ -45,11 +45,19 @@ Asesmen multi-domain untuk pengembangan diri & arah karir (inspired-by kerangka 
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run build` | Production build |
 
+## Soft-launch ops
+
+Config yang **bukan** ticket MVP (OAuth Google, OpenRouter, SMTP, hosting):  
+→ **[`docs/SOFT-LAUNCH-OPS.md`](./docs/SOFT-LAUNCH-OPS.md)**  
+→ Readiness: `GET /api/ops/readiness`  
+→ Backlog: [`.scratch/post-mvp-followups/BACKLOG.md`](./.scratch/post-mvp-followups/BACKLOG.md)
+
 ## Docs
 
 - `PRD.md` — product scope
 - `CONTEXT.md` — domain language
 - `docs/adr/` — decisions
+- `docs/SOFT-LAUNCH-OPS.md` — Track A ops checklist
 - `.scratch/iq-lab-mvp/` — MVP spec & tickets (done)
 - `.scratch/item-bank-v2/` — Item Bank Content Version v2
 - Active Item Bank for new Attempts: **`cv_mvp_v2`** (v1 placeholder remains loadable for old pins)

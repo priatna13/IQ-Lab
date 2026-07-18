@@ -1,9 +1,14 @@
 import type { RulePayload } from "@/domain/assessment/career-rules";
 import type { InsightNarration } from "@/domain/assessment/insight-template";
+import {
+  DEFAULT_OPENROUTER_BASE_URL,
+  getOpenRouterChatModel,
+} from "./openrouter-config";
 
 /**
  * Optional OpenRouter narration. Requires OPENROUTER_API_KEY.
  * Never invents clusters outside the provided Rule Payload JSON.
+ * Default model: ADR 0016 (`openai/gpt-4o-mini`).
  */
 export async function narrateInsightWithOpenRouter(
   payload: RulePayload,
@@ -13,10 +18,9 @@ export async function narrateInsightWithOpenRouter(
     throw new Error("OPENROUTER_API_KEY not configured");
   }
 
-  const model =
-    process.env.OPENROUTER_CHAT_MODEL ?? "openai/gpt-4o-mini";
+  const model = getOpenRouterChatModel();
   const baseUrl =
-    process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
+    process.env.OPENROUTER_BASE_URL?.trim() || DEFAULT_OPENROUTER_BASE_URL;
 
   const system = `Anda menuliskan insight asesmen IQ-Lab dalam Bahasa Indonesia.
 Aturan ketat:
