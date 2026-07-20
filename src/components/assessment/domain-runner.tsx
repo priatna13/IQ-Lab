@@ -15,6 +15,7 @@ import {
   isSaveStillCurrent,
   mergeServerResponsesWithPending,
 } from "@/domain/assessment/response-save-coordinator";
+import { getDomainVisual } from "@/domain/assessment/domain-visual";
 import {
   earlyFinishAction,
   recordIntegrityEventAction,
@@ -47,12 +48,14 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   const [integrityWarning, setIntegrityWarning] = useState<string | null>(null);
   const [closing, startCloseTransition] = useTransition();
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [celebrating, setCelebrating] = useState(false);
   /**
    * SSR + first client paint must share the same clock snapshot (view.serverNow).
    * Live Date.now() only after mount — avoids hydration mismatch on the timer text.
    */
   const [nowMs, setNowMs] = useState(() => Date.parse(initialView.serverNow));
   const [clockLive, setClockLive] = useState(false);
+  const domainVisual = getDomainVisual(view.domain.id);
 
   /** Latest answer the user intends per item (wins over in-flight older saves). */
   const latestIntendedRef = useRef<Record<string, string>>({
@@ -309,6 +312,12 @@ export function DomainRunner({ attemptId, initialView }: Props) {
         await refresh();
         return;
       }
+      // Brief success moment (expressive calm) after saves flushed
+      setCelebrating(true);
+      const reduce =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      await new Promise((r) => setTimeout(r, reduce ? 200 : 900));
       router.push(`/asesmen/${attemptId}`);
       router.refresh();
     });
@@ -356,10 +365,35 @@ export function DomainRunner({ attemptId, initialView }: Props) {
           ? "Gagal simpan — coba lagi"
           : null;
 
+  const timerUrgent = remainingMs < 30_000 && remainingMs > 0 && !inGrace;
+
+  if (celebrating) {
+    return (
+      <div
+        className="lab-card flex flex-col items-center gap-3 p-10 text-center"
+        role="status"
+        aria-live="polite"
+      >
+        <div
+          className={`flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br ${domainVisual.accentBar} text-2xl font-bold text-white shadow-soft`}
+          aria-hidden
+        >
+          ✓
+        </div>
+        <h2 className="text-lg font-bold text-lab-navy">Domain selesai</h2>
+        <p className="text-sm text-slate-600">{view.domain.label}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
-      {/* Calm chrome header */}
-      <div className="lab-card px-3 py-3 sm:px-5">
+      {/* Expressive-calm chrome (DESIGN.md R3) — logic unchanged */}
+      <div className="lab-card overflow-hidden px-3 py-3 sm:px-5">
+        <div
+          className={`-mx-3 -mt-3 mb-3 h-1.5 bg-gradient-to-r sm:-mx-5 ${domainVisual.accentBar}`}
+          aria-hidden
+        />
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-lab-navy break-words">
@@ -370,35 +404,33 @@ export function DomainRunner({ attemptId, initialView }: Props) {
                 {view.domain.shortBlurb}
               </p>
             ) : null}
-            <p className="mt-1 text-xs text-slate-500">
-              {view.answeredCount}/{view.totalItems} dijawab · soal {index + 1}/
-              {view.totalItems} · ±
-              {Math.round(view.domain.timeLimitSeconds / 60)} mnt
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span>
+                {view.answeredCount}/{view.totalItems} dijawab · soal{" "}
+                {index + 1}/{view.totalItems} · ±
+                {Math.round(view.domain.timeLimitSeconds / 60)} mnt
+              </span>
               {saveStatusLabel ? (
-                <>
-                  {" "}
-                  ·{" "}
-                  <span
-                    className={
-                      saveStatus === "error"
-                        ? "font-medium text-red-600"
-                        : saveStatus === "saved"
-                          ? "font-medium text-lab-teal-deep"
-                          : "text-slate-500"
-                    }
-                    aria-live="polite"
-                  >
-                    {saveStatusLabel}
-                  </span>
-                </>
+                <span
+                  className={`lab-save-pill ${
+                    saveStatus === "error"
+                      ? "lab-save-pill--error"
+                      : saveStatus === "saved"
+                        ? "lab-save-pill--ok"
+                        : "lab-save-pill--busy"
+                  }`}
+                  aria-live="polite"
+                >
+                  {saveStatusLabel}
+                </span>
               ) : null}
-            </p>
+            </div>
           </div>
           <div className="shrink-0 text-right">
             <p
               className={`font-mono text-xl font-semibold tabular-nums sm:text-2xl ${
                 remainingMs < 60_000 ? "text-red-600" : "text-lab-navy"
-              }`}
+              } ${timerUrgent ? "lab-timer-urgent" : ""}`}
               role="timer"
               aria-live="polite"
               aria-atomic="true"
@@ -419,13 +451,15 @@ export function DomainRunner({ attemptId, initialView }: Props) {
         </div>
         <div className="lab-progress-track mt-3">
           <div
-            className="lab-progress-fill"
+            className={`lab-progress-fill bg-gradient-to-r ${domainVisual.accentBar}`}
             style={{ width: `${Math.max(3, answerProgress)}%` }}
           />
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-100 bg-lab-mist/50 px-4 py-3 text-sm text-slate-700">
+      <div
+        className={`rounded-xl border border-slate-100 px-4 py-3 text-sm text-slate-700 ${domainVisual.accentSoft}`}
+      >
         <p className="font-medium text-lab-navy" id="domain-instruction-title">
           Petunjuk domain
         </p>
@@ -436,7 +470,8 @@ export function DomainRunner({ attemptId, initialView }: Props) {
 
       {item ? (
         <fieldset
-          className="lab-card p-5"
+          key={item.id}
+          className="lab-card lab-runner-item p-5"
           aria-describedby="domain-instruction"
         >
           <legend className="text-sm font-medium leading-relaxed text-lab-navy">
@@ -450,7 +485,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
             {item.choices.map((choice) => (
               <label
                 key={choice.id}
-                className={`lab-choice min-h-11 items-center ${
+                className={`lab-choice min-h-11 cursor-pointer items-center ${
                   selected === choice.id ? "lab-choice-selected" : ""
                 }`}
               >

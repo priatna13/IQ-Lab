@@ -64,6 +64,17 @@ export {
   isSaveStillCurrent,
   mergeServerResponsesWithPending,
 } from "./response-save-coordinator";
+export { getDomainVisual } from "./domain-visual";
+export type { DomainVisual } from "./domain-visual";
+export {
+  buildRadarGeometry,
+  polarToCartesian,
+  axisAngle,
+  ringPolygonPath,
+} from "./radar-geometry";
+export type { RadarGeometry, RadarPoint } from "./radar-geometry";
+export { toShareCardModel } from "./share-card-model";
+export type { ShareCardModel } from "./share-card-model";
 export { createSeedContentCatalog } from "./content-catalog";
 export type { ContentCatalog } from "./content-catalog";
 export { toPublicContentVersion } from "./content-types";

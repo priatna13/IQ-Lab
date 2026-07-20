@@ -40,7 +40,7 @@ export default async function HomePage() {
   const user = await getSessionUser();
 
   return (
-    <PageShell width="xl" orbs="full" mainClassName="sm:py-14">
+    <PageShell width="xl" orbs="full" particles mainClassName="sm:py-14">
       {/* Hero — stack on mobile, 2-col from lg (DESIGN.md §6) */}
       <section className="animate-fade-up grid items-center gap-8 md:gap-10 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="min-w-0 space-y-5 sm:space-y-6">

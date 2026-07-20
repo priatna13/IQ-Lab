@@ -1,4 +1,7 @@
 import type { PublicResultReport } from "@/domain/assessment";
+import { AbilityRadar } from "@/components/assessment/ability-radar";
+import { ShareCardPanel } from "@/components/assessment/share-card";
+import { getDomainVisual } from "@/domain/assessment/domain-visual";
 
 const BAR_HUES = [
   "from-lab-teal to-[#0f766e]",
@@ -71,32 +74,42 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
               : "Rancang langkah karir"}
           </span>
         </p>
-        <ul className="mt-6 space-y-5">
-          {report.abilityProfile.map((entry, i) => (
-            <li key={entry.domainId}>
-              <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2 text-sm">
-                <span className="min-w-0 break-words font-medium text-lab-navy">
-                  {entry.label}
-                </span>
-                <span className="shrink-0 font-mono tabular-nums text-slate-600">
-                  {entry.score}
-                  <span className="text-slate-400">
-                    {" "}
-                    · {entry.rawCorrect}/{entry.rawTotal}
-                  </span>
-                </span>
-              </div>
-              <div className="lab-progress-track">
-                <div
-                  className={`lab-progress-fill bg-gradient-to-r ${BAR_HUES[i % BAR_HUES.length]} animate-bar-in`}
-                  style={{
-                    width: `${Math.max(4, Math.min(100, entry.score))}%`,
-                  }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+
+        <div className="mt-6 grid gap-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:items-center">
+          <AbilityRadar profile={report.abilityProfile} />
+          <ul className="space-y-5">
+            {report.abilityProfile.map((entry, i) => {
+              const visual = getDomainVisual(entry.domainId);
+              return (
+                <li key={entry.domainId}>
+                  <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                    <span className="min-w-0 break-words font-medium text-lab-navy">
+                      {entry.label}
+                      <span className="ml-1.5 text-xs font-normal text-slate-400">
+                        ({visual.shortLabel})
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-mono tabular-nums text-slate-600">
+                      {entry.score}
+                      <span className="text-slate-400">
+                        {" "}
+                        · {entry.rawCorrect}/{entry.rawTotal}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="lab-progress-track">
+                    <div
+                      className={`lab-progress-fill bg-gradient-to-r ${BAR_HUES[i % BAR_HUES.length]} animate-bar-in`}
+                      style={{
+                        width: `${Math.max(4, Math.min(100, entry.score))}%`,
+                      }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </section>
 
       {payload ? (
@@ -162,6 +175,8 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
             "Action plan belum tersedia pada snapshot ini."}
         </p>
       </section>
+
+      <ShareCardPanel report={report} />
 
       <p className="text-xs text-slate-400">
         Dibekukan: {new Date(report.frozenAt).toLocaleString("id-ID")} · Content{" "}

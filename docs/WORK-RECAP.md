@@ -140,9 +140,9 @@ Urutan mendekati head `main` (rekap UI):
 - A3 email verification / SMTP (sengaja off soft-launch internal)  
 - A5 purge `auth.users` platform  
 - B3 timer/grace final decision; B4 figural/memori multi-fase; B5 re-norm empiris  
-- Radar chart, dark mode, particle — out of scope DESIGN.md  
-- Domain runner “deep restyle” ekspresif (chrome calm sudah; bukan overhaul item UI)  
-- Optional: 1× human Google login personal sanity di production
+- Dark mode, monetisasi, B2B HRD — tetap non-goal soft-launch  
+- Optional: 1× human Google login personal sanity di production  
+- **R3 shipped (kode):** radar + share card + soft particles + runner expressive-calm — deploy perlu approve
 
 ---
 

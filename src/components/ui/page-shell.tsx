@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MeshOrbs } from "@/components/ui/mesh-orbs";
+import { SoftParticles } from "@/components/ui/soft-particles";
 
 type Width = "sm" | "md" | "lg" | "xl";
 
@@ -18,6 +19,8 @@ type Props = {
   width?: Width;
   /** Heavier orbs on marketing; calm on forms/results/runner */
   orbs?: "full" | "calm" | "none";
+  /** Soft CSS particles (landing only; DESIGN.md R3) */
+  particles?: boolean;
   /** Hide chrome (rare) */
   header?: boolean;
   footer?: boolean;
@@ -33,6 +36,7 @@ export function PageShell({
   children,
   width = "xl",
   orbs = "full",
+  particles = false,
   header = true,
   footer = true,
   className = "",
@@ -49,6 +53,7 @@ export function PageShell({
       >
         {orbs === "full" ? <MeshOrbs /> : null}
         {orbs === "calm" ? <MeshOrbs calm /> : null}
+        {particles ? <SoftParticles /> : null}
         <div className="relative min-w-0">{children}</div>
       </main>
       {footer ? <SiteFooter /> : null}

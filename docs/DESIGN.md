@@ -1,16 +1,16 @@
 # IQ-Lab — Design System & Visual Spec
 
-**Status:** Grill locked · **R1 + R2 light chrome implemented** · brand logo `/brand/logo.jpg` · await deploy approve  
-**Last updated:** 2026-07-18  
+**Status:** Grill locked · **R1 + R2 + R3** (radar, share card, soft particles, runner expressive-calm)  
+**Last updated:** 2026-07-20  
 **Product:** IQ-Lab — asesmen multi-domain (self-dev / karir), UI Bahasa Indonesia  
 **Stack UI:** Next.js App Router + Tailwind CSS  
-**Sources:** grill session (ui-ux-pro-max + grill-me), PRD v1.1, a11y baseline in app  
+**Sources:** grill session (ui-ux-pro-max + grill-me), PRD v1.1, a11y baseline, R3 plan  
 
 > **Governance**  
 > - Patokan visual & UX untuk agent dan manusia.  
 > - **Jangan deploy** tanpa approve eksplisit pemilik produk.  
 > - **Jangan implement visual** menyimpang dari dokumen ini tanpa update grill / revisi dokumen.  
-> - Domain logic (Assessment boundary) tidak diubah oleh restyle UI.
+> - Domain logic (Assessment boundary) tidak diubah oleh restyle UI (scoring/autosave semantics frozen).
 
 ---
 
@@ -35,28 +35,28 @@
 | 1 | Color mode | **Light-first futuristic** | `theme.light-first` |
 | 2 | Typography | **Plus Jakarta Sans** (heading + body) | `type.jakarta` |
 | 3 | Accents | **Soft neon** — teal primary + violet/sky secondary | `accent.soft-neon` |
-| 4 | Motion | **Calm delight** (150–250ms); runner almost static | `motion.calm` |
+| 4 | Motion | **Calm delight** (150–250ms); runner expressive-calm | `motion.calm` |
 | 5 | Scope round 1 | Shell + landing + auth + dashboard + **hasil** | `scope.r1` |
 | 6 | Surfaces | **Soft solid cards**, large radius, soft shadow + thin glow | `surface.soft-solid` |
-| 7 | Ability profile viz | **Enhanced horizontal bars** (no radar in R1) | `chart.bars` |
-| 8 | Decoration | **Soft mesh + orbs** (landing/dashboard heavier) | `deco.mesh-orbs` |
+| 7 | Ability profile viz | **Bars + radar** (radar companion; bars remain a11y source) | `chart.bars+radar` |
+| 8 | Decoration | **Soft mesh + orbs** + **landing soft particles** (R3) | `deco.mesh-orbs-particles` |
 | 9 | Mobile | **Mobile-first plan** (§6) | `layout.mobile-first` |
 | 10 | Deploy | **Never without explicit owner approve** | `gov.no-auto-deploy` |
+| 11 | Share card | Safe-by-default PNG; **IQ off** unless opt-in; disclaimer on image | `share.safe-card` |
+| 12 | Runner R3 | Domain accent stripe, save pill, item enter, finish moment | `runner.expressive-calm` |
 
-### Out of scope — round 1
+### Out of scope (still)
 
-- Domain runner deep restyle (round 2; keep focus-first)
 - Legal/FAQ full visual overhaul (functional links OK; light token inheritance only)
 - Figural images / multi-phase memory UI (content track B4)
 - Dark mode toggle
-- Radar/spider chart
-- Particle systems / heavy 3D
+- Heavy 3D / WebGL particles / confetti on runner
+- Monetisasi, B2B HRD, share auto-post
 
-### Round 2 (planned, not approved to build yet)
+### Round 2 (done) + Round 3 (done)
 
-- Domain runner: calm chrome, large touch targets, minimal motion
-- Optional radar chart if product asks
-- FAQ/legal skin to match tokens lightly
+- R2: Domain runner calm chrome, large touch targets
+- R3: Radar + share card + soft particles landing + runner expressive-calm
 
 ---
 
@@ -270,8 +270,22 @@ When implementing, prefer shared primitives under `src/components/ui/` (names il
 
 - Norm badge + disclaimer first (trust).
 - Big composite + IQ cards.
-- Enhanced bars for 9 domains (animated fill once if motion allowed).
+- **Radar + bars** for 9 domains (radar `role="img"`; list/bars for exact values).
 - Insight / action plan cards; PDF CTA clear.
+- **Share card** panel: preview, IQ toggle (default off), Unduh PNG / Bagikan.
+
+### Landing (R3)
+
+- Mesh + orbs + **soft CSS particles** (reduced-motion → none).
+- Particles never cover primary CTA (`pointer-events-none`, z below content).
+
+### Runner (R3 expressive-calm)
+
+- Domain accent gradient stripe + progress tint.
+- Save status pill (Menyimpan / Tersimpan).
+- Item enter 150–180ms (opacity/transform); choice active scale 0.98.
+- Domain-complete moment ~0.9s after early finish (saves already flushed).
+- **No** particle/confetti/SFX; autosave coordinator semantics unchanged.
 
 ---
 
