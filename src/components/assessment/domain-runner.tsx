@@ -1,8 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import type { PublicDomainRunnerView } from "@/domain/assessment";
+import {
+  applyOptimisticAnswer,
+  isSaveStillCurrent,
+  mergeServerResponsesWithPending,
+} from "@/domain/assessment/response-save-coordinator";
 import {
   earlyFinishAction,
   recordIntegrityEventAction,
@@ -24,6 +36,8 @@ function formatRemaining(ms: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+
 /** Calm focus chrome for domain runner (DESIGN.md R2 / motion.calm). */
 export function DomainRunner({ attemptId, initialView }: Props) {
   const router = useRouter();
@@ -31,13 +45,23 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   const [index, setIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [integrityWarning, setIntegrityWarning] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [closing, startCloseTransition] = useTransition();
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   /**
    * SSR + first client paint must share the same clock snapshot (view.serverNow).
    * Live Date.now() only after mount — avoids hydration mismatch on the timer text.
    */
   const [nowMs, setNowMs] = useState(() => Date.parse(initialView.serverNow));
   const [clockLive, setClockLive] = useState(false);
+
+  /** Latest answer the user intends per item (wins over in-flight older saves). */
+  const latestIntendedRef = useRef<Record<string, string>>({
+    ...initialView.responses,
+  });
+  /** Item ids with an in-flight save request. */
+  const inFlightRef = useRef<Set<string>>(new Set());
+  const inFlightCountRef = useRef(0);
+  const savedFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const endsAtMs = useMemo(
     () => Date.parse(view.session.endsAt),
@@ -55,11 +79,16 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     return () => window.clearInterval(id);
   }, []);
 
-  // When view refreshes from server, re-anchor frozen clock until next tick if needed
   useEffect(() => {
     if (clockLive) return;
     setNowMs(Date.parse(view.serverNow));
   }, [view.serverNow, clockLive]);
+
+  useEffect(() => {
+    return () => {
+      if (savedFlashTimerRef.current) clearTimeout(savedFlashTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (view.session.status === "closed") return;
@@ -102,22 +131,47 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   const inGrace = nowMs >= endsAtMs && nowMs < graceEndsAtMs;
   const pastGrace = nowMs >= graceEndsAtMs;
 
+  const applyServerViewPreservingInFlight = useCallback(
+    (serverView: PublicDomainRunnerView) => {
+      const mergedResponses = mergeServerResponsesWithPending(
+        serverView.responses,
+        latestIntendedRef.current,
+        inFlightRef.current,
+      );
+      const answeredCount = Object.keys(mergedResponses).length;
+      setView({
+        ...serverView,
+        responses: mergedResponses,
+        answeredCount,
+        canEarlyFinish:
+          serverView.session.status === "in_progress" &&
+          answeredCount === serverView.totalItems,
+      });
+    },
+    [],
+  );
+
   const refresh = useCallback(async () => {
     const result = await refreshRunnerViewAction(view.session.id);
-    if (result.ok) setView(result.view);
-  }, [view.session.id]);
+    if (result.ok) applyServerViewPreservingInFlight(result.view);
+  }, [view.session.id, applyServerViewPreservingInFlight]);
 
   useEffect(() => {
     if (view.session.status === "closed") return;
     if (!pastGrace) return;
 
-    startTransition(async () => {
+    startCloseTransition(async () => {
       const result = await syncTimerCloseAction(view.session.id);
       if (result.ok) {
-        setView(result.view);
+        applyServerViewPreservingInFlight(result.view);
       }
     });
-  }, [pastGrace, view.session.id, view.session.status]);
+  }, [
+    pastGrace,
+    view.session.id,
+    view.session.status,
+    applyServerViewPreservingInFlight,
+  ]);
 
   const item = view.items[index];
   const selected = item ? view.responses[item.id] : undefined;
@@ -125,36 +179,130 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     (view.answeredCount / Math.max(1, view.totalItems)) * 100,
   );
 
+  function markInFlight(itemId: string, active: boolean) {
+    if (active) {
+      if (!inFlightRef.current.has(itemId)) {
+        inFlightRef.current.add(itemId);
+        inFlightCountRef.current += 1;
+      }
+    } else if (inFlightRef.current.has(itemId)) {
+      inFlightRef.current.delete(itemId);
+      inFlightCountRef.current = Math.max(0, inFlightCountRef.current - 1);
+    }
+    if (inFlightCountRef.current > 0) {
+      setSaveStatus("saving");
+    }
+  }
+
+  function flashSaved() {
+    if (inFlightCountRef.current > 0) {
+      setSaveStatus("saving");
+      return;
+    }
+    setSaveStatus("saved");
+    if (savedFlashTimerRef.current) clearTimeout(savedFlashTimerRef.current);
+    savedFlashTimerRef.current = setTimeout(() => {
+      if (inFlightCountRef.current === 0) setSaveStatus("idle");
+    }, 1500);
+  }
+
   function selectAnswer(answer: string) {
     if (!item || view.session.status === "closed") return;
     setError(null);
+
+    const itemId = item.id;
+    const sessionId = view.session.id;
+
+    latestIntendedRef.current[itemId] = answer;
+    const optimistic = applyOptimisticAnswer(
+      view.totalItems,
+      // Use latest map so concurrent items don't clobber each other via stale closure
+      { ...latestIntendedRef.current },
+      itemId,
+      answer,
+    );
+    // Keep latestIntended in sync with full map keys
+    latestIntendedRef.current = { ...optimistic.responses };
+
     setView((v) => ({
       ...v,
-      responses: { ...v.responses, [item.id]: answer },
-      answeredCount: Object.keys({ ...v.responses, [item.id]: answer }).length,
-      canEarlyFinish:
-        Object.keys({ ...v.responses, [item.id]: answer }).length ===
-        v.totalItems,
+      responses: optimistic.responses,
+      answeredCount: optimistic.answeredCount,
+      canEarlyFinish: optimistic.canEarlyFinish,
     }));
 
-    startTransition(async () => {
-      const result = await saveResponseAction({
-        sessionId: view.session.id,
-        itemId: item.id,
-        answer,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        await refresh();
-        return;
+    markInFlight(itemId, true);
+
+    void (async () => {
+      let failed = false;
+      try {
+        const result = await saveResponseAction({
+          sessionId,
+          itemId,
+          answer,
+        });
+
+        // Superseded by a newer choice for this item — ignore result
+        if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
+          return;
+        }
+
+        if (!result.ok) {
+          failed = true;
+          setError(result.error);
+          setSaveStatus("error");
+          // Recover server truth; keep other in-flight optimistics
+          const refreshed = await refreshRunnerViewAction(sessionId);
+          if (
+            refreshed.ok &&
+            isSaveStillCurrent(latestIntendedRef.current, itemId, answer)
+          ) {
+            delete latestIntendedRef.current[itemId];
+            if (refreshed.view.responses[itemId]) {
+              latestIntendedRef.current[itemId] =
+                refreshed.view.responses[itemId];
+            }
+            applyServerViewPreservingInFlight(refreshed.view);
+          }
+          return;
+        }
+        // Success: no full-refresh (pilot wipe bug — lag + lost answers)
+      } catch {
+        if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
+          return;
+        }
+        failed = true;
+        setError("Gagal menyimpan jawaban. Coba pilih lagi.");
+        setSaveStatus("error");
+      } finally {
+        // Only the latest intended answer for this item clears in-flight
+        if (isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
+          markInFlight(itemId, false);
+          if (!failed && inFlightCountRef.current === 0) {
+            flashSaved();
+          }
+        }
       }
-      await refresh();
-    });
+    })();
+  }
+
+  async function waitForInFlightSaves(timeoutMs = 12_000) {
+    const start = Date.now();
+    while (inFlightCountRef.current > 0 && Date.now() - start < timeoutMs) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
   }
 
   function onEarlyFinish() {
     setError(null);
-    startTransition(async () => {
+    startCloseTransition(async () => {
+      await waitForInFlightSaves();
+      if (inFlightCountRef.current > 0) {
+        setError(
+          "Masih menyimpan jawaban. Tunggu sebentar lalu coba Selesai domain lagi.",
+        );
+        return;
+      }
       const result = await earlyFinishAction(view.session.id);
       if (!result.ok) {
         setError(result.error);
@@ -199,6 +347,15 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     );
   }
 
+  const saveStatusLabel =
+    saveStatus === "saving"
+      ? "Menyimpan…"
+      : saveStatus === "saved"
+        ? "Tersimpan"
+        : saveStatus === "error"
+          ? "Gagal simpan — coba lagi"
+          : null;
+
   return (
     <div className="space-y-5">
       {/* Calm chrome header */}
@@ -217,6 +374,24 @@ export function DomainRunner({ attemptId, initialView }: Props) {
               {view.answeredCount}/{view.totalItems} dijawab · soal {index + 1}/
               {view.totalItems} · ±
               {Math.round(view.domain.timeLimitSeconds / 60)} mnt
+              {saveStatusLabel ? (
+                <>
+                  {" "}
+                  ·{" "}
+                  <span
+                    className={
+                      saveStatus === "error"
+                        ? "font-medium text-red-600"
+                        : saveStatus === "saved"
+                          ? "font-medium text-lab-teal-deep"
+                          : "text-slate-500"
+                    }
+                    aria-live="polite"
+                  >
+                    {saveStatusLabel}
+                  </span>
+                </>
+              ) : null}
             </p>
           </div>
           <div className="shrink-0 text-right">
@@ -285,7 +460,6 @@ export function DomainRunner({ attemptId, initialView }: Props) {
                   value={choice.id}
                   checked={selected === choice.id}
                   onChange={() => selectAnswer(choice.id)}
-                  disabled={pending && !inGrace && pastGrace}
                   className="shrink-0"
                 />
                 <span>
@@ -349,11 +523,15 @@ export function DomainRunner({ attemptId, initialView }: Props) {
 
         <button
           type="button"
-          disabled={!view.canEarlyFinish || pending}
+          disabled={!view.canEarlyFinish || closing || saveStatus === "saving"}
           onClick={onEarlyFinish}
           className="lab-btn-navy lab-btn-block"
         >
-          Selesai domain
+          {closing
+            ? "Menutup…"
+            : saveStatus === "saving"
+              ? "Menyimpan dulu…"
+              : "Selesai domain"}
         </button>
       </div>
 

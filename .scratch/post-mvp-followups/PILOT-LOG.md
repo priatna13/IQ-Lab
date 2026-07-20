@@ -62,12 +62,39 @@ Domain diselesaikan: 9 / 9
 
 | Severity | Temuan | Aksi |
 |----------|--------|------|
-| — | Tidak ada P0/P1 | — |
+| — | Tidak ada P0/P1 (technical path) | — |
 
 ### Catatan scope
 
 - Ini **menutup P6 technical / soft-launch gate** (1 completion full 9 domain + report).  
 - **B1 multi-human qualitative pilot** (3–8 orang + form umpan balik stem) tetap disarankan sebelum public launch luas; bukan blocker soft-launch internal.
+
+## Putaran 3 — pilot manusia live (malam sebelum 2026-07-20 report)
+
+**Metode:** beberapa peserta manusia mengerjakan domain di web (production/local).  
+**Sumber:** laporan operator (bukan form individual lengkap).
+
+| Tanggal | Peserta | Track | Domain | Severity | Temuan | Status |
+|---------|---------|-------|--------|----------|--------|--------|
+| ~2026-07-19 malam | beberapa pilot manusia | — | multi | **P0** | Jawaban terasa **tidak tersimpan** — harus jawab **~2×** | **fixed** (client race) |
+| ~2026-07-19 malam | beberapa pilot manusia | — | multi | **P1** | **Lag** saat pilih opsi / pindah soal | **fixed** (hilangkan double RTT) |
+
+### Root cause (engineering)
+
+`DomainRunner.selectAnswer` melakukan **optimistic UI → `saveResponseAction` → `refreshRunnerViewAction` (full view)**.
+
+1. **Wipe race:** refresh setelah save item A menimpa state lokal dengan snapshot server yang **belum** memuat jawaban optimistik item B (atau jawaban terbaru yang masih in-flight) → UI “hilang” → pilot pilih lagi.  
+2. **Lag:** setiap klik = **2 round-trip** server (save + full refresh view), terasa lambat di jaringan nyata.
+
+### Fix (2026-07-20)
+
+- Tidak full-refresh setelah save sukses.  
+- Koordinasi last-write-wins per item (`response-save-coordinator`).  
+- Merge aman jika refresh error/timer.  
+- UI status: Menyimpan… / Tersimpan.  
+- “Selesai domain” menunggu in-flight saves.
+
+Files: `src/components/assessment/domain-runner.tsx`, `src/domain/assessment/response-save-coordinator.ts`
 
 ---
 

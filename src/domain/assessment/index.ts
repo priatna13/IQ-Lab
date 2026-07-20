@@ -59,6 +59,11 @@ export {
   getDomainRunnerView,
 } from "./domain-session";
 export type { PublicDomainRunnerView, PublicRunnerItem } from "./domain-session";
+export {
+  applyOptimisticAnswer,
+  isSaveStillCurrent,
+  mergeServerResponsesWithPending,
+} from "./response-save-coordinator";
 export { createSeedContentCatalog } from "./content-catalog";
 export type { ContentCatalog } from "./content-catalog";
 export { toPublicContentVersion } from "./content-types";
