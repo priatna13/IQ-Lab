@@ -14,6 +14,7 @@ import {
 import { deleteParticipantAssessmentData } from "@/domain/assessment";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import { getSessionUser } from "@/lib/auth/session";
+import { isAdminEmail } from "@/lib/auth/admin";
 import { trackProductEvent } from "@/lib/analytics/track";
 import { removeReportPdfsForParticipant } from "@/lib/assessment/report-pdf-storage";
 
@@ -106,10 +107,22 @@ export async function signInAction(
     { distinctId: data.user.id },
   );
 
+  const next = String(formData.get("next") ?? "").trim();
+  const safeNext =
+    next.startsWith("/") && !next.startsWith("//") ? next : null;
+  const sessionEmail = data.user.email ?? email;
+
+  if (isAdminEmail(sessionEmail) || safeNext?.startsWith("/admin")) {
+    redirect(safeNext?.startsWith("/admin") ? safeNext : "/admin");
+  }
+
   if (!ageBand) {
     redirect("/onboarding/usia");
   }
 
+  if (safeNext) {
+    redirect(safeNext);
+  }
   redirect("/dashboard");
 }
 

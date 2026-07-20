@@ -10,16 +10,26 @@ type Props = {
   ) => Promise<AuthActionResult>;
   submitLabel: string;
   includeName?: boolean;
+  /** Safe internal path, e.g. /admin */
+  nextPath?: string;
 };
 
 const initial: AuthActionResult = { ok: false };
 
-export function AuthForm({ action, submitLabel, includeName }: Props) {
+export function AuthForm({
+  action,
+  submitLabel,
+  includeName,
+  nextPath,
+}: Props) {
   const [state, formAction, pending] = useActionState(action, initial);
   const errorId = "auth-form-error";
 
   return (
     <form action={formAction} className="space-y-4" noValidate>
+      {nextPath ? (
+        <input type="hidden" name="next" value={nextPath} />
+      ) : null}
       {includeName ? (
         <div className="space-y-1.5 text-sm">
           <label htmlFor="auth-name" className="font-medium text-lab-navy">

@@ -6,18 +6,26 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { GoogleButton } from "@/components/auth/google-button";
 import { signInAction } from "@/app/actions/auth";
 import { getSessionUser } from "@/lib/auth/session";
+import { isAdminEmail } from "@/lib/auth/admin";
 
 type Props = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 };
 
 export default async function SignInPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const nextRaw = params.next?.trim() ?? "";
+  const nextPath =
+    nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : undefined;
+
   const user = await getSessionUser();
   if (user) {
+    if (isAdminEmail(user.email) || nextPath?.startsWith("/admin")) {
+      redirect(nextPath?.startsWith("/admin") ? nextPath : "/admin");
+    }
     redirect(user.ageBand ? "/dashboard" : "/onboarding/usia");
   }
 
-  const params = await searchParams;
   const oauthError = params.error
     ? decodeURIComponent(params.error)
     : null;
@@ -33,7 +41,9 @@ export default async function SignInPage({ searchParams }: Props) {
           Masuk
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Lanjutkan asesmen dan lihat hasil Anda.
+          {nextPath?.startsWith("/admin")
+            ? "Masuk dengan akun admin untuk portal operator."
+            : "Lanjutkan asesmen dan lihat hasil Anda."}
         </p>
 
         <div className="lab-card relative mt-8 space-y-6 p-5 sm:p-6">
@@ -57,7 +67,11 @@ export default async function SignInPage({ searchParams }: Props) {
             <div className="absolute inset-x-0 top-1/2 -z-0 border-t border-slate-100" />
           </div>
 
-          <AuthForm action={signInAction} submitLabel="Masuk" />
+          <AuthForm
+            action={signInAction}
+            submitLabel="Masuk"
+            nextPath={nextPath}
+          />
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-600">

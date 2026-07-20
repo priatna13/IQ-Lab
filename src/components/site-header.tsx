@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/auth/session";
-import { signOutAction } from "@/app/actions/auth";
+import { isAdminEmail } from "@/lib/auth/admin";
 import { BrandLogo } from "@/components/ui/brand-logo";
-import {
-  IconDashboard,
-  IconHelp,
-  IconLogin,
-  IconLogout,
-  IconUserPlus,
-} from "@/components/ui/icons";
+import { IconLogin, IconUserPlus, IconShield } from "@/components/ui/icons";
 
+/**
+ * Header: logo kiri, navigasi kanan.
+ * FAQ / Dasbor / Keluar dihapus dari header (permintaan produk).
+ * Admin: tautan Portal admin di kanan.
+ */
 export async function SiteHeader() {
   const user = await getSessionUser();
+  const admin = isAdminEmail(user?.email);
 
   return (
     <header className="sticky top-0 z-40 overflow-visible border-b border-white/70 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
@@ -21,25 +21,17 @@ export async function SiteHeader() {
         </div>
 
         <nav className="lab-dock shrink-0" aria-label="Navigasi utama">
-          <Link href="/faq" className="lab-dock-item">
-            <IconHelp className="lab-dock-icon" />
-            <span className="lab-dock-label">FAQ</span>
-          </Link>
+          {admin ? (
+            <Link
+              href="/admin"
+              className="lab-dock-item lab-dock-item--cta"
+            >
+              <IconShield className="lab-dock-icon" />
+              <span className="lab-dock-label">Admin</span>
+            </Link>
+          ) : null}
 
-          {user ? (
-            <>
-              <Link href="/dashboard" className="lab-dock-item">
-                <IconDashboard className="lab-dock-icon" />
-                <span className="lab-dock-label">Dasbor</span>
-              </Link>
-              <form action={signOutAction} className="contents">
-                <button type="submit" className="lab-dock-item">
-                  <IconLogout className="lab-dock-icon" />
-                  <span className="lab-dock-label">Keluar</span>
-                </button>
-              </form>
-            </>
-          ) : (
+          {!user ? (
             <>
               <Link href="/masuk" className="lab-dock-item">
                 <IconLogin className="lab-dock-icon" />
@@ -50,7 +42,7 @@ export async function SiteHeader() {
                 <span className="lab-dock-label">Daftar</span>
               </Link>
             </>
-          )}
+          ) : null}
         </nav>
       </div>
     </header>

@@ -4,13 +4,14 @@ import { SiteFooter } from "@/components/site-footer";
 import { MeshOrbs } from "@/components/ui/mesh-orbs";
 import { SoftParticles } from "@/components/ui/soft-particles";
 
-type Width = "sm" | "md" | "lg" | "xl";
+type Width = "sm" | "md" | "lg" | "xl" | "2xl";
 
 const WIDTH: Record<Width, string> = {
   sm: "max-w-md",
   md: "max-w-2xl",
   lg: "max-w-3xl",
   xl: "max-w-4xl",
+  "2xl": "max-w-6xl",
 };
 
 type Props = {
