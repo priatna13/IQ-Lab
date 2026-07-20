@@ -12,6 +12,15 @@ function newId(prefix: string): string {
   return `${prefix}_${crypto.randomUUID()}`;
 }
 
+/**
+ * Stable Response PK per (session, item) so concurrent autosaves merge on
+ * upsert instead of racing two random IDs into UNIQUE (domain_session_id, item_id).
+ */
+export function stableResponseId(sessionId: string, itemId: string): string {
+  const raw = `rsp_${sessionId}_${itemId}`;
+  return raw.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 200);
+}
+
 function graceMs(ports: AssessmentPorts): number {
   return ports.graceWindowMs ?? DEFAULT_GRACE_WINDOW_MS;
 }
@@ -254,7 +263,7 @@ export async function upsertResponse(
   }
 
   const response: Response = {
-    id: existing?.id ?? newId("rsp"),
+    id: existing?.id ?? stableResponseId(live.id, input.itemId),
     domainSessionId: live.id,
     attemptId: live.attemptId,
     participantId: input.participantId,
@@ -262,7 +271,23 @@ export async function upsertResponse(
     answer: input.answer,
     updatedAt: ports.clock.now(),
   };
-  await ports.responses.upsert(response);
+  try {
+    await ports.responses.upsert(response);
+  } catch (err) {
+    // Race: another write may have inserted the unique (session, item) row first.
+    const again = await ports.responses.findBySessionAndItem(
+      live.id,
+      input.itemId,
+    );
+    if (!again) throw err;
+    const retry: Response = {
+      ...response,
+      id: again.id,
+      updatedAt: ports.clock.now(),
+    };
+    await ports.responses.upsert(retry);
+    return retry;
+  }
   return response;
 }
 
@@ -295,9 +320,10 @@ export async function earlyFinishDomainSession(
   const answered = new Set(responses.map((r) => r.itemId));
   const allAnswered = domain.items.every((item) => answered.has(item.id));
   if (!allAnswered) {
+    const missing = domain.items.length - answered.size;
     throw new AssessmentError(
       "INVALID_STATE",
-      "Early Finish requires a Response for every Item",
+      `Belum semua soal tersimpan di server (${answered.size}/${domain.items.length}). Tunggu indikator "Tersimpan", lalu coba lagi. Sisa: ${missing} soal.`,
     );
   }
 

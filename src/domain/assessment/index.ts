@@ -57,6 +57,7 @@ export {
   earlyFinishDomainSession,
   closeDomainSessionIfTimedOut,
   getDomainRunnerView,
+  stableResponseId,
 } from "./domain-session";
 export type { PublicDomainRunnerView, PublicRunnerItem } from "./domain-session";
 export {

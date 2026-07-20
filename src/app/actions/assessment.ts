@@ -136,7 +136,12 @@ export async function saveResponseAction(input: {
   answer: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const user = await getSessionUser();
-  if (!user) return { ok: false, error: "Sesi tidak valid." };
+  if (!user) {
+    return {
+      ok: false,
+      error: "Sesi tidak valid. Muat ulang halaman dan masuk lagi.",
+    };
+  }
 
   const ports = createServerAssessmentPorts();
   try {
@@ -149,10 +154,77 @@ export async function saveResponseAction(input: {
     return { ok: true };
   } catch (err) {
     if (err instanceof AssessmentError) {
-      return { ok: false, error: err.message };
+      // Map common English boundary messages to BI for the runner UI
+      const msg = err.message;
+      if (msg.includes("closed") || msg.includes("frozen")) {
+        return {
+          ok: false,
+          error: "Sesi domain sudah ditutup. Jawaban tidak bisa diubah lagi.",
+        };
+      }
+      if (msg.includes("Grace Window")) {
+        return {
+          ok: false,
+          error:
+            "Waktu domain habis (grace). Hanya jawaban yang sudah ada yang boleh diperbarui.",
+        };
+      }
+      return { ok: false, error: msg };
     }
-    console.error(err);
-    return { ok: false, error: "Gagal menyimpan jawaban." };
+    console.error("[saveResponseAction]", err);
+    const detail =
+      err instanceof Error && err.message
+        ? err.message
+        : "Gagal menyimpan jawaban.";
+    return {
+      ok: false,
+      error:
+        detail.length < 180
+          ? `Gagal menyimpan jawaban: ${detail}`
+          : "Gagal menyimpan jawaban. Cek koneksi lalu coba lagi.",
+    };
+  }
+}
+
+/** Persist many answers in one server round (used before early finish). */
+export async function saveResponsesBatchAction(input: {
+  sessionId: string;
+  answers: Array<{ itemId: string; answer: string }>;
+}): Promise<
+  | { ok: true; saved: number }
+  | { ok: false; error: string; saved: number }
+> {
+  const user = await getSessionUser();
+  if (!user) {
+    return {
+      ok: false,
+      error: "Sesi tidak valid. Muat ulang halaman dan masuk lagi.",
+      saved: 0,
+    };
+  }
+  const ports = createServerAssessmentPorts();
+  let saved = 0;
+  try {
+    for (const row of input.answers) {
+      await upsertResponse(ports, {
+        sessionId: input.sessionId,
+        participantId: user.id,
+        itemId: row.itemId,
+        answer: row.answer,
+      });
+      saved += 1;
+    }
+    return { ok: true, saved };
+  } catch (err) {
+    if (err instanceof AssessmentError) {
+      return { ok: false, error: err.message, saved };
+    }
+    console.error("[saveResponsesBatchAction]", err);
+    return {
+      ok: false,
+      error: "Gagal menyimpan sebagian jawaban. Coba lagi.",
+      saved,
+    };
   }
 }
 

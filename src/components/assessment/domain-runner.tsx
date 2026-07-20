@@ -21,6 +21,7 @@ import {
   recordIntegrityEventAction,
   refreshRunnerViewAction,
   saveResponseAction,
+  saveResponsesBatchAction,
   syncTimerCloseAction,
 } from "@/app/actions/assessment";
 
@@ -296,16 +297,35 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     }
   }
 
+  /** Ensure every optimistic answer is on the server before closing the domain. */
+  async function flushIntendedAnswersToServer(): Promise<boolean> {
+    const answers = Object.entries(latestIntendedRef.current).map(
+      ([itemId, answer]) => ({ itemId, answer }),
+    );
+    if (answers.length === 0) return true;
+    setSaveStatus("saving");
+    const batch = await saveResponsesBatchAction({
+      sessionId: view.session.id,
+      answers,
+    });
+    if (!batch.ok) {
+      setError(batch.error);
+      setSaveStatus("error");
+      return false;
+    }
+    flashSaved();
+    return true;
+  }
+
   function onEarlyFinish() {
     setError(null);
     startCloseTransition(async () => {
       await waitForInFlightSaves();
-      if (inFlightCountRef.current > 0) {
-        setError(
-          "Masih menyimpan jawaban. Tunggu sebentar lalu coba Selesai domain lagi.",
-        );
-        return;
-      }
+      // Final flush: optimistic UI can show 8/8 while some POSTs still failed/raced
+      const flushed = await flushIntendedAnswersToServer();
+      if (!flushed) return;
+      await waitForInFlightSaves(5_000);
+
       const result = await earlyFinishAction(view.session.id);
       if (!result.ok) {
         setError(result.error);

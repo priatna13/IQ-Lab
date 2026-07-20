@@ -6,6 +6,7 @@ import {
   earlyFinishDomainSession,
   getDomainRunnerView,
   startDomainSession,
+  stableResponseId,
   upsertResponse,
 } from "./domain-session";
 import type { AssessmentPorts } from "./ports";
@@ -98,6 +99,10 @@ describe("Domain Session runner boundary", () => {
     });
     expect(view.responses[item.id]).toBe("b");
     expect(JSON.stringify(view)).not.toContain("correctKey");
+
+    const listed = await ports.responses.listBySession(session.id);
+    expect(listed).toHaveLength(1);
+    expect(listed[0].id).toBe(stableResponseId(session.id, item.id));
   });
 
   it("rejects Early Finish until every Item has a Response, then freezes", async () => {
