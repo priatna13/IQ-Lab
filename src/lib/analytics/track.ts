@@ -12,6 +12,8 @@ export type AnalyticsEventName =
   | "attempt_started"
   | "domain_session_closed"
   | "attempt_completed"
+  | "skill_attempt_started"
+  | "skill_attempt_completed"
   | "pdf_downloaded"
   | "pdf_stored"
   | "account_data_deleted";

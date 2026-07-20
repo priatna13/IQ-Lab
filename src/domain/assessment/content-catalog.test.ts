@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createSeedContentCatalog } from "./content-catalog";
 import { MVP_CONTENT_VERSION_ID } from "./content-seed";
+import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import {
   CURRENT_CONTENT_VERSION_ID,
-  V2_CONTENT_VERSION_ID,
-} from "./content/v2";
+  V3_CONTENT_VERSION_ID,
+} from "./content/v3";
 import { startDomainSession, getDomainRunnerView } from "./domain-session";
 import { createAttempt } from "./create-attempt";
 import { createFixedClock } from "./testing/fixed-clock";
@@ -31,13 +32,20 @@ function buildPorts(): AssessmentPorts {
   };
 }
 
-describe("Content catalog — Item Bank v2", () => {
-  it("publishes only cv_mvp_v2", async () => {
+describe("Content catalog — Item Bank", () => {
+  it("publishes cv_mvp_v3 as current", async () => {
     const catalog = createSeedContentCatalog();
     const published = await catalog.getPublished();
-    expect(published?.id).toBe(V2_CONTENT_VERSION_ID);
+    expect(published?.id).toBe(V3_CONTENT_VERSION_ID);
     expect(published?.published).toBe(true);
     expect(published?.id).toBe(CURRENT_CONTENT_VERSION_ID);
+  });
+
+  it("keeps cv_mvp_v2 loadable for pinned attempts", async () => {
+    const catalog = createSeedContentCatalog();
+    const v2 = await catalog.getById(V2_CONTENT_VERSION_ID);
+    expect(v2).not.toBeNull();
+    expect(v2?.domains).toHaveLength(9);
   });
 
   it("keeps cv_mvp_v1 loadable but unpublished", async () => {
@@ -75,7 +83,7 @@ describe("Content catalog — Item Bank v2", () => {
     }
   });
 
-  it("createAttempt pins published v2", async () => {
+  it("createAttempt pins published v3", async () => {
     const ports = buildPorts();
     const attempt = await createAttempt(ports, {
       participant: {
@@ -84,7 +92,7 @@ describe("Content catalog — Item Bank v2", () => {
       },
       track: "explore",
     });
-    expect(attempt.contentVersionId).toBe(V2_CONTENT_VERSION_ID);
+    expect(attempt.contentVersionId).toBe(V3_CONTENT_VERSION_ID);
   });
 
   it("public runner view never exposes correctKey", async () => {

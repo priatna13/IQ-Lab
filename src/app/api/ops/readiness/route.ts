@@ -32,7 +32,7 @@ export async function GET() {
     apiKeyConfigured: apiKey,
     appUrlConfigured: Boolean(appUrl),
     publishedContentVersion: published?.id ?? null,
-    publishedIsCurrentV2: published?.id === CURRENT_CONTENT_VERSION_ID,
+    publishedIsCurrentV3: published?.id === CURRENT_CONTENT_VERSION_ID,
     openRouterConfigured: openRouter,
     openRouterModel: openRouter ? getOpenRouterChatModel() : null,
     insightMode: openRouter ? ("llm_or_template_fallback" as const) : ("template_only" as const),
@@ -44,7 +44,7 @@ export async function GET() {
     checks.insforgeUrlConfigured &&
     checks.anonKeyConfigured &&
     checks.apiKeyConfigured &&
-    checks.publishedIsCurrentV2;
+    checks.publishedIsCurrentV3;
 
   const body = {
     ok: requiredOk,

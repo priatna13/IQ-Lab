@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { completeAttempt, getResultSnapshotForAttempt } from "./complete-attempt";
 import { createAttempt } from "./create-attempt";
 import { createSeedContentCatalog } from "./content-catalog";
-import { V2_CONTENT_VERSION_ID } from "./content/v2";
+import { V3_CONTENT_VERSION_ID } from "./content/v3";
 import {
   earlyFinishDomainSession,
   startDomainSession,
@@ -35,7 +35,8 @@ function buildPorts(): AssessmentPorts {
 }
 
 async function finishAllDomains(ports: AssessmentPorts, attemptId: string) {
-  const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
+  const attempt = await ports.attempts.findById(attemptId);
+  const cv = await ports.content.getById(attempt!.contentVersionId);
   for (const domainId of cv!.domainOrder) {
     const session = await startDomainSession(ports, {
       attemptId,
@@ -65,7 +66,7 @@ describe("completeAttempt → Result Snapshot", () => {
       participant: { id: "p_1", ageBand: "18_45" },
       track: "explore",
     });
-    const cv = await ports.content.getById(V2_CONTENT_VERSION_ID);
+    const cv = await ports.content.getById(attempt.contentVersionId);
     await startDomainSession(ports, {
       attemptId: attempt.id,
       participantId: "p_1",
@@ -104,7 +105,7 @@ describe("completeAttempt → Result Snapshot", () => {
 
     expect(snapshot.normVersion).toBe(NORM_VERSION_SYNTHETIC_V1);
     expect(snapshot.track).toBe("career");
-    expect(snapshot.contentVersionId).toBe(V2_CONTENT_VERSION_ID);
+    expect(snapshot.contentVersionId).toBe(V3_CONTENT_VERSION_ID);
     expect(snapshot.abilityProfile).toHaveLength(9);
     expect(snapshot.abilityProfile.every((e) => e.score === 100)).toBe(true);
     expect(snapshot.compositeIndex).toBe(100);

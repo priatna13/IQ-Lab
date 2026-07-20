@@ -88,9 +88,13 @@ export type {
 export { MVP_CONTENT_VERSION_ID, getMvpContentVersion } from "./content-seed";
 export {
   V2_CONTENT_VERSION_ID,
-  CURRENT_CONTENT_VERSION_ID,
   getV2ContentVersion,
 } from "./content/v2";
+export {
+  V3_CONTENT_VERSION_ID,
+  CURRENT_CONTENT_VERSION_ID,
+  getV3ContentVersion,
+} from "./content/v3";
 export type {
   AssessmentPorts,
   AttemptRepository,
