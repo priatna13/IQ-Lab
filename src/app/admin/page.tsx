@@ -49,7 +49,8 @@ export default async function AdminHomePage() {
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-lab-mist/50 text-xs uppercase tracking-wide text-slate-500">
-                <th className="px-4 py-3">Peserta</th>
+                <th className="px-4 py-3">Nama</th>
+                <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Track</th>
                 <th className="px-4 py-3">Composite</th>
@@ -66,13 +67,16 @@ export default async function AdminHomePage() {
                 >
                   <td className="px-4 py-3">
                     <span className="font-medium text-lab-navy">
-                      {r.participantName ||
-                        r.participantEmail ||
-                        r.participantId.slice(0, 8) + "…"}
+                      {r.participantName || "—"}
                     </span>
                     <span className="mt-0.5 block font-mono text-[11px] text-slate-400">
                       {r.participantId.slice(0, 13)}…
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-700 break-all">
+                    {r.participantEmail || (
+                      <span className="text-slate-400">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -115,7 +119,7 @@ export default async function AdminHomePage() {
               {rows.length === 0 && !loadError ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-4 py-10 text-center text-slate-500"
                   >
                     Belum ada attempt.

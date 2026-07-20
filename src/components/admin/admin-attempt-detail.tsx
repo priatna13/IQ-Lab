@@ -17,14 +17,22 @@ export function AdminAttemptDetailView({
         <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-xs font-semibold uppercase text-slate-500">
-              Peserta
+              Nama peserta
+            </dt>
+            <dd className="mt-0.5 font-medium text-lab-navy break-words">
+              {a.participantName || "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase text-slate-500">
+              Email
             </dt>
             <dd className="mt-0.5 font-medium text-lab-navy break-all">
-              {a.participantName || a.participantEmail || a.participantId}
+              {a.participantEmail || "—"}
             </dd>
-            {a.participantEmail ? (
-              <dd className="text-xs text-slate-500">{a.participantEmail}</dd>
-            ) : null}
+            <dd className="mt-0.5 font-mono text-[11px] text-slate-400 break-all">
+              id: {a.participantId}
+            </dd>
           </div>
           <div>
             <dt className="text-xs font-semibold uppercase text-slate-500">

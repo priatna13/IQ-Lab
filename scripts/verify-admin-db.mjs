@@ -37,3 +37,17 @@ const s = await c.database
   .select("attempt_id,composite_index")
   .limit(3);
 console.log("snaps", s.error?.message || `ok ${s.data?.length ?? 0}`);
+const u = await c.database.rpc("admin_user_directory");
+if (u.error) {
+  console.log("users RPC", u.error.message);
+} else {
+  const rows = u.data ?? [];
+  console.log("users RPC ok", rows.length);
+  console.log(
+    "sample",
+    rows.slice(0, 3).map((r) => ({
+      email: r.email,
+      name: r.display_name,
+    })),
+  );
+}

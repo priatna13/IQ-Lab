@@ -87,40 +87,74 @@ type SessionDb = {
 
 type UserMeta = { email: string | null; name: string | null };
 
+type UserDirRow = {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+};
+
+/**
+ * Load id → { email, name } via SECURITY DEFINER RPC (auth.users).
+ * Fallback: per-id auth profile + empty email if RPC unavailable.
+ */
 async function loadUserMetaMap(
   admin: ReturnType<typeof createInsForgeAdminClient>,
   ids: string[],
 ): Promise<Map<string, UserMeta>> {
   const map = new Map<string, UserMeta>();
   const unique = [...new Set(ids.filter(Boolean))];
-  // Best-effort: profiles table (if exposed) or skip emails
   for (const id of unique) {
-    try {
-      const { data } = await admin.database
-        .from("profiles")
-        .select("*")
-        .eq("id", id)
-        .limit(1);
-      const row = (data as Record<string, unknown>[] | null)?.[0];
-      if (row) {
-        const name =
-          typeof row.name === "string"
-            ? row.name
-            : typeof row.display_name === "string"
-              ? row.display_name
-              : null;
-        map.set(id, {
-          email: typeof row.email === "string" ? row.email : null,
-          name,
-        });
-        continue;
-      }
-    } catch {
-      // profiles may not exist / not readable
-    }
     map.set(id, { email: null, name: null });
   }
+
+  try {
+    const { data, error } = await admin.database.rpc("admin_user_directory");
+    if (!error && Array.isArray(data)) {
+      for (const row of data as UserDirRow[]) {
+        if (!row?.id) continue;
+        map.set(String(row.id), {
+          email: row.email ? String(row.email) : null,
+          name: row.display_name ? String(row.display_name) : null,
+        });
+      }
+      return map;
+    }
+    if (error) {
+      console.warn("[admin] admin_user_directory RPC:", error.message);
+    }
+  } catch (e) {
+    console.warn("[admin] admin_user_directory failed", e);
+  }
+
+  // Fallback: profile name only (no email without RPC)
+  for (const id of unique) {
+    try {
+      const { data } = await admin.auth.getProfile(id);
+      if (data && typeof data === "object") {
+        const p = data as Record<string, unknown>;
+        const name =
+          typeof p.name === "string"
+            ? p.name
+            : typeof p.display_name === "string"
+              ? p.display_name
+              : null;
+        map.set(id, { email: null, name });
+      }
+    } catch {
+      // ignore
+    }
+  }
   return map;
+}
+
+function labelParticipant(m: UserMeta | undefined, id: string): {
+  email: string | null;
+  name: string | null;
+} {
+  return {
+    email: m?.email ?? null,
+    name: m?.name ?? null,
+  };
 }
 
 export async function listAdminAttempts(): Promise<AdminAttemptRow[]> {
@@ -135,14 +169,9 @@ export async function listAdminAttempts(): Promise<AdminAttemptRow[]> {
   const rows = (attempts ?? []) as AttemptDb[];
   const { data: snaps } = await admin.database
     .from("result_snapshots")
-    .select(
-      "attempt_id,participant_id,composite_index,iq_estimate,frozen_at",
-    )
+    .select("attempt_id,participant_id,composite_index,iq_estimate,frozen_at")
     .limit(500);
-  const snapByAttempt = new Map<
-    string,
-    { composite: number; iq: number }
-  >();
+  const snapByAttempt = new Map<string, { composite: number; iq: number }>();
   for (const s of (snaps ?? []) as Array<{
     attempt_id: string;
     composite_index: number;
@@ -161,12 +190,12 @@ export async function listAdminAttempts(): Promise<AdminAttemptRow[]> {
 
   return rows.map((r) => {
     const snap = snapByAttempt.get(r.id);
-    const m = meta.get(r.participant_id);
+    const m = labelParticipant(meta.get(r.participant_id), r.participant_id);
     return {
       id: r.id,
       participantId: r.participant_id,
-      participantEmail: m?.email ?? null,
-      participantName: m?.name ?? null,
+      participantEmail: m.email,
+      participantName: m.name,
       track: r.track as Track,
       status: r.status,
       contentVersionId: r.content_version_id,
@@ -220,13 +249,16 @@ export async function getAdminAttemptDetail(
   }));
 
   const meta = await loadUserMetaMap(admin, [attempt.participant_id]);
-  const m = meta.get(attempt.participant_id);
+  const m = labelParticipant(
+    meta.get(attempt.participant_id),
+    attempt.participant_id,
+  );
 
   const attemptRow: AdminAttemptRow = {
     id: attempt.id,
     participantId: attempt.participant_id,
-    participantEmail: m?.email ?? null,
-    participantName: m?.name ?? null,
+    participantEmail: m.email,
+    participantName: m.name,
     track: attempt.track as Track,
     status: attempt.status,
     contentVersionId: attempt.content_version_id,
