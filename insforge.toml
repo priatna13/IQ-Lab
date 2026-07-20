@@ -8,10 +8,14 @@ allowed_redirect_urls = [
   "http://localhost:3000/dashboard",
   "http://127.0.0.1:3000/api/auth/callback",
   "http://127.0.0.1:3000/masuk",
-  # "https://YOUR_PRODUCTION_DOMAIN/api/auth/callback",
-  # "https://YOUR_PRODUCTION_DOMAIN/masuk",
-  # "https://YOUR_PRODUCTION_DOMAIN/daftar",
-  # "https://YOUR_PRODUCTION_DOMAIN/dashboard",
+  "https://6a6g33ic.insforge.site/api/auth/callback",
+  "https://6a6g33ic.insforge.site/masuk",
+  "https://6a6g33ic.insforge.site/daftar",
+  "https://6a6g33ic.insforge.site/dashboard",
+  "https://iqlab.insforge.site/api/auth/callback",
+  "https://iqlab.insforge.site/masuk",
+  "https://iqlab.insforge.site/daftar",
+  "https://iqlab.insforge.site/dashboard",
 ]
 # MVP lokal: verifikasi email dimatikan agar daftar bisa diuji tanpa SMTP.
 # Production public: pertimbangkan require_email_verification = true + [auth.smtp] enabled.

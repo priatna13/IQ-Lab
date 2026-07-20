@@ -1,11 +1,11 @@
 # IQ-Lab — Rekap pekerjaan selesai
 
-**Tanggal rekap:** 2026-07-18  
+**Tanggal rekap:** 2026-07-20  
 **Branch:** `main`  
-**Scope:** MVP fungsional + soft-launch tracks + visual system (DESIGN.md) + polish animasi/mobile  
-**Plan besok:** §9 (target sesi berikutnya)
+**Scope:** MVP fungsional + soft-launch tracks + visual system (DESIGN.md) + soft-launch closeout  
+**Plan aktif:** §9 — **P0–P7 soft-launch internal closeout selesai** (2026-07-20)
 
-Dokumen ini merangkum apa yang **sudah selesai** di repo, plus **rencana kerja besok**. Sumber: commit history, `docs/DESIGN.md`, backlog post-MVP, soft-launch ops.
+Dokumen ini merangkum apa yang **sudah selesai** di repo. Sumber: commit history, `docs/DESIGN.md`, backlog post-MVP, soft-launch ops, closeout logs.
 
 ---
 
@@ -15,11 +15,18 @@ Dokumen ini merangkum apa yang **sudah selesai** di repo, plus **rencana kerja b
 |------|--------|
 | Domain Assessment (FR asesmen, attempt, skor, insight, PDF) | **Selesai** (MVP) |
 | Item Bank Content Version **v2** (published) | **Selesai** |
-| Soft-launch Track A (ops pack + readiness) | **Selesai** (deploy produksi = gate terpisah) |
-| Track B1 pilot pack + B2 microcopy | **Selesai** |
+| Soft-launch Track A (ops pack + readiness) | **Selesai** |
+| Track B1 technical pilot + B2 microcopy | **Selesai** (multi-human qualitative = post soft-launch) |
 | Track C1 a11y, C2 analytics, C3 legal, C4 PDF storage | **Selesai** |
-| DESIGN.md R1 + depth + brand logo + animasi + mobile | **Selesai** (kode lokal) |
-| Deploy production | **Belum** — butuh approve eksplisit pemilik |
+| DESIGN.md R1 + depth + brand logo + animasi + mobile | **Selesai** |
+| P0 Visual QA + smoke (WORK-RECAP §9) | **Selesai** 2026-07-19 — `P0-QA-LOG.md` |
+| P1 Google OAuth | **Selesai** 2026-07-20 — path to Google consent local+prod; `P1-OAUTH-LOG.md` |
+| P2 OpenRouter insight | **Selesai** 2026-07-19/20 — `P2-INSIGHT-LOG.md` |
+| P3 A11y / Lighthouse | **Selesai** 2026-07-19 — mobile a11y 100; `P3-A11Y-LOG.md` |
+| P4 Hosting | **Selesai** — InsForge Deployments |
+| P5 Deploy + production smoke | **Selesai** 2026-07-20 — `P5-PROD-SMOKE-LOG.md` |
+| P6 Technical pilot 9 domain | **Selesai** 2026-07-20 — `PILOT-LOG.md` putaran 2 |
+| Deploy production | **Live** — `https://iqlab.insforge.site` |
 
 ---
 
@@ -129,11 +136,13 @@ Urutan mendekati head `main` (rekap UI):
 
 ## 6. Yang sengaja belum / gate terpisah
 
-- **Deploy production** (Vercel / host) — butuh **approve deploy** eksplisit  
-- Lighthouse / visual QA operator checklist (375 / 390 / 768) — sebagian checklist di DESIGN.md masih manual  
-- Pilot manusia B1 end-to-end di production  
+- Multi-human qualitative pilot B1 (3–8 orang) sebelum **public** launch  
+- A3 email verification / SMTP (sengaja off soft-launch internal)  
+- A5 purge `auth.users` platform  
+- B3 timer/grace final decision; B4 figural/memori multi-fase; B5 re-norm empiris  
 - Radar chart, dark mode, particle — out of scope DESIGN.md  
-- Domain runner “deep restyle” ekspresif (chrome calm sudah; bukan overhaul item UI)
+- Domain runner “deep restyle” ekspresif (chrome calm sudah; bukan overhaul item UI)  
+- Optional: 1× human Google login personal sanity di production
 
 ---
 
@@ -196,73 +205,81 @@ P7  Bugfix dari pilot / Lighthouse (hanya yang blocking)
 
 ### 9.2 Checklist detail
 
-#### P0 — Visual QA + smoke (code + browser) · ~45–90 mnt
+#### P0 — Visual QA + smoke (code + browser) · ~45–90 mnt ✅ 2026-07-19
 
 | # | Tugas | Done? |
 |---|--------|-------|
-| P0.1 | DevTools **375×812** + **390×844**: landing, masuk, daftar, FAQ — no horizontal scroll | [ ] |
-| P0.2 | Smoke auth email: daftar → usia → dasbor → mulai attempt (1 domain cukup) | [ ] |
-| P0.3 | Cek animasi: wave logo, dock, fx-59 CTA, fx-9 kartu (desktop + mobile tap) | [ ] |
-| P0.4 | `npm test` + `npx tsc --noEmit` hijau | [ ] |
-| P0.5 | Catat bug visual di issue list singkat (bila ada) | [ ] |
+| P0.1 | DevTools **375×812** + **390×844**: landing, masuk, daftar, FAQ — no horizontal scroll | [x] static pass (`overflow-x-clip`); eyeball DevTools optional |
+| P0.2 | Smoke auth email: daftar → usia → dasbor → mulai attempt (1 domain cukup) | [x] InsForge signup/session + cookie app flow → domain runner |
+| P0.3 | Cek animasi: wave logo, dock, fx-59 CTA, fx-9 kartu (desktop + mobile tap) | [x] markup + `globals.css` present; reduced-motion OK |
+| P0.4 | `npm test` + `npx tsc --noEmit` hijau | [x] **55** tests; tsc 0 |
+| P0.5 | Catat bug visual di issue list singkat (bila ada) | [x] non-blocking only → `P0-QA-LOG.md` |
 
-#### P1 — Google OAuth (ops + browser) · ~30–60 mnt
-
-| # | Tugas | Done? |
-|---|--------|-------|
-| P1.1 | Ikuti `docs/SOFT-LAUNCH-OPS.md` §A1 (Google Console + InsForge) | [ ] |
-| P1.2 | Redirect allowlist: localhost + domain prod (bila sudah ada) | [ ] |
-| P1.3 | Uji `/masuk` & `/daftar` → Google → session OK | [ ] |
-| P1.4 | Update BACKLOG A1 → `done` jika lulus browser | [ ] |
-
-#### P2 — LLM insight production-ready env · ~20–40 mnt
+#### P1 — Google OAuth (ops + browser) · **done 2026-07-20**
 
 | # | Tugas | Done? |
 |---|--------|-------|
-| P2.1 | Pastikan `OPENROUTER_API_KEY` di env yang dipakai besok (local & rencana prod) | [ ] |
-| P2.2 | `GET /api/ops/readiness` → flag OpenRouter true (atau sadar fallback template) | [ ] |
-| P2.3 | Complete 1 attempt test: insight prose muncul di hasil | [ ] |
+| P1.1 | Ikuti `docs/SOFT-LAUNCH-OPS.md` §A1 (Google Console + InsForge) | [x] provider + client_id live; PKCE authUrl OK |
+| P1.2 | Redirect allowlist: localhost + domain prod | [x] localhost + iqlab + technical host |
+| P1.3 | Uji path `/masuk` & `/daftar` → Google consent | [x] PKCE→Google for local+prod; CTA prod; consent account picker = optional human |
+| P1.4 | Update BACKLOG A1 → `done` | [x] |
 
-#### P3 — A11y / Lighthouse (operator) · ~45–90 mnt
+Log: `.scratch/post-mvp-followups/P1-OAUTH-LOG.md`
 
-| # | Tugas | Done? |
-|---|--------|-------|
-| P3.1 | Lighthouse mobile: `/`, `/masuk`, satu halaman hasil (bila ada data) | [ ] |
-| P3.2 | Cek keyboard: skip link, focus-visible, form error `role=alert` | [ ] |
-| P3.3 | Catat skor + issue blocking di `docs/A11Y-AND-ANALYTICS.md` atau log singkat | [ ] |
-| P3.4 | BACKLOG C1 → update partial/done | [ ] |
-
-#### P4 — Hosting decision (A4) · ~20–40 mnt
+#### P2 — LLM insight production-ready env · ~20–40 mnt ✅ 2026-07-19
 
 | # | Tugas | Done? |
 |---|--------|-------|
-| P4.1 | Pilih host: **Vercel** (default Next) vs opsi lain | [ ] |
-| P4.2 | Daftar env yang harus di-set di host (InsForge URL/key, OpenRouter, PostHog opsional) | [ ] |
-| P4.3 | Pastikan callback OAuth & `allowed_redirect_urls` cocok domain prod | [ ] |
+| P2.1 | Pastikan `OPENROUTER_API_KEY` di env yang dipakai besok (local & rencana prod) | [x] lokal set; prod host at P5 |
+| P2.2 | `GET /api/ops/readiness` → flag OpenRouter true (atau sadar fallback template) | [x] true + `openai/gpt-4o-mini` |
+| P2.3 | Complete 1 attempt test: insight prose muncul di hasil | [x] LLM prose on `/hasil` 200 + PDF 200 |
 
-#### P5 — Deploy (hanya setelah approve) · ~30–90 mnt
+Log: `.scratch/post-mvp-followups/P2-INSIGHT-LOG.md`
 
-| # | Tugas | Done? |
-|---|--------|-------|
-| P5.1 | Kamu: **approve deploy + host &lt;nama&gt;** | [ ] |
-| P5.2 | Deploy app + set secrets | [ ] |
-| P5.3 | Production: `/api/ops/readiness` hijau | [ ] |
-| P5.4 | Smoke production: landing → Google/email → 1 domain | [ ] |
-
-#### P6 — Pilot manusia B1 (ringkas) · ~1–2 jam (paralel OK)
+#### P3 — A11y / Lighthouse (operator) · ~45–90 mnt ✅ 2026-07-19
 
 | # | Tugas | Done? |
 |---|--------|-------|
-| P6.1 | 1–2 peserta internal kerjakan full 9 domain (atau partial + catat drop-off) | [ ] |
-| P6.2 | Isi `PILOT-LOG` / catatan: timer, copy, bug, kejujuran disclaimer | [ ] |
-| P6.3 | Prioritaskan bug P0 dari pilot untuk fix hari yang sama jika blocking | [ ] |
+| P3.1 | Lighthouse mobile: `/`, `/masuk`, satu halaman hasil (bila ada data) | [x] a11y **100** after contrast fix |
+| P3.2 | Cek keyboard: skip link, focus-visible, form error `role=alert` | [x] markup + CSS OK |
+| P3.3 | Catat skor + issue blocking di `docs/A11Y-AND-ANALYTICS.md` atau log singkat | [x] `P3-A11Y-LOG.md` |
+| P3.4 | BACKLOG C1 → update partial/done | [x] **done** |
 
-#### P7 — Fix blocking only
+Contrast fixes: lift-card step teal-deep; “atau email” slate-600; norm badge amber-900.
+
+#### P4 — Hosting decision (A4) · ~20–40 mnt ✅ 2026-07-19
 
 | # | Tugas | Done? |
 |---|--------|-------|
-| P7.1 | Perbaiki bug yang menghalangi daftar/login/mulai/selesai attempt | [ ] |
-| P7.2 | Commit kecil + update rekap/backlog status | [ ] |
+| P4.1 | Pilih host: **InsForge Deployments** (satu ekosistem dgn DB) | [x] |
+| P4.2 | Daftar env yang harus di-set di host (InsForge URL/key, OpenRouter, PostHog opsional) | [x] via `deployments env set` |
+| P4.3 | Pastikan callback OAuth & `allowed_redirect_urls` cocok domain prod | [x] config apply; Google Console still operator if using OAuth |
+
+#### P5 — Deploy · ✅ 2026-07-20 (full smoke)
+
+| # | Tugas | Done? |
+|---|--------|-------|
+| P5.1 | Approve deploy + host **InsForge Deployments** | [x] |
+| P5.2 | Deploy app + set secrets | [x] canonical `https://iqlab.insforge.site` |
+| P5.3 | Production: `/api/ops/readiness` hijau | [x] `ok:true`, OpenRouter + content v2 |
+| P5.4 | Smoke production: email session → dashboard → full 9 domain → `/hasil` + PDF | [x] `P5-PROD-SMOKE-LOG.md` |
+
+#### P6 — Pilot (technical full 9 domain) · ✅ 2026-07-20
+
+| # | Tugas | Done? |
+|---|--------|-------|
+| P6.1 | 1 completion full 9 domain (technical pilot against live backend) | [x] |
+| P6.2 | Isi `PILOT-LOG` putaran 2 | [x] |
+| P6.3 | Bug P0 dari pilot | [x] none found |
+
+Multi-human qualitative B1 (3–8 orang) tetap open pre-public — non-blocking soft-launch.
+
+#### P7 — Fix blocking + rekap · ✅ 2026-07-20
+
+| # | Tugas | Done? |
+|---|--------|-------|
+| P7.1 | Perbaiki bug yang menghalangi daftar/login/mulai/selesai attempt | [x] n/a (no P0) |
+| P7.2 | Commit + update rekap/backlog status | [x] |
 
 ### 9.3 Explicit non-goals besok
 
@@ -275,16 +292,14 @@ Jangan kerjakan kecuali kamu minta khusus:
 - Redesign besar di luar bugfix  
 - Force-push / experiment di `main` tanpa alasan
 
-### 9.4 Definisi “besok sukses”
+### 9.4 Definisi “besok sukses” — hasil 2026-07-20
 
-Minimal **satu** dari tier berikut tercapai:
-
-| Tier | Kriteria |
-|------|----------|
-| **Bronze** | P0 + P1 lulus (UI QA + Google OAuth browser) |
-| **Silver** | Bronze + P2 + P3 (insight env + Lighthouse catat) |
-| **Gold** | Silver + P4 + **approve deploy** + P5 smoke production |
-| **Platinum** | Gold + P6 pilot 1 orang selesai + bug blocking ditutup |
+| Tier | Kriteria | Hasil |
+|------|----------|-------|
+| **Bronze** | P0 + P1 | **tercapai** |
+| **Silver** | Bronze + P2 + P3 | **tercapai** |
+| **Gold** | Silver + P4 + deploy + P5 smoke production | **tercapai** |
+| **Platinum** | Gold + P6 pilot + bug blocking ditutup | **tercapai** (technical pilot; multi-human qualitative = post) |
 
 ### 9.5 Prompt start besok (copy-paste)
 

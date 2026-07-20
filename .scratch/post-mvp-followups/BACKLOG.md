@@ -2,17 +2,19 @@
 
 **Status index:** `open` | `partial` | `done` | `wontfix` | `ops-only`  
 **Sumber:** `docs/MVP-COMPLETION-REPORT.md` §8–§9, `PRD.md` §16 Fase 3 sisa + §18  
-**Bukan ticket MVP 01–11** — pekerjaan hardening / ops / legal / konten lanjutan.
+**Bukan ticket MVP 01–11** — pekerjaan hardening / ops / legal / konten lanjutan.  
+**Closeout soft-launch internal:** 2026-07-20 (P0–P6 technical + P5 prod smoke)
 
 ---
 
-## Sudah tergerus sejak report (update 2026-07-18)
+## Sudah tergerus sejak report (update 2026-07-18 → 2026-07-20)
 
 | Area report | Update |
 |-------------|--------|
 | Konten item placeholder | **Partial → largely done:** `cv_mvp_v2` shipped + key review; sisa = psikometrik lapangan & iterasi bank |
 | ISSUES.md duplikat index MVP | **Done** (index dirapikan; frontier “MVP complete”) |
 | Pin Content Version di docs §18 | **Partial:** pin aktif `cv_mvp_v2` (seed kode); masih bukan snapshot rows di DB |
+| Soft-launch A1–A4 + C1–C4 + P5/P6 | **Done** (lihat di bawah) |
 
 ---
 
@@ -22,17 +24,17 @@
 
 | ID | Item | Tipe | Status | Effort | Catatan |
 |----|------|------|--------|--------|---------|
-| A1 | **Google OAuth live** | ops | **partial** | S | Metadata: `oAuthProviders` includes **google** (+ github). Endpoint `/api/auth/oauth/google` responds (400 tanpa params = ada). **Uji browser** tombol Google di `/masuk` masih wajib |
-| A2 | **LLM Insight production** | ops + code | **done (local)** | S | `npx @insforge/cli ai setup` menulis `OPENROUTER_API_KEY` ke `.env.local`; model `openai/gpt-4o-mini` di-set. Production host masih perlu secret yang sama |
+| A1 | **Google OAuth live** | ops | **done** 2026-07-20 | S | PKCE→Google untuk localhost + prod hosts; CTA prod OK; path ke consent page verified. Human account picker not automatable. Log: `P1-OAUTH-LOG.md` |
+| A2 | **LLM Insight production** | ops + code | **done** 2026-07-19/20 | S | Local + prod readiness OpenRouter; live completeAttempt + LLM prose + prod `/hasil`/PDF. Log: `P2-INSIGHT-LOG.md`, `P5-PROD-SMOKE-LOG.md` |
 | A3 | **Email verification / SMTP** | ops | open | M | Runbook A3; tetap `false` untuk soft-launch internal |
-| A4 | **Hosting front final** | ops | open | M | Checklist deploy di runbook; keputusan host belum final |
+| A4 | **Hosting front final** | ops | **done** 2026-07-19 | M | **InsForge Deployments** → `https://iqlab.insforge.site` |
 | A5 | **Purge auth.users penuh** | research + code | open | M | Documented; product delete data OK tanpa purge platform |
 
 ### B. Konten & norma (kualitas produk)
 
 | ID | Item | Tipe | Status | Effort | Catatan |
 |----|------|------|--------|--------|---------|
-| B1 | **Review psikometrik / pilot item** | human process | **partial** | L | Protokol + desk review + revisi P1 (`PILOT-B1.md`, `PILOT-LOG.md`); **pilot manusia live** masih open |
+| B1 | **Review psikometrik / pilot item** | human process | **partial** | L | Desk review + **technical pilot 9/9 done**; multi-human qualitative 3–8 still open pre-public |
 | B2 | **Microcopy final 9 Domain** | content | **done** | S | Label, shortBlurb, instruction BI; UI mulai/progress/runner |
 | B3 | **Timer exact + grace** | product decision | open | S | Grace 30s fixed; timer per domain di specs — konfirmasi angka final |
 | B4 | **Figural gambar / memori multi-fase** | feature | open | L | Saat ini teks/simbol + stimulus in-prompt |
@@ -42,7 +44,7 @@
 
 | ID | Item | Tipe | Status | Effort | Catatan |
 |----|------|------|--------|--------|---------|
-| C1 | **Lighthouse + a11y audit** | eng | **partial** | M | Skip link, landmarks, focus, form/runner a11y done; Lighthouse manual checklist di docs |
+| C1 | **Lighthouse + a11y audit** | eng | **done** 2026-07-19 P3 | M | Mobile LH a11y **100** on `/`, `/masuk`, `/hasil`; contrast fix shipped. Log: `P3-A11Y-LOG.md` |
 | C2 | **Analytics activation/completion** | eng | **done** | M | `trackProductEvent` + hooks; PostHog/webhook optional |
 | C3 | **ToS + Privasi formal** | legal/content | **done** | M | `/privasi` + `/syarat` + footer, daftar, FAQ, landing, dasbor |
 | C4 | **PDF storage permanen** | eng | **done** | M | Bucket `reports` + `pdf_url`/`pdf_key`; first download stores |
@@ -61,18 +63,14 @@
 
 ---
 
-## Urutan rekomendasi (soft-launch internal dulu)
+## Urutan rekomendasi (post soft-launch)
 
 ```
-1. A1 Google OAuth     ─┐
-2. A2 OpenRouter model ─┼─► soft-launch config
-3. B2 + B3 microcopy/timer decision (cepat)
-4. C3 ToS/Privasi minimal
-5. C1 a11y/Lighthouse pass
-6. C2 analytics ringan
-7. A3/A4/A5 ops lanjutan
-8. B1 pilot → B5 re-norm (panjang)
-9. B4 figural/memori UI (opsional kualitas)
+1. Optional: 1× human Google login sanity di production
+2. B1 multi-human qualitative (3–8) sebelum public
+3. A3 SMTP jika public + email verification
+4. B3 timer decision, B4 figural bila prioritas
+5. B5 re-norm setelah volume Norm Samples
 ```
 
 ---
@@ -82,8 +80,8 @@
 | Item | Status |
 |------|--------|
 | Grill-locked UI direction + mobile plan | **`docs/DESIGN.md`** (source of truth) |
-| Implement visual R1 | **done** (after `GO BUILD`) |
-| Deploy | Waiting separate explicit approve |
+| Implement visual R1 | **done** |
+| Deploy production | **live** `https://iqlab.insforge.site` |
 
 ## Non-goals tetap (Fase 4+ / PRD non-goals)
 

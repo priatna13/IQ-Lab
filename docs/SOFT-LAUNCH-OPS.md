@@ -96,24 +96,41 @@ Sengaja untuk MVP lokal tanpa SMTP.
 
 ## A4 — Hosting front final
 
-| Opsi | Kapan |
+| Opsi | Status |
 |------|--------|
-| **Vercel** (Next.js native) | Default praktis; set env `NEXT_PUBLIC_*` + server secrets |
-| **InsForge Deployments** | Jika ingin satu platform dengan backend |
+| **InsForge Deployments** (via Vercel under the hood) | **Production live** — satu platform dgn backend |
+| Vercel standalone | Tidak dipakai (boleh alternatif nanti) |
 
-### Checklist deploy (Vercel-style)
+### Production URLs (2026-07-19)
 
-1. Connect repo → build `npm run build`, output Next default.
-2. Env production:
-   - `NEXT_PUBLIC_INSFORGE_URL`
-   - `NEXT_PUBLIC_INSFORGE_ANON_KEY`
-   - `NEXT_PUBLIC_APP_URL=https://<domain>`
-   - `INSFORGE_URL` / `INSFORGE_API_KEY`
-   - `OPENROUTER_API_KEY` (opsional)
-3. Tambah production URLs ke `insforge.toml` `allowed_redirect_urls` + Google Console.
-4. Smoke: `/`, `/faq`, `/masuk`, OAuth, 1 domain runner.
+| Layer | URL |
+|-------|-----|
+| **Frontend app (canonical)** | `https://iqlab.insforge.site` (slug `iqlab`) |
+| Frontend (technical default) | `https://6a6g33ic.insforge.site` (tetap jalan) |
+| **Backend (DB/Auth/Storage)** | `https://6a6g33ic.ap-southeast.insforge.app` |
+| Readiness | `https://iqlab.insforge.site/api/ops/readiness` |
 
-**Keputusan:** belum di-hardcode di repo — pilih host saat first deploy.
+### Checklist deploy (InsForge)
+
+1. Local: `npm run build` hijau.
+2. Persistent env: `npx @insforge/cli deployments env set <KEY> <value>`
+   - `NEXT_PUBLIC_INSFORGE_URL`, `NEXT_PUBLIC_INSFORGE_ANON_KEY`
+   - `NEXT_PUBLIC_APP_URL=https://iqlab.insforge.site`
+   - `INSFORGE_URL`, `INSFORGE_API_KEY`
+   - `OPENROUTER_API_KEY`, `OPENROUTER_CHAT_MODEL` (opsional)
+3. Deploy: `npx @insforge/cli deployments deploy .`
+4. Tambah production URLs ke `insforge.toml` `allowed_redirect_urls` → `config apply`.
+5. Redeploy setelah set `NEXT_PUBLIC_APP_URL` (build-time Next public env).
+6. Smoke: `/`, `/faq`, `/masuk`, readiness, OAuth, 1 domain runner.
+7. Google Console: jika OAuth production, authorized redirect = callback InsForge + app URL di allowlist.
+
+**Redeploy:**
+
+```bash
+npx @insforge/cli deployments deploy .
+npx @insforge/cli deployments status <id>
+npx @insforge/cli deployments metadata
+```
 
 ---
 

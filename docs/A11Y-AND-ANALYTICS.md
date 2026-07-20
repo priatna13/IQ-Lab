@@ -2,6 +2,8 @@
 
 ## C1 — Accessibility (soft-launch baseline)
 
+**Status (2026-07-19 / P3):** soft-launch **done** — mobile Lighthouse Accessibility **100** on `/`, `/masuk`, `/hasil` after contrast polish. Full log: `.scratch/post-mvp-followups/P3-A11Y-LOG.md`.
+
 Implemented in app:
 
 - Skip link → `#main-content`
@@ -10,16 +12,27 @@ Implemented in app:
 - `:focus-visible` outline
 - Auth form: `label`/`htmlFor`, `role="alert"` on errors
 - Domain runner: `fieldset`/`legend`, radiogroup, timer `aria-live`, status alerts
+- Contrast polish: lift-card step teal-deep; “atau email” slate-600; norm badge amber-900
 
-### Manual Lighthouse checklist (operator)
+### Lighthouse results (mobile 375×812, 2026-07-19)
+
+| Page | A11y (after fix) | Notes |
+|------|------------------|--------|
+| `/` | **100** | was 96 (step labels) |
+| `/masuk` | **100** | was 96 (divider text) |
+| `/hasil` (authed) | **100** | was 96 (norm badge) |
+
+Best-practices **100** on sampled pages. Perf scores from `next dev` are not gate criteria — re-check after production build if needed.
+
+### Manual Lighthouse checklist (operator re-run)
 
 ```bash
 npm run build && npm run start
 # Chrome DevTools → Lighthouse → Accessibility + Best Practices on:
-# /  /faq  /masuk  /privasi  /syarat  /dashboard (logged in)
+# /  /faq  /masuk  /privasi  /syarat  /dashboard (logged in)  /hasil
 ```
 
-Target soft-launch: fix any **serious/critical** a11y issues; contrast of teal/navy on white is intentional brand.
+Target soft-launch: fix any **serious/critical** a11y issues — **met**. Residual non-blocking: decorative lift cards as inert buttons (optional cleanup).
 
 ---
 

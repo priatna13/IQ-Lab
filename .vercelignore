@@ -1,0 +1,11 @@
+# Keep deploy zip lean — InsForge excludes node_modules/.git/.next/.env* already
+report responden/
+docs/
+.scratch/
+migrations/
+*.md
+!package.json
+logo.jpg
+tsconfig.tsbuildinfo
+vitest.config.ts
+eslint.config.mjs

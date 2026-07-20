@@ -52,7 +52,7 @@ export default async function SignInPage({ searchParams }: Props) {
 
           <GoogleButton label="Lanjut dengan Google" />
 
-          <div className="relative text-center text-xs text-slate-400">
+          <div className="relative text-center text-xs text-slate-600">
             <span className="relative z-10 bg-white px-2">atau email</span>
             <div className="absolute inset-x-0 top-1/2 -z-0 border-t border-slate-100" />
           </div>

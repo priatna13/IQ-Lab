@@ -32,7 +32,12 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [integrityWarning, setIntegrityWarning] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [nowMs, setNowMs] = useState(() => Date.now());
+  /**
+   * SSR + first client paint must share the same clock snapshot (view.serverNow).
+   * Live Date.now() only after mount — avoids hydration mismatch on the timer text.
+   */
+  const [nowMs, setNowMs] = useState(() => Date.parse(initialView.serverNow));
+  const [clockLive, setClockLive] = useState(false);
 
   const endsAtMs = useMemo(
     () => Date.parse(view.session.endsAt),
@@ -44,9 +49,17 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   );
 
   useEffect(() => {
+    setClockLive(true);
+    setNowMs(Date.now());
     const id = window.setInterval(() => setNowMs(Date.now()), 250);
     return () => window.clearInterval(id);
   }, []);
+
+  // When view refreshes from server, re-anchor frozen clock until next tick if needed
+  useEffect(() => {
+    if (clockLive) return;
+    setNowMs(Date.parse(view.serverNow));
+  }, [view.serverNow, clockLive]);
 
   useEffect(() => {
     if (view.session.status === "closed") return;

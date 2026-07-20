@@ -39,3 +39,15 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+# Local smoke artifacts (may contain tokens/passwords)
+.scratch/p0-smoke-session.json
+.scratch/post-mvp-followups/closeout-session.json
+.scratch/post-mvp-followups/closeout-session.public.json
+.scratch/post-mvp-followups/p2-e2e-result.json
+.scratch/post-mvp-followups/p2-hasil-result.json
+.scratch/post-mvp-followups/lighthouse/
+
+# Local respondent exports (PII risk)
+/report responden/
+

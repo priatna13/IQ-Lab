@@ -1,0 +1,36 @@
+{
+  "ranAt": "2026-07-20T10:15:23.555Z",
+  "prodApp": "https://iqlab.insforge.site",
+  "userId": "001b0109-ce12-4b40-a2c5-5563291e435e",
+  "attemptId": "att_34c20213-d729-4759-867e-42612e1a46ea",
+  "snapshotId": "rs_071ff3b1-563d-4ca2-8d09-bc5eacdea614",
+  "compositeIndex": 63,
+  "iqEstimate": 113,
+  "checks": {
+    "dashboard": {
+      "status": 200,
+      "location": null,
+      "bodyHint": ""
+    },
+    "hasil": {
+      "status": 200,
+      "location": null,
+      "bodyHint": "iq,content,disclaimer"
+    },
+    "pdf": {
+      "status": 200,
+      "location": null,
+      "bodyHint": "application/pdf;bytes=3623;%PDF=true"
+    },
+    "domainProgress": {
+      "status": 307,
+      "location": "/asesmen/att_34c20213-d729-4759-867e-42612e1a46ea/hasil",
+      "bodyHint": ""
+    },
+    "dashboardUnauth": {
+      "status": 307,
+      "location": "/masuk?next=%2Fdashboard"
+    }
+  },
+  "pass": true
+}

@@ -551,7 +551,8 @@ body {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: var(--lab-teal, #0d9488);
+  /* teal-deep for ≥4.5:1 on white (soft-launch Lighthouse color-contrast) */
+  color: var(--lab-teal-deep, #0f766e);
 }
 
 .lab-lift-card-desc {

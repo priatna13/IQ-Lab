@@ -18,7 +18,7 @@ export function ResultReport({ report }: { report: PublicResultReport }) {
   return (
     <div className="space-y-6 sm:space-y-8">
       <section className="lab-card animate-fade-up border-amber-200/80 bg-amber-50/90 p-4 text-sm text-slate-700 sm:p-5">
-        <p className="lab-badge bg-white text-lab-warm ring-1 ring-amber-200">
+        <p className="lab-badge bg-white text-amber-900 ring-1 ring-amber-200">
           {report.labels.normBadge}
         </p>
         <p className="mt-3 leading-relaxed">{report.labels.disclaimer}</p>

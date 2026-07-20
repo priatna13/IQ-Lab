@@ -1,0 +1,116 @@
+{
+  "ranAt": "2026-07-20T10:13:31.659Z",
+  "prodApp": "https://iqlab.insforge.site",
+  "backend": "https://6a6g33ic.ap-southeast.insforge.app",
+  "a1": {
+    "probes": [
+      {
+        "redirectUri": "http://localhost:3000/api/auth/callback",
+        "oauthStartStatus": 200,
+        "hasAuthUrl": true,
+        "googleHost": "accounts.google.com",
+        "googleStatus": 302,
+        "clientIdPrefix": "365684866253-hgu6rftlc63…",
+        "error": null
+      },
+      {
+        "redirectUri": "https://iqlab.insforge.site/api/auth/callback",
+        "oauthStartStatus": 200,
+        "hasAuthUrl": true,
+        "googleHost": "accounts.google.com",
+        "googleStatus": 302,
+        "clientIdPrefix": "365684866253-hgu6rftlc63…",
+        "error": null
+      },
+      {
+        "redirectUri": "https://6a6g33ic.insforge.site/api/auth/callback",
+        "oauthStartStatus": 200,
+        "hasAuthUrl": true,
+        "googleHost": "accounts.google.com",
+        "googleStatus": 302,
+        "clientIdPrefix": "365684866253-hgu6rftlc63…",
+        "error": null
+      }
+    ],
+    "prod/masukGoogleCta": true,
+    "prod/daftarGoogleCta": true,
+    "prodCallbackNoCode": 307,
+    "prodCallbackAccessDenied": 307,
+    "summary": "ops-ready: PKCE authUrl 200 + Google accounts host for localhost+prod; google HTTP 302 is normal redirect chain",
+    "humanConsent": "not_automatable_platform_ux",
+    "softLaunchVerdict": "done",
+    "googleCta": {
+      "masuk": true,
+      "daftar": true
+    }
+  },
+  "p5": {
+    "routes": {
+      "/": 200,
+      "/masuk": 200,
+      "/daftar": 200,
+      "/faq": 200,
+      "/privasi": 200,
+      "/syarat": 200,
+      "/dashboard": 307
+    },
+    "readiness": {
+      "status": 200,
+      "body": {
+        "ok": true,
+        "softLaunch": {
+          "required": true,
+          "recommendedGoogleOAuth": "enable in InsForge dashboard (ops A1)",
+          "recommendedOpenRouter": "configured",
+          "emailVerification": "controlled by insforge.toml require_email_verification (default false for local MVP)"
+        },
+        "checks": {
+          "insforgeUrlConfigured": true,
+          "anonKeyConfigured": true,
+          "apiKeyConfigured": true,
+          "appUrlConfigured": true,
+          "publishedContentVersion": "cv_mvp_v2",
+          "publishedIsCurrentV2": true,
+          "openRouterConfigured": true,
+          "openRouterModel": "openai/gpt-4o-mini",
+          "insightMode": "llm_or_template_fallback",
+          "analyticsConfigured": false,
+          "reportPdfBucket": "reports"
+        },
+        "docs": "/docs/SOFT-LAUNCH-OPS.md"
+      }
+    },
+    "auth": {
+      "method": "email",
+      "email": "pilot+1784542417796@iq-lab.test",
+      "userId": "1daa0e9c-9543-432a-975a-4468ebfcb702",
+      "signupOk": true,
+      "ageBandSet": true
+    },
+    "assessment": {
+      "source": "p2-e2e-live",
+      "attemptId": "att_34c20213-d729-4759-867e-42612e1a46ea",
+      "domains": 9,
+      "hasil200": true,
+      "pdf200": true,
+      "pass": true
+    },
+    "dashboardWithSession": {
+      "status": 200,
+      "location": null
+    },
+    "mulaiWithSession": {
+      "status": 200,
+      "location": null
+    },
+    "sessionCookiesWork": true
+  },
+  "p6": {
+    "type": "technical_pilot_agent",
+    "domainsCompleted": 9,
+    "track": "explore",
+    "blockingP0": 0,
+    "pass": true
+  },
+  "blockingBugs": []
+}
