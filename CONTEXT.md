@@ -15,7 +15,7 @@ Identitas autentikasi Participant (email/password atau Google OAuth) yang wajib 
 _Avoid_: Profile-as-login, Member
 
 **Account Deletion**:
-Proses menghapus identitas Account dan semua data teridentifikasi milik Participant (Attempt, Response, Result Snapshot, Report files, dll.). Norm Sample yang sudah terpisah/agregat **tetap** untuk sains norma dan **bukan** lagi milik Participant (tidak ada link Account/PII). Mekanisme teknis boleh cascade delete + extract, atau anonymize-in-place; hasil domain sama.
+Proses menghapus identitas Account dan semua data teridentifikasi milik Participant (Attempt, Response, Result Snapshot, Skill Attempt / Skill Result Snapshot, Report files, dll.). Norm Sample yang sudah terpisah/agregat **tetap** untuk sains norma dan **bukan** lagi milik Participant (tidak ada link Account/PII). Mekanisme teknis boleh cascade delete + extract, atau anonymize-in-place; hasil domain sama.
 _Avoid_: Full erasure of published norm statistics, Refuse delete if completed
 
 **Age Band**:
@@ -36,7 +36,7 @@ _Avoid_: Test (membingungkan dengan “ujian resmi”), IST, IQ test sebagai nam
 
 **Domain**:
 Satu area kemampuan dalam profil multi-faktor (sembilan area setara konsep asesmen struktur klasik; label tampilan milik IQ-Lab).
-_Avoid_: Subtest (istilah tes berlisensi), Category longgar, Skill (skill = output insight karir)
+_Avoid_: Subtest (istilah tes berlisensi), Category longgar, menyamakan Domain dengan Field skill (Field = lapisan keahlian pasca-asesmen, bukan Domain ke-10)
 
 **Item**:
 Satu soal dalam Domain, original IQ-Lab, punya kunci dan metadata kesulitan.
@@ -133,16 +133,42 @@ Narasi dan action plan yang disajikan ke Participant; dibangun dari Rule Payload
 _Avoid_: Diagnosis, Rekomendasi klinis, Hasil psikotes resmi, Live-refresh narrative
 
 **Result Snapshot**:
-Rekaman beku saat Attempt completed: Domain Scores, Ability Profile, Composite Index, IQ Estimate, Norm Version, Rule Payload (+ version), Insight prose, Track, Content Version. Sumber kebenaran dashboard dan PDF.
+Rekaman beku saat Attempt completed: Domain Scores, Ability Profile, Composite Index, IQ Estimate, Norm Version, Rule Payload (+ version), Insight prose, Track, Content Version. Sumber kebenaran dashboard dan PDF. **Tidak** memuat skor Skill Assessment (lapisan terpisah).
 _Avoid_: Live recompute on view, Mutable historical scores
 
 **Report**:
-Artefak penyajian (dashboard dan/atau PDF) yang **hanya merender** Result Snapshot + disclaimer. PDF boleh di-generate ulang sebagai file, selama isinya setara snapshot.
+Artefak penyajian (dashboard dan/atau PDF) yang **hanya merender** Result Snapshot + disclaimer. PDF boleh di-generate ulang sebagai file, selama isinya setara snapshot. Ringkasan keahlian di UI `/hasil` merender Skill Result Snapshot terpisah, bukan bagian PDF kognitif MVP.
 _Avoid_: Certificate, Sertifikat, Re-scored report as default
 
 **Score Correction**:
 Proses luar-jalur (bukan fitur Participant) untuk memperbaiki Result Snapshot hanya bila ada bug perhitungan terbukti; bukan untuk “insight lebih bagus” atau Norma baru.
 _Avoid_: User-facing rescore, Silent rewrite without audit
+
+### Keahlian bidang (lapisan paralel)
+
+**Skill Assessment**:
+Lapisan opsional **setelah** Completed Attempt 9 domain: Participant memilih Field kerja, mengerjakan paket MCQ keahlian, mendapat skor + Domain Alignment vs Ability Profile beku. Tidak mengubah Composite Index, IQ Estimate, atau Norm Sample.
+_Avoid_: Domain ke-10, Job certification, Certified skill score
+
+**Field** / **Field Category**:
+Role/bidang kerja (15 Field dalam 5 kategori: mis. Teknologi & Produk, Bisnis & Keuangan). Dipilih Participant; rekomendasi dari profil bersifat saran, bukan paksaan.
+_Avoid_: Job title pastikan lolos rekrutmen, Domain id sebagai nama field
+
+**Skill Content Version**:
+Versi bank soal keahlian (pack per Field) yang dipin pada Skill Attempt; independen dari Content Version asesmen 9 domain.
+_Avoid_: Live edit pack mid skill-attempt
+
+**Skill Attempt**:
+Satu siklus pengerjaan pack keahlian untuk satu Field, terikat `source_attempt_id` ke Completed Attempt kognitif. Status: `in_progress` | `completed` | `abandoned`. Boleh beberapa Field per source Attempt.
+_Avoid_: Mixing skill items into Domain Session, Skill as retake of cognitive Attempt
+
+**Skill Result Snapshot**:
+Rekaman beku skor keahlian, Domain Alignment, dan insight prose skill saat Skill Attempt completed. Sumber kebenaran halaman hasil keahlian dan ringkasan di `/hasil`.
+_Avoid_: Merging into cognitive Result Snapshot, Live re-score on view
+
+**Domain Alignment**:
+Perbandingan skor skill vs rata-rata Domain terkait Field (dari Ability Profile beku): mis. selaras, potensi belum terampil, pengalaman mengompensasi, perlu penguatan ganda.
+_Avoid_: Clinical diagnosis, Hire/no-hire signal
 
 ### Integritas & kebijakan
 

@@ -29,6 +29,19 @@ export default async function DashboardPage() {
     new Date(),
   );
 
+  /** Completed skill fields per cognitive attempt (for dasbor badges). */
+  const skillBySource = new Map<string, number>();
+  if (completedAttempts.length > 0) {
+    const skillAttempts = await ports.skillAttempts.listByParticipant(user.id);
+    for (const sa of skillAttempts) {
+      if (sa.status !== "completed") continue;
+      skillBySource.set(
+        sa.sourceAttemptId,
+        (skillBySource.get(sa.sourceAttemptId) ?? 0) + 1,
+      );
+    }
+  }
+
   return (
     <PageShell width="lg" orbs="full">
       <div className="animate-fade-up">
@@ -145,34 +158,48 @@ export default async function DashboardPage() {
                 Hasil selesai
               </p>
               <ul className="mt-3 space-y-3">
-                {completedAttempts.map((a) => (
-                  <li
-                    key={a.id}
-                    className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <span className="min-w-0 text-sm text-slate-600">
-                      {a.track === "explore" ? "Jelajahi potensi" : "Karir"}
-                      {a.isPrimary ? " · utama" : ""}
-                      {a.completedAt
-                        ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
-                        : ""}
-                    </span>
-                    <span className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
-                      <Link
-                        href={`/asesmen/${a.id}/hasil`}
-                        className="lab-btn-secondary min-h-11 px-3 text-xs sm:text-sm"
-                      >
-                        Lihat profil
-                      </Link>
-                      <a
-                        href={`/api/asesmen/${a.id}/pdf`}
-                        className="lab-btn-ghost min-h-11 border border-slate-200 px-3 text-xs sm:text-sm"
-                      >
-                        PDF
-                      </a>
-                    </span>
-                  </li>
-                ))}
+                {completedAttempts.map((a) => {
+                  const skillCount = skillBySource.get(a.id) ?? 0;
+                  return (
+                    <li
+                      key={a.id}
+                      className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <span className="min-w-0 text-sm text-slate-600">
+                        {a.track === "explore" ? "Jelajahi potensi" : "Karir"}
+                        {a.isPrimary ? " · utama" : ""}
+                        {a.completedAt
+                          ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
+                          : ""}
+                        {skillCount > 0 ? (
+                          <span className="mt-0.5 block text-xs text-lab-teal">
+                            {skillCount} bidang keahlian selesai
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap">
+                        <Link
+                          href={`/asesmen/${a.id}/hasil`}
+                          className="lab-btn-secondary min-h-11 px-3 text-xs sm:text-sm"
+                        >
+                          Lihat profil
+                        </Link>
+                        <Link
+                          href={`/asesmen/${a.id}/keahlian`}
+                          className="lab-btn-primary min-h-11 px-3 text-xs sm:text-sm"
+                        >
+                          Keahlian
+                        </Link>
+                        <a
+                          href={`/api/asesmen/${a.id}/pdf`}
+                          className="lab-btn-ghost col-span-2 min-h-11 border border-slate-200 px-3 text-xs sm:col-span-1 sm:text-sm"
+                        >
+                          PDF
+                        </a>
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ) : null}
