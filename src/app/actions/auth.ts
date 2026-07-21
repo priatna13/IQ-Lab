@@ -17,6 +17,11 @@ import { getSessionUser } from "@/lib/auth/session";
 import { isAdminEmail } from "@/lib/auth/admin";
 import { trackProductEvent } from "@/lib/analytics/track";
 import { removeReportPdfsForParticipant } from "@/lib/assessment/report-pdf-storage";
+import {
+  AUTH_NEXT_COOKIE,
+  authNextCookieOptions,
+  parseSafeNextPath,
+} from "@/lib/auth/safe-next-path";
 
 function appOrigin(): string {
   return (
@@ -107,9 +112,7 @@ export async function signInAction(
     { distinctId: data.user.id },
   );
 
-  const next = String(formData.get("next") ?? "").trim();
-  const safeNext =
-    next.startsWith("/") && !next.startsWith("//") ? next : null;
+  const safeNext = parseSafeNextPath(String(formData.get("next") ?? ""));
   const sessionEmail = data.user.email ?? email;
 
   if (isAdminEmail(sessionEmail) || safeNext?.startsWith("/admin")) {
@@ -117,7 +120,11 @@ export async function signInAction(
   }
 
   if (!ageBand) {
-    redirect("/onboarding/usia");
+    redirect(
+      safeNext
+        ? `/onboarding/usia?next=${encodeURIComponent(safeNext)}`
+        : "/onboarding/usia",
+    );
   }
 
   if (safeNext) {
@@ -132,8 +139,23 @@ export async function signOutAction(): Promise<void> {
   redirect("/");
 }
 
-export async function signInWithGoogleAction(): Promise<void> {
+export async function signInWithGoogleAction(
+  formData: FormData,
+): Promise<void> {
   const cookieStore = await cookies();
+  const isProd = process.env.NODE_ENV === "production";
+  const safeNext = parseSafeNextPath(String(formData.get("next") ?? ""));
+
+  if (safeNext) {
+    cookieStore.set(
+      AUTH_NEXT_COOKIE,
+      safeNext,
+      authNextCookieOptions(isProd),
+    );
+  } else {
+    cookieStore.delete(AUTH_NEXT_COOKIE);
+  }
+
   const auth = await createInsForgeAuthActions();
   const { data, error } = await auth.signInWithOAuth("google", {
     redirectTo: `${appOrigin()}/api/auth/callback`,
@@ -143,14 +165,18 @@ export async function signInWithGoogleAction(): Promise<void> {
 
   if (error || !data?.url || !data.codeVerifier) {
     // Surface on /masuk (shared OAuth entry); /daftar also reads ?error=
-    redirect(
-      `/masuk?error=${encodeURIComponent(error?.message ?? "OAuth Google gagal. Pastikan Google diaktifkan di dashboard InsForge (Auth Methods). Lihat docs/SOFT-LAUNCH-OPS.md.")}`,
-    );
+    const errQs = new URLSearchParams({
+      error:
+        error?.message ??
+        "OAuth Google gagal. Pastikan Google diaktifkan di dashboard InsForge (Auth Methods). Lihat docs/SOFT-LAUNCH-OPS.md.",
+    });
+    if (safeNext) errQs.set("next", safeNext);
+    redirect(`/masuk?${errQs.toString()}`);
   }
 
   cookieStore.set("insforge_code_verifier", data.codeVerifier, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isProd,
     sameSite: "lax",
     path: "/",
     maxAge: 600,
@@ -207,6 +233,10 @@ export async function saveAgeBandAction(
     };
   }
 
+  const safeNext = parseSafeNextPath(String(formData.get("next") ?? ""));
+  if (safeNext) {
+    redirect(safeNext);
+  }
   redirect("/dashboard");
 }
 

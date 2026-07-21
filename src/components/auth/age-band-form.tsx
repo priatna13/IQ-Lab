@@ -8,12 +8,20 @@ import {
 
 const initial: AuthActionResult = { ok: false };
 
-export function AgeBandForm() {
+type Props = {
+  /** After age band is saved, redirect here instead of /dashboard. */
+  nextPath?: string;
+};
+
+export function AgeBandForm({ nextPath }: Props) {
   const [state, formAction, pending] = useActionState(saveAgeBandAction, initial);
   const [choice, setChoice] = useState<string>("");
 
   return (
     <form action={formAction} className="space-y-5">
+      {nextPath ? (
+        <input type="hidden" name="next" value={nextPath} />
+      ) : null}
       <fieldset className="space-y-3">
         <legend className="text-sm font-semibold text-lab-navy">
           Rentang usia Anda
@@ -91,7 +99,11 @@ export function AgeBandForm() {
         disabled={pending}
         className="lab-btn-primary lab-btn-block w-full"
       >
-        {pending ? "Menyimpan…" : "Lanjut ke dasbor"}
+        {pending
+          ? "Menyimpan…"
+          : nextPath
+            ? "Simpan & lanjut"
+            : "Lanjut ke dasbor"}
       </button>
     </form>
   );

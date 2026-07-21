@@ -7,6 +7,7 @@ import { GoogleButton } from "@/components/auth/google-button";
 import { signInAction } from "@/app/actions/auth";
 import { getSessionUser } from "@/lib/auth/session";
 import { isAdminEmail } from "@/lib/auth/admin";
+import { parseSafeNextPath } from "@/lib/auth/safe-next-path";
 
 type Props = {
   searchParams: Promise<{ error?: string; next?: string }>;
@@ -14,9 +15,7 @@ type Props = {
 
 export default async function SignInPage({ searchParams }: Props) {
   const params = await searchParams;
-  const nextRaw = params.next?.trim() ?? "";
-  const nextPath =
-    nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : undefined;
+  const nextPath = parseSafeNextPath(params.next) ?? undefined;
 
   const user = await getSessionUser();
   if (user) {
@@ -67,7 +66,7 @@ export default async function SignInPage({ searchParams }: Props) {
             </p>
           ) : null}
 
-          <GoogleButton label="Lanjut dengan Google" />
+          <GoogleButton label="Lanjut dengan Google" nextPath={nextPath} />
 
           <div className="relative text-center text-xs text-slate-600">
             <span className="relative z-10 bg-white px-2">atau email</span>

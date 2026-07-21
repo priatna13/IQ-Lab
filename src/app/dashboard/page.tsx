@@ -5,11 +5,13 @@ import { IconArrowRight, IconSparkle } from "@/components/ui/icons";
 import { getSessionUser } from "@/lib/auth/session";
 import { signOutAction } from "@/app/actions/auth";
 import { DeleteAccountButton } from "@/components/account/delete-account-button";
+import { AbandonSkillButton } from "@/components/assessment/abandon-skill-button";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import {
   getOpenAttempt,
   getRetakeCooldownUntil,
 } from "@/domain/assessment";
+import { getFieldDef } from "@/domain/assessment/skill/field-catalog";
 
 export default async function DashboardPage() {
   const user = await getSessionUser();
@@ -29,18 +31,21 @@ export default async function DashboardPage() {
     new Date(),
   );
 
-  /** Completed skill fields per cognitive attempt (for dasbor badges). */
+  /** Completed skill fields per cognitive attempt + open skill (if any). */
   const skillBySource = new Map<string, number>();
-  if (completedAttempts.length > 0) {
-    const skillAttempts = await ports.skillAttempts.listByParticipant(user.id);
-    for (const sa of skillAttempts) {
-      if (sa.status !== "completed") continue;
-      skillBySource.set(
-        sa.sourceAttemptId,
-        (skillBySource.get(sa.sourceAttemptId) ?? 0) + 1,
-      );
-    }
+  const allSkillAttempts = await ports.skillAttempts.listByParticipant(user.id);
+  for (const sa of allSkillAttempts) {
+    if (sa.status !== "completed") continue;
+    skillBySource.set(
+      sa.sourceAttemptId,
+      (skillBySource.get(sa.sourceAttemptId) ?? 0) + 1,
+    );
   }
+  const openSkill =
+    allSkillAttempts.find((s) => s.status === "in_progress") ?? null;
+  const openSkillLabel = openSkill
+    ? (getFieldDef(openSkill.fieldId)?.label ?? openSkill.fieldId)
+    : null;
 
   return (
     <PageShell width="lg" orbs="full">
@@ -78,7 +83,9 @@ export default async function DashboardPage() {
               <dd className="mt-1 font-semibold text-lab-navy">
                 {openAttempt
                   ? "Ada Attempt berjalan"
-                  : "Belum ada Open Attempt"}
+                  : openSkill
+                    ? "Keahlian berjalan"
+                    : "Belum ada Open Attempt"}
               </dd>
             </div>
           </dl>
@@ -88,6 +95,48 @@ export default async function DashboardPage() {
               Anda mendaftar dengan disclaimer 46+: norma &amp; saran karir
               fase awal dioptimalkan untuk 18–45.
             </p>
+          ) : null}
+
+          {openSkill ? (
+            <div className="rounded-[1.25rem] border border-lab-violet/30 bg-gradient-to-br from-lab-mist/80 to-white p-4 sm:p-5">
+              <span className="lab-badge bg-white text-lab-navy ring-1 ring-lab-violet/25">
+                <IconSparkle className="h-3.5 w-3.5" />
+                Keahlian berjalan
+              </span>
+              <p className="mt-3 text-sm font-semibold text-lab-navy">
+                {openSkillLabel}
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Dimulai {openSkill.startedAt.toLocaleString("id-ID")} · berakhir{" "}
+                {openSkill.endsAt.toLocaleString("id-ID", {
+                  timeStyle: "short",
+                  dateStyle: "short",
+                })}
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                Selesaikan sesi keahlian ini, atau batalkan untuk memilih bidang
+                lain. Maksimal satu sesi keahlian terbuka.
+              </p>
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <Link
+                  href={`/asesmen/${openSkill.sourceAttemptId}/keahlian/${openSkill.fieldId}/sesi?sid=${openSkill.id}`}
+                  className="lab-btn-primary"
+                >
+                  Lanjutkan keahlian
+                  <IconArrowRight />
+                </Link>
+                <Link
+                  href={`/asesmen/${openSkill.sourceAttemptId}/keahlian`}
+                  className="lab-btn-secondary"
+                >
+                  Daftar bidang
+                </Link>
+                <AbandonSkillButton
+                  skillAttemptId={openSkill.id}
+                  sourceAttemptId={openSkill.sourceAttemptId}
+                />
+              </div>
+            </div>
           ) : null}
 
           {openAttempt ? (
@@ -160,6 +209,8 @@ export default async function DashboardPage() {
               <ul className="mt-3 space-y-3">
                 {completedAttempts.map((a) => {
                   const skillCount = skillBySource.get(a.id) ?? 0;
+                  const skillOpenHere =
+                    openSkill?.sourceAttemptId === a.id ? openSkill : null;
                   return (
                     <li
                       key={a.id}
@@ -171,7 +222,13 @@ export default async function DashboardPage() {
                         {a.completedAt
                           ? ` · ${a.completedAt.toLocaleDateString("id-ID")}`
                           : ""}
-                        {skillCount > 0 ? (
+                        {skillOpenHere ? (
+                          <span className="mt-0.5 block text-xs font-medium text-lab-navy">
+                            Keahlian berjalan:{" "}
+                            {getFieldDef(skillOpenHere.fieldId)?.label ??
+                              skillOpenHere.fieldId}
+                          </span>
+                        ) : skillCount > 0 ? (
                           <span className="mt-0.5 block text-xs text-lab-teal">
                             {skillCount} bidang keahlian selesai
                           </span>
@@ -185,10 +242,14 @@ export default async function DashboardPage() {
                           Lihat profil
                         </Link>
                         <Link
-                          href={`/asesmen/${a.id}/keahlian`}
+                          href={
+                            skillOpenHere
+                              ? `/asesmen/${a.id}/keahlian/${skillOpenHere.fieldId}/sesi?sid=${skillOpenHere.id}`
+                              : `/asesmen/${a.id}/keahlian`
+                          }
                           className="lab-btn-primary min-h-11 px-3 text-xs sm:text-sm"
                         >
-                          Keahlian
+                          {skillOpenHere ? "Lanjut keahlian" : "Keahlian"}
                         </Link>
                         <a
                           href={`/api/asesmen/${a.id}/pdf`}

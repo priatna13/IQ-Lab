@@ -1,8 +1,17 @@
 import { signInWithGoogleAction } from "@/app/actions/auth";
 
-export function GoogleButton({ label }: { label: string }) {
+type Props = {
+  label: string;
+  /** Safe internal path preserved across OAuth redirect (e.g. /asesmen/…). */
+  nextPath?: string;
+};
+
+export function GoogleButton({ label, nextPath }: Props) {
   return (
     <form action={signInWithGoogleAction}>
+      {nextPath ? (
+        <input type="hidden" name="next" value={nextPath} />
+      ) : null}
       <button type="submit" className="lab-btn-secondary lab-btn-block w-full">
         <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden>
           <path
