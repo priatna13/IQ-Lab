@@ -64,8 +64,11 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   });
   /** Item ids with an in-flight save request. */
   const inFlightRef = useRef<Set<string>>(new Set());
+  /** Outstanding save requests per item (supports rapid re-select). */
+  const inFlightDepthRef = useRef<Map<string, number>>(new Map());
   const inFlightCountRef = useRef(0);
   const savedFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerCloseStartedRef = useRef(false);
 
   const endsAtMs = useMemo(
     () => Date.parse(view.session.endsAt),
@@ -161,13 +164,24 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   }, [view.session.id, applyServerViewPreservingInFlight]);
 
   useEffect(() => {
-    if (view.session.status === "closed") return;
+    if (view.session.status === "closed") {
+      timerCloseStartedRef.current = false;
+      return;
+    }
     if (!pastGrace) return;
+    if (timerCloseStartedRef.current) return;
+    timerCloseStartedRef.current = true;
 
     startCloseTransition(async () => {
       const result = await syncTimerCloseAction(view.session.id);
       if (result.ok) {
         applyServerViewPreservingInFlight(result.view);
+        if (result.view.session.status !== "closed") {
+          // Server clock not past grace yet — allow a later retry.
+          timerCloseStartedRef.current = false;
+        }
+      } else {
+        timerCloseStartedRef.current = false;
       }
     });
   }, [
@@ -183,17 +197,25 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     (view.answeredCount / Math.max(1, view.totalItems)) * 100,
   );
 
+  function recomputeInFlightCount() {
+    let total = 0;
+    for (const n of inFlightDepthRef.current.values()) total += n;
+    inFlightCountRef.current = total;
+    inFlightRef.current = new Set(inFlightDepthRef.current.keys());
+    return total;
+  }
+
   function markInFlight(itemId: string, active: boolean) {
+    const depth = inFlightDepthRef.current.get(itemId) ?? 0;
     if (active) {
-      if (!inFlightRef.current.has(itemId)) {
-        inFlightRef.current.add(itemId);
-        inFlightCountRef.current += 1;
-      }
-    } else if (inFlightRef.current.has(itemId)) {
-      inFlightRef.current.delete(itemId);
-      inFlightCountRef.current = Math.max(0, inFlightCountRef.current - 1);
+      inFlightDepthRef.current.set(itemId, depth + 1);
+    } else if (depth <= 1) {
+      inFlightDepthRef.current.delete(itemId);
+    } else {
+      inFlightDepthRef.current.set(itemId, depth - 1);
     }
-    if (inFlightCountRef.current > 0) {
+    const total = recomputeInFlightCount();
+    if (total > 0) {
       setSaveStatus("saving");
     }
   }
@@ -246,7 +268,7 @@ export function DomainRunner({ attemptId, initialView }: Props) {
           answer,
         });
 
-        // Superseded by a newer choice for this item — ignore result
+        // Superseded by a newer choice for this item — ignore result body
         if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
           return;
         }
@@ -255,18 +277,30 @@ export function DomainRunner({ attemptId, initialView }: Props) {
           failed = true;
           setError(result.error);
           setSaveStatus("error");
-          // Recover server truth; keep other in-flight optimistics
+          // Keep optimistic answer so "Selesai domain" can still flush it.
+          // Only recover server map for other items still in-flight.
           const refreshed = await refreshRunnerViewAction(sessionId);
           if (
             refreshed.ok &&
             isSaveStillCurrent(latestIntendedRef.current, itemId, answer)
           ) {
-            delete latestIntendedRef.current[itemId];
-            if (refreshed.view.responses[itemId]) {
-              latestIntendedRef.current[itemId] =
-                refreshed.view.responses[itemId];
-            }
-            applyServerViewPreservingInFlight(refreshed.view);
+            // Prefer latest intended over server for this item
+            applyServerViewPreservingInFlight({
+              ...refreshed.view,
+              responses: {
+                ...refreshed.view.responses,
+                [itemId]: answer,
+              },
+              answeredCount: Object.keys({
+                ...refreshed.view.responses,
+                [itemId]: answer,
+              }).length,
+              canEarlyFinish:
+                Object.keys({
+                  ...refreshed.view.responses,
+                  [itemId]: answer,
+                }).length === refreshed.view.totalItems,
+            });
           }
           return;
         }
@@ -279,12 +313,16 @@ export function DomainRunner({ attemptId, initialView }: Props) {
         setError("Gagal menyimpan jawaban. Coba pilih lagi.");
         setSaveStatus("error");
       } finally {
-        // Only the latest intended answer for this item clears in-flight
-        if (isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
-          markInFlight(itemId, false);
-          if (!failed && inFlightCountRef.current === 0) {
-            flashSaved();
-          }
+        // Always release this request slot (depth counter handles supersede races).
+        markInFlight(itemId, false);
+        if (
+          !failed &&
+          isSaveStillCurrent(latestIntendedRef.current, itemId, answer) &&
+          inFlightCountRef.current === 0
+        ) {
+          flashSaved();
+        } else if (failed && inFlightCountRef.current === 0) {
+          setSaveStatus("error");
         }
       }
     })();
@@ -322,11 +360,24 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     startCloseTransition(async () => {
       await waitForInFlightSaves();
       // Final flush: optimistic UI can show 8/8 while some POSTs still failed/raced
-      const flushed = await flushIntendedAnswersToServer();
-      if (!flushed) return;
+      let flushed = await flushIntendedAnswersToServer();
+      if (!flushed) {
+        // One more wait + retry — common when last answer just left the wire
+        await waitForInFlightSaves(3_000);
+        flushed = await flushIntendedAnswersToServer();
+        if (!flushed) return;
+      }
       await waitForInFlightSaves(5_000);
 
-      const result = await earlyFinishAction(view.session.id);
+      let result = await earlyFinishAction(view.session.id);
+      if (!result.ok) {
+        // Retry once after another flush (server may have lagged behind UI)
+        await waitForInFlightSaves(2_000);
+        const retryFlush = await flushIntendedAnswersToServer();
+        if (retryFlush) {
+          result = await earlyFinishAction(view.session.id);
+        }
+      }
       if (!result.ok) {
         setError(result.error);
         await refresh();
@@ -578,21 +629,23 @@ export function DomainRunner({ attemptId, initialView }: Props) {
 
         <button
           type="button"
-          disabled={!view.canEarlyFinish || closing || saveStatus === "saving"}
+          disabled={!view.canEarlyFinish || closing}
           onClick={onEarlyFinish}
           className="lab-btn-navy lab-btn-block"
         >
           {closing
-            ? "Menutup…"
+            ? "Menyimpan & menutup…"
             : saveStatus === "saving"
-              ? "Menyimpan dulu…"
+              ? "Selesai domain (menyimpan…)"
               : "Selesai domain"}
         </button>
       </div>
 
       <p className="text-xs text-slate-500">
-        Jawaban tersimpan otomatis ke server. Setelah domain ditutup, jawaban
-        dibekukan. Item tanpa jawaban saat waktu habis dihitung kosong/salah.
+        Jawaban tersimpan otomatis ke server. Jawab semua soal, lalu tekan{" "}
+        <strong>Selesai domain</strong> untuk lanjut. Setelah domain ditutup,
+        jawaban dibekukan. Item tanpa jawaban saat waktu habis dihitung
+        kosong/salah.
       </p>
     </div>
   );

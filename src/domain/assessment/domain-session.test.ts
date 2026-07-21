@@ -3,6 +3,7 @@ import { createAttempt } from "./create-attempt";
 import { createSeedContentCatalog } from "./content-catalog";
 import { V2_CONTENT_VERSION_ID } from "./content/v2";
 import {
+  closeExpiredSessionsForAttempt,
   earlyFinishDomainSession,
   getDomainRunnerView,
   startDomainSession,
@@ -10,7 +11,6 @@ import {
   upsertResponse,
 } from "./domain-session";
 import type { AssessmentPorts } from "./ports";
-import { createFixedClock } from "./testing/fixed-clock";
 import { createInMemoryAttemptRepository } from "./testing/in-memory-attempts";
 import {
   createInMemoryDomainSessionRepository,
@@ -143,6 +143,46 @@ describe("Domain Session runner boundary", () => {
         answer: "c",
       }),
     ).rejects.toBeInstanceOf(AssessmentError);
+  });
+
+  it("closeExpiredSessionsForAttempt closes stale open sessions so order can advance", async () => {
+    const ports = buildPorts();
+    const attempt = await createAttempt(ports, {
+      participant: { id: "p_exp", ageBand: "18_45" },
+      track: "explore",
+    });
+    const cv = await ports.content.getById(attempt.contentVersionId);
+    if (!cv) throw new Error("no content");
+    const domainId = cv.domainOrder[0]!;
+    const session = await startDomainSession(ports, {
+      attemptId: attempt.id,
+      participantId: "p_exp",
+      domainId,
+    });
+
+    // Jump past endsAt + grace without closing via runner
+    ports.setNow(new Date(session.endsAt.getTime() + 60_000).toISOString());
+
+    const closed = await closeExpiredSessionsForAttempt(ports, {
+      attemptId: attempt.id,
+      participantId: "p_exp",
+    });
+    expect(closed).toHaveLength(1);
+    expect(closed[0]!.status).toBe("closed");
+    expect(closed[0]!.closeReason).toBe("timer");
+
+    const reloaded = await ports.domainSessions.findById(session.id);
+    expect(reloaded?.status).toBe("closed");
+
+    // Next domain in order may now start
+    const nextId = cv.domainOrder[1]!;
+    const next = await startDomainSession(ports, {
+      attemptId: attempt.id,
+      participantId: "p_exp",
+      domainId: nextId,
+    });
+    expect(next.domainId).toBe(nextId);
+    expect(next.status).toBe("in_progress");
   });
 
   it("on timer + grace expiry closes with partial score and freezes Responses", async () => {

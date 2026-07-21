@@ -5,7 +5,10 @@ import { AbandonAttemptButton } from "@/components/assessment/abandon-attempt-bu
 import { CompleteAttemptButton } from "@/components/assessment/complete-attempt-button";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
-import { toPublicContentVersion } from "@/domain/assessment";
+import {
+  closeExpiredSessionsForAttempt,
+  toPublicContentVersion,
+} from "@/domain/assessment";
 
 type Props = {
   params: Promise<{ attemptId: string }>;
@@ -28,6 +31,17 @@ export default async function AttemptProgressPage({ params }: Props) {
   }
   if (attempt.status === "completed") {
     redirect(`/asesmen/${attemptId}/hasil`);
+  }
+
+  // Timer may have expired while participant left the runner — close stale
+  // open sessions so the next domain in fixed order unlocks.
+  try {
+    await closeExpiredSessionsForAttempt(ports, {
+      attemptId,
+      participantId: user.id,
+    });
+  } catch {
+    // Non-fatal: progress still renders; startDomain will re-check.
   }
 
   const cv = await ports.content.getById(attempt.contentVersionId);

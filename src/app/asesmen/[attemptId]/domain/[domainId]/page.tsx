@@ -6,6 +6,7 @@ import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import {
   AssessmentError,
+  closeExpiredSessionsForAttempt,
   getDomainRunnerView,
   startDomainSession,
 } from "@/domain/assessment";
@@ -25,6 +26,18 @@ export default async function DomainRunnerPage({ params }: Props) {
     notFound();
   }
 
+  // Close stale timer sessions so fixed domain order is not blocked.
+  if (attempt.status === "in_progress") {
+    try {
+      await closeExpiredSessionsForAttempt(ports, {
+        attemptId,
+        participantId: user.id,
+      });
+    } catch {
+      // continue — startDomainSession re-validates
+    }
+  }
+
   let sessionId: string;
   try {
     const session = await startDomainSession(ports, {
@@ -32,6 +45,11 @@ export default async function DomainRunnerPage({ params }: Props) {
       participantId: user.id,
       domainId,
     });
+    // If this domain just auto-closed on open (timer), send user back to list
+    // so they can continue the next domain.
+    if (session.status === "closed") {
+      redirect(`/asesmen/${attemptId}`);
+    }
     sessionId = session.id;
   } catch (err) {
     if (err instanceof AssessmentError) {

@@ -56,6 +56,7 @@ export {
   upsertResponse,
   earlyFinishDomainSession,
   closeDomainSessionIfTimedOut,
+  closeExpiredSessionsForAttempt,
   getDomainRunnerView,
   stableResponseId,
 } from "./domain-session";

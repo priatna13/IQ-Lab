@@ -350,6 +350,35 @@ export async function closeDomainSessionIfTimedOut(
   return ensureSessionNotPastGrace(ports, session, domain);
 }
 
+/**
+ * Close every open Domain Session on an Attempt that is past endsAt + grace.
+ * Call when loading progress / starting the next domain so a stale open
+ * session (client left mid-timer) does not block fixed-order progression.
+ */
+export async function closeExpiredSessionsForAttempt(
+  ports: AssessmentPorts,
+  input: { attemptId: AttemptId; participantId: ParticipantId },
+): Promise<DomainSession[]> {
+  const attempt = await requireOwnedOpenAttempt(
+    ports,
+    input.attemptId,
+    input.participantId,
+  );
+  const sessions = await ports.domainSessions.listByAttempt(input.attemptId);
+  const closed: DomainSession[] = [];
+  for (const session of sessions) {
+    if (session.status !== "in_progress") continue;
+    const domain = await loadDomainDef(
+      ports,
+      attempt.contentVersionId,
+      session.domainId,
+    );
+    const live = await ensureSessionNotPastGrace(ports, session, domain);
+    if (live.status === "closed") closed.push(live);
+  }
+  return closed;
+}
+
 /** Public runner payload — never includes correctKey. */
 export type PublicRunnerItem = {
   id: string;
