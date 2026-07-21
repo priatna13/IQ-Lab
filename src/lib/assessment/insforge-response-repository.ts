@@ -61,6 +61,25 @@ export function createInsForgeResponseRepository(): ResponseRepository {
       const { error } = await client.database.from("responses").upsert([row]);
       if (error) throw new Error(error.message ?? "upsert response failed");
     },
+    async upsertMany(responses) {
+      if (responses.length === 0) return;
+      if (responses.length === 1) {
+        await this.upsert(responses[0]!);
+        return;
+      }
+      const client = await createInsForgeServerClient();
+      const rows = responses.map((response) => ({
+        id: response.id,
+        domain_session_id: response.domainSessionId,
+        attempt_id: response.attemptId,
+        participant_id: response.participantId,
+        item_id: response.itemId,
+        answer: response.answer,
+        updated_at: response.updatedAt.toISOString(),
+      }));
+      const { error } = await client.database.from("responses").upsert(rows);
+      if (error) throw new Error(error.message ?? "upsert responses failed");
+    },
     async deleteByAttemptIds(attemptIds) {
       if (attemptIds.length === 0) return;
       void attemptIds; // CASCADE from attempts delete

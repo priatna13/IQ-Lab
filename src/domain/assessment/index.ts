@@ -54,6 +54,7 @@ export { buildReportPdfBytes } from "./build-report-pdf";
 export {
   startDomainSession,
   upsertResponse,
+  upsertResponsesBatch,
   earlyFinishDomainSession,
   closeDomainSessionIfTimedOut,
   closeExpiredSessionsForAttempt,

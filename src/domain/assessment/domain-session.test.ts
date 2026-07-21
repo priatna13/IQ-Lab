@@ -9,6 +9,7 @@ import {
   startDomainSession,
   stableResponseId,
   upsertResponse,
+  upsertResponsesBatch,
 } from "./domain-session";
 import type { AssessmentPorts } from "./ports";
 import { createInMemoryAttemptRepository } from "./testing/in-memory-attempts";
@@ -103,6 +104,25 @@ describe("Domain Session runner boundary", () => {
     const listed = await ports.responses.listBySession(session.id);
     expect(listed).toHaveLength(1);
     expect(listed[0].id).toBe(stableResponseId(session.id, item.id));
+  });
+
+  it("batch upserts many answers after a single session load", async () => {
+    const ports = buildPorts();
+    const { session, cv, domainId } = await openFirstDomain(ports);
+    const domain = cv.domains.find((d) => d.id === domainId)!;
+
+    const { saved } = await upsertResponsesBatch(ports, {
+      sessionId: session.id,
+      participantId: "p_1",
+      answers: domain.items.map((item) => ({
+        itemId: item.id,
+        answer: item.choices[0]!.id,
+      })),
+    });
+    expect(saved).toBe(domain.items.length);
+
+    const listed = await ports.responses.listBySession(session.id);
+    expect(listed).toHaveLength(domain.items.length);
   });
 
   it("rejects Early Finish until every Item has a Response, then freezes", async () => {

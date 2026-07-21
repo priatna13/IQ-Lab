@@ -61,6 +61,8 @@ export type ResponseRepository = {
     itemId: string,
   ): Promise<Response | null>;
   upsert(response: Response): Promise<void>;
+  /** Multi-row upsert in one HTTP call (flush / batch save). Optional. */
+  upsertMany?(responses: Response[]): Promise<void>;
   deleteByAttemptIds(attemptIds: AttemptId[]): Promise<void>;
 };
 

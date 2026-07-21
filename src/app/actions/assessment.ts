@@ -14,6 +14,7 @@ import {
   startDomainSession,
   toPublicResultReport,
   upsertResponse,
+  upsertResponsesBatch,
   type IntegrityEventType,
   type PublicDomainRunnerView,
   type PublicResultReport,
@@ -186,7 +187,7 @@ export async function saveResponseAction(input: {
   }
 }
 
-/** Persist many answers in one server round (used before early finish). */
+/** Persist many answers after one session load (used before early finish). */
 export async function saveResponsesBatchAction(input: {
   sessionId: string;
   answers: Array<{ itemId: string; answer: string }>;
@@ -203,27 +204,22 @@ export async function saveResponsesBatchAction(input: {
     };
   }
   const ports = createServerAssessmentPorts();
-  let saved = 0;
   try {
-    for (const row of input.answers) {
-      await upsertResponse(ports, {
-        sessionId: input.sessionId,
-        participantId: user.id,
-        itemId: row.itemId,
-        answer: row.answer,
-      });
-      saved += 1;
-    }
+    const { saved } = await upsertResponsesBatch(ports, {
+      sessionId: input.sessionId,
+      participantId: user.id,
+      answers: input.answers,
+    });
     return { ok: true, saved };
   } catch (err) {
     if (err instanceof AssessmentError) {
-      return { ok: false, error: err.message, saved };
+      return { ok: false, error: err.message, saved: 0 };
     }
     console.error("[saveResponsesBatchAction]", err);
     return {
       ok: false,
       error: "Gagal menyimpan sebagian jawaban. Coba lagi.",
-      saved,
+      saved: 0,
     };
   }
 }

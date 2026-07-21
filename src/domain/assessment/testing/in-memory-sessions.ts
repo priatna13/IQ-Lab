@@ -57,6 +57,13 @@ export function createInMemoryResponseRepository(): ResponseRepository {
         ...response,
       });
     },
+    async upsertMany(responses) {
+      for (const response of responses) {
+        byKey.set(key(response.domainSessionId, response.itemId), {
+          ...response,
+        });
+      }
+    },
     async deleteByAttemptIds(attemptIds) {
       const set = new Set(attemptIds);
       for (const [k, r] of byKey) {

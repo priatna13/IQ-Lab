@@ -69,6 +69,12 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   const inFlightCountRef = useRef(0);
   const savedFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timerCloseStartedRef = useRef(false);
+  /** Debounce network save per item so rapid re-selects only hit the server once. */
+  const saveDebounceRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
+
+  const SAVE_DEBOUNCE_MS = 140;
 
   const endsAtMs = useMemo(
     () => Date.parse(view.session.endsAt),
@@ -94,6 +100,8 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   useEffect(() => {
     return () => {
       if (savedFlashTimerRef.current) clearTimeout(savedFlashTimerRef.current);
+      for (const t of saveDebounceRef.current.values()) clearTimeout(t);
+      saveDebounceRef.current.clear();
     };
   }, []);
 
@@ -232,6 +240,66 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     }, 1500);
   }
 
+  function clearSaveDebounce(itemId?: string) {
+    if (itemId) {
+      const t = saveDebounceRef.current.get(itemId);
+      if (t) clearTimeout(t);
+      saveDebounceRef.current.delete(itemId);
+      return;
+    }
+    for (const t of saveDebounceRef.current.values()) clearTimeout(t);
+    saveDebounceRef.current.clear();
+  }
+
+  async function persistAnswerToServer(
+    sessionId: string,
+    itemId: string,
+    answer: string,
+  ) {
+    if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
+      return;
+    }
+    markInFlight(itemId, true);
+    let failed = false;
+    try {
+      const result = await saveResponseAction({
+        sessionId,
+        itemId,
+        answer,
+      });
+
+      if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
+        return;
+      }
+
+      if (!result.ok) {
+        failed = true;
+        setError(result.error);
+        setSaveStatus("error");
+        // Keep optimistic answer; "Selesai domain" will flush again.
+        return;
+      }
+    } catch {
+      if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
+        return;
+      }
+      failed = true;
+      setError("Gagal menyimpan jawaban. Coba pilih lagi.");
+      setSaveStatus("error");
+    } finally {
+      markInFlight(itemId, false);
+      if (
+        !failed &&
+        isSaveStillCurrent(latestIntendedRef.current, itemId, answer) &&
+        inFlightCountRef.current === 0
+      ) {
+        flashSaved();
+      } else if (failed && inFlightCountRef.current === 0) {
+        setSaveStatus("error");
+      }
+    }
+  }
+
   function selectAnswer(answer: string) {
     if (!item || view.session.status === "closed") return;
     setError(null);
@@ -257,75 +325,16 @@ export function DomainRunner({ attemptId, initialView }: Props) {
       canEarlyFinish: optimistic.canEarlyFinish,
     }));
 
-    markInFlight(itemId, true);
-
-    void (async () => {
-      let failed = false;
-      try {
-        const result = await saveResponseAction({
-          sessionId,
-          itemId,
-          answer,
-        });
-
-        // Superseded by a newer choice for this item — ignore result body
-        if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
-          return;
-        }
-
-        if (!result.ok) {
-          failed = true;
-          setError(result.error);
-          setSaveStatus("error");
-          // Keep optimistic answer so "Selesai domain" can still flush it.
-          // Only recover server map for other items still in-flight.
-          const refreshed = await refreshRunnerViewAction(sessionId);
-          if (
-            refreshed.ok &&
-            isSaveStillCurrent(latestIntendedRef.current, itemId, answer)
-          ) {
-            // Prefer latest intended over server for this item
-            applyServerViewPreservingInFlight({
-              ...refreshed.view,
-              responses: {
-                ...refreshed.view.responses,
-                [itemId]: answer,
-              },
-              answeredCount: Object.keys({
-                ...refreshed.view.responses,
-                [itemId]: answer,
-              }).length,
-              canEarlyFinish:
-                Object.keys({
-                  ...refreshed.view.responses,
-                  [itemId]: answer,
-                }).length === refreshed.view.totalItems,
-            });
-          }
-          return;
-        }
-        // Success: no full-refresh (pilot wipe bug — lag + lost answers)
-      } catch {
-        if (!isSaveStillCurrent(latestIntendedRef.current, itemId, answer)) {
-          return;
-        }
-        failed = true;
-        setError("Gagal menyimpan jawaban. Coba pilih lagi.");
-        setSaveStatus("error");
-      } finally {
-        // Always release this request slot (depth counter handles supersede races).
-        markInFlight(itemId, false);
-        if (
-          !failed &&
-          isSaveStillCurrent(latestIntendedRef.current, itemId, answer) &&
-          inFlightCountRef.current === 0
-        ) {
-          flashSaved();
-        } else if (failed && inFlightCountRef.current === 0) {
-          setSaveStatus("error");
-        }
-      }
-    })();
+    // Debounce network: UI feels instant; last choice within 140ms is saved once.
+    clearSaveDebounce(itemId);
+    setSaveStatus((s) => (s === "error" ? "idle" : s));
+    const timer = setTimeout(() => {
+      saveDebounceRef.current.delete(itemId);
+      const latest = latestIntendedRef.current[itemId];
+      if (!latest) return;
+      void persistAnswerToServer(sessionId, itemId, latest);
+    }, SAVE_DEBOUNCE_MS);
+    saveDebounceRef.current.set(itemId, timer);
   }
 
   async function waitForInFlightSaves(timeoutMs = 12_000) {
@@ -335,8 +344,20 @@ export function DomainRunner({ attemptId, initialView }: Props) {
     }
   }
 
+  async function waitForDebouncedSaves(timeoutMs = 2_000) {
+    const start = Date.now();
+    while (
+      saveDebounceRef.current.size > 0 &&
+      Date.now() - start < timeoutMs
+    ) {
+      await new Promise((r) => setTimeout(r, 30));
+    }
+  }
+
   /** Ensure every optimistic answer is on the server before closing the domain. */
   async function flushIntendedAnswersToServer(): Promise<boolean> {
+    // Cancel pending debounces — batch write is the source of truth for finish.
+    clearSaveDebounce();
     const answers = Object.entries(latestIntendedRef.current).map(
       ([itemId, answer]) => ({ itemId, answer }),
     );
@@ -358,16 +379,17 @@ export function DomainRunner({ attemptId, initialView }: Props) {
   function onEarlyFinish() {
     setError(null);
     startCloseTransition(async () => {
-      await waitForInFlightSaves();
-      // Final flush: optimistic UI can show 8/8 while some POSTs still failed/raced
+      clearSaveDebounce();
+      await waitForDebouncedSaves(500);
+      await waitForInFlightSaves(4_000);
+      // Final flush: one multi-row upsert for all intended answers
       let flushed = await flushIntendedAnswersToServer();
       if (!flushed) {
-        // One more wait + retry — common when last answer just left the wire
-        await waitForInFlightSaves(3_000);
+        await waitForInFlightSaves(2_000);
         flushed = await flushIntendedAnswersToServer();
         if (!flushed) return;
       }
-      await waitForInFlightSaves(5_000);
+      await waitForInFlightSaves(3_000);
 
       let result = await earlyFinishAction(view.session.id);
       if (!result.ok) {

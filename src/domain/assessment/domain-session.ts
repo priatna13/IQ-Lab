@@ -196,15 +196,22 @@ export async function startDomainSession(
   return session;
 }
 
-export async function upsertResponse(
+type OpenSessionContext = {
+  live: DomainSession;
+  domain: DomainDefinition;
+  now: number;
+  endsAt: number;
+  hardClose: number;
+};
+
+/**
+ * Load session + content once and validate timer state for writes.
+ * Shared by single and batch upsert hot paths.
+ */
+async function loadOpenSessionContext(
   ports: AssessmentPorts,
-  input: {
-    sessionId: string;
-    participantId: ParticipantId;
-    itemId: string;
-    answer: string;
-  },
-): Promise<Response> {
+  input: { sessionId: string; participantId: ParticipantId },
+): Promise<OpenSessionContext> {
   const session = await ports.domainSessions.findById(input.sessionId);
   if (!session || session.participantId !== input.participantId) {
     throw new AssessmentError("NOT_FOUND", "Domain Session not found");
@@ -229,14 +236,6 @@ export async function upsertResponse(
     );
   }
 
-  const item = domain.items.find((i) => i.id === input.itemId);
-  if (!item) {
-    throw new AssessmentError("NOT_FOUND", "Item not in this Domain");
-  }
-  if (!item.choices.some((c) => c.id === input.answer)) {
-    throw new AssessmentError("INVALID_STATE", "Answer is not a valid choice");
-  }
-
   const now = ports.clock.now().getTime();
   const endsAt = live.endsAt.getTime();
   const hardClose = endsAt + graceMs(ports);
@@ -249,46 +248,131 @@ export async function upsertResponse(
     );
   }
 
-  const existing = await ports.responses.findBySessionAndItem(
-    live.id,
-    input.itemId,
-  );
+  return { live, domain, now, endsAt, hardClose };
+}
 
-  // During grace: only allow updates to answers already present (in-flight), not new blanks filled
-  if (now >= endsAt && !existing) {
-    throw new AssessmentError(
-      "INVALID_STATE",
-      "Grace Window only accepts updates to existing Responses",
-    );
+function buildValidatedResponse(
+  ctx: OpenSessionContext,
+  input: {
+    participantId: ParticipantId;
+    itemId: string;
+    answer: string;
+  },
+  existingIds: ReadonlySet<string> | null,
+  nowDate: Date,
+): Response {
+  const item = ctx.domain.items.find((i) => i.id === input.itemId);
+  if (!item) {
+    throw new AssessmentError("NOT_FOUND", "Item not in this Domain");
+  }
+  if (!item.choices.some((c) => c.id === input.answer)) {
+    throw new AssessmentError("INVALID_STATE", "Answer is not a valid choice");
   }
 
-  const response: Response = {
-    id: existing?.id ?? stableResponseId(live.id, input.itemId),
-    domainSessionId: live.id,
-    attemptId: live.attemptId,
+  // Grace: only updates to rows already on server (in-flight), not new blanks.
+  if (ctx.now >= ctx.endsAt) {
+    if (!existingIds || !existingIds.has(input.itemId)) {
+      throw new AssessmentError(
+        "INVALID_STATE",
+        "Grace Window only accepts updates to existing Responses",
+      );
+    }
+  }
+
+  return {
+    // Stable PK — skips a SELECT on the hot pre-endsAt path.
+    id: stableResponseId(ctx.live.id, input.itemId),
+    domainSessionId: ctx.live.id,
+    attemptId: ctx.live.attemptId,
     participantId: input.participantId,
     itemId: input.itemId,
     answer: input.answer,
-    updatedAt: ports.clock.now(),
+    updatedAt: nowDate,
   };
-  try {
-    await ports.responses.upsert(response);
-  } catch (err) {
-    // Race: another write may have inserted the unique (session, item) row first.
-    const again = await ports.responses.findBySessionAndItem(
-      live.id,
-      input.itemId,
-    );
-    if (!again) throw err;
-    const retry: Response = {
-      ...response,
-      id: again.id,
-      updatedAt: ports.clock.now(),
-    };
-    await ports.responses.upsert(retry);
-    return retry;
+}
+
+export async function upsertResponse(
+  ports: AssessmentPorts,
+  input: {
+    sessionId: string;
+    participantId: ParticipantId;
+    itemId: string;
+    answer: string;
+  },
+): Promise<Response> {
+  const ctx = await loadOpenSessionContext(ports, input);
+
+  let existingIds: Set<string> | null = null;
+  if (ctx.now >= ctx.endsAt) {
+    // Only during grace do we need to know which items already have a row.
+    const listed = await ports.responses.listBySession(ctx.live.id);
+    existingIds = new Set(listed.map((r) => r.itemId));
   }
+
+  const response = buildValidatedResponse(
+    ctx,
+    input,
+    existingIds,
+    ports.clock.now(),
+  );
+  await ports.responses.upsert(response);
   return response;
+}
+
+/**
+ * Persist many answers after one session/attempt load.
+ * Uses multi-row upsert when the repository supports it (one HTTP round-trip).
+ */
+export async function upsertResponsesBatch(
+  ports: AssessmentPorts,
+  input: {
+    sessionId: string;
+    participantId: ParticipantId;
+    answers: Array<{ itemId: string; answer: string }>;
+  },
+): Promise<{ saved: number }> {
+  if (input.answers.length === 0) return { saved: 0 };
+
+  const ctx = await loadOpenSessionContext(ports, {
+    sessionId: input.sessionId,
+    participantId: input.participantId,
+  });
+
+  let existingIds: Set<string> | null = null;
+  if (ctx.now >= ctx.endsAt) {
+    const listed = await ports.responses.listBySession(ctx.live.id);
+    existingIds = new Set(listed.map((r) => r.itemId));
+  }
+
+  const nowDate = ports.clock.now();
+  // Last write wins per itemId if the client sent duplicates.
+  const byItem = new Map<string, { itemId: string; answer: string }>();
+  for (const row of input.answers) {
+    byItem.set(row.itemId, row);
+  }
+
+  const rows: Response[] = [];
+  for (const row of byItem.values()) {
+    rows.push(
+      buildValidatedResponse(
+        ctx,
+        {
+          participantId: input.participantId,
+          itemId: row.itemId,
+          answer: row.answer,
+        },
+        existingIds,
+        nowDate,
+      ),
+    );
+  }
+
+  if (ports.responses.upsertMany) {
+    await ports.responses.upsertMany(rows);
+  } else {
+    await Promise.all(rows.map((r) => ports.responses.upsert(r)));
+  }
+  return { saved: rows.length };
 }
 
 export async function earlyFinishDomainSession(

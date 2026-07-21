@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createInsForgeServerClient } from "@/lib/insforge/server";
 import {
   AGE_BAND_PROFILE_KEY,
@@ -12,7 +13,8 @@ export type SessionUser = {
   ageBand: AgeBand | null;
 };
 
-export async function getSessionUser(): Promise<SessionUser | null> {
+/** Deduped per request so multi-step server actions do not re-hit auth. */
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const client = await createInsForgeServerClient();
   const { data, error } = await client.auth.getCurrentUser();
 
@@ -37,7 +39,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
       (typeof user.email === "string" ? user.email : null),
     ageBand,
   };
-}
+});
 
 export async function requireSessionUser(): Promise<SessionUser> {
   const user = await getSessionUser();
