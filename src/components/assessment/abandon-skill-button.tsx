@@ -31,11 +31,16 @@ export function AbandonSkillButton({
           }
           setError(null);
           start(async () => {
-            const res = await abandonSkillAttemptAction(
-              skillAttemptId,
-              sourceAttemptId,
-            );
-            if (!res.ok) setError(res.error);
+            try {
+              const res = await abandonSkillAttemptAction(
+                skillAttemptId,
+                sourceAttemptId,
+              );
+              // Success redirects away; res is often undefined after redirect().
+              if (res && !res.ok) setError(res.error);
+            } catch {
+              // NEXT_REDIRECT — navigation in progress
+            }
           });
         }}
       >

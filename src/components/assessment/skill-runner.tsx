@@ -83,14 +83,19 @@ export function SkillRunner({ initialView }: Props) {
     autoCloseStartedRef.current = true;
     startClose(async () => {
       setError(null);
-      const res = await completeSkillAttemptAction(
-        view.skillAttemptId,
-        view.sourceAttemptId,
-        view.fieldId,
-      );
-      if (!res.ok) {
-        setError(res.error);
-        autoCloseStartedRef.current = false;
+      try {
+        const res = await completeSkillAttemptAction(
+          view.skillAttemptId,
+          view.sourceAttemptId,
+          view.fieldId,
+        );
+        // On success the action redirects — res may be undefined.
+        if (res && !res.ok) {
+          setError(res.error);
+          autoCloseStartedRef.current = false;
+        }
+      } catch {
+        // NEXT_REDIRECT or navigation — leave as success path
       }
     });
   }, [view.skillAttemptId, view.sourceAttemptId, view.fieldId]);

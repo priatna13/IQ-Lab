@@ -108,10 +108,7 @@ export default async function DashboardPage() {
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 Dimulai {openSkill.startedAt.toLocaleString("id-ID")} · berakhir{" "}
-                {openSkill.endsAt.toLocaleString("id-ID", {
-                  timeStyle: "short",
-                  dateStyle: "short",
-                })}
+                {openSkill.endsAt.toLocaleString("id-ID")}
               </p>
               <p className="mt-2 text-sm text-slate-600">
                 Selesaikan sesi keahlian ini, atau batalkan untuk memilih bidang
