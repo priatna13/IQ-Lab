@@ -63,8 +63,12 @@ export default async function SkillSessionPage({ params, searchParams }: Props) 
         href={`/asesmen/${attemptId}/keahlian`}
         className="text-sm font-semibold text-lab-teal hover:underline"
       >
-        ← Pilih bidang lain
+        ← Kembali ke daftar keahlian
       </Link>
+      <p className="mt-2 text-xs text-slate-500">
+        Sesi tetap terbuka jika Anda keluar. Batalkan di daftar keahlian bila
+        ingin ganti bidang.
+      </p>
       <div className="mt-6">
         <SkillRunner initialView={view} />
       </div>

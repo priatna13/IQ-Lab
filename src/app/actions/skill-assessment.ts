@@ -3,6 +3,7 @@
 import { AssessmentError, type PublicResultReport } from "@/domain/assessment";
 import { createSkillAttempt } from "@/domain/assessment/skill/create-skill-attempt";
 import { completeSkillAttempt, toPublicSkillResult } from "@/domain/assessment/skill/complete-skill-attempt";
+import { abandonSkillAttempt } from "@/domain/assessment/skill/abandon-skill-attempt";
 import { upsertSkillResponse, getSkillRunnerView } from "@/domain/assessment/skill/skill-session";
 import { recommendFields } from "@/domain/assessment/skill/field-recommendation";
 import { FIELD_CATEGORIES, FIELD_DEFS, isFieldId } from "@/domain/assessment/skill/field-catalog";
@@ -108,6 +109,36 @@ export async function completeSkillAttemptAction(
     if (err instanceof AssessmentError) return { ok: false, error: err.message };
     console.error(err);
     return { ok: false, error: "Gagal menyelesaikan asesmen keahlian." };
+  }
+}
+
+/**
+ * Abandon open skill session so participant can pick another field.
+ * Redirects back to the skill picker for the source cognitive attempt.
+ */
+export async function abandonSkillAttemptAction(
+  skillAttemptId: string,
+  sourceAttemptId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Sesi tidak valid." };
+  const ports = createServerAssessmentPorts();
+  try {
+    await abandonSkillAttempt(ports, {
+      skillAttemptId,
+      participantId: user.id,
+    });
+    trackProductEvent(
+      "skill_attempt_abandoned",
+      { sourceAttemptId },
+      { distinctId: user.id },
+    );
+    redirect(`/asesmen/${sourceAttemptId}/keahlian`);
+  } catch (err) {
+    if (isNextRedirect(err)) throw err;
+    if (err instanceof AssessmentError) return { ok: false, error: err.message };
+    console.error(err);
+    return { ok: false, error: "Gagal membatalkan asesmen keahlian." };
   }
 }
 

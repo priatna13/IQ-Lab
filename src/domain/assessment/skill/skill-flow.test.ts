@@ -15,6 +15,7 @@ import { createInMemoryIntegrityEventRepository } from "../testing/in-memory-int
 import type { AssessmentPorts } from "../ports";
 import { createSkillAttempt } from "./create-skill-attempt";
 import { completeSkillAttempt } from "./complete-skill-attempt";
+import { abandonSkillAttempt } from "./abandon-skill-attempt";
 import { upsertSkillResponse } from "./skill-session";
 import {
   createInMemorySkillAttemptRepository,
@@ -127,5 +128,81 @@ describe("Skill assessment flow", () => {
         fieldId: "ui_ux",
       }),
     ).rejects.toMatchObject({ code: "INVALID_STATE" });
+  });
+
+  it("blocks second open skill until first is completed or abandoned", async () => {
+    const ports = buildPorts();
+    const { attempt } = await completeCognitive(ports);
+
+    await createSkillAttempt(ports, {
+      participantId: "p_skill",
+      sourceAttemptId: attempt.id,
+      fieldId: "it_software",
+    });
+
+    await expect(
+      createSkillAttempt(ports, {
+        participantId: "p_skill",
+        sourceAttemptId: attempt.id,
+        fieldId: "ui_ux",
+      }),
+    ).rejects.toMatchObject({ code: "OPEN_ATTEMPT_EXISTS" });
+  });
+
+  it("allows new field after abandon, and scores partial answers on complete", async () => {
+    const ports = buildPorts();
+    const { attempt } = await completeCognitive(ports);
+
+    const open = await createSkillAttempt(ports, {
+      participantId: "p_skill",
+      sourceAttemptId: attempt.id,
+      fieldId: "it_software",
+    });
+
+    await abandonSkillAttempt(ports, {
+      skillAttemptId: open.id,
+      participantId: "p_skill",
+    });
+
+    const next = await createSkillAttempt(ports, {
+      participantId: "p_skill",
+      sourceAttemptId: attempt.id,
+      fieldId: "ui_ux",
+    });
+    expect(next.fieldId).toBe("ui_ux");
+
+    // Answer only first item → partial score (blank = wrong)
+    const pack = getSkillPack("ui_ux")!;
+    await upsertSkillResponse(ports, {
+      skillAttemptId: next.id,
+      participantId: "p_skill",
+      itemId: pack.items[0]!.id,
+      answer: pack.items[0]!.correctKey,
+    });
+
+    const result = await completeSkillAttempt(ports, {
+      skillAttemptId: next.id,
+      participantId: "p_skill",
+    });
+    expect(result.rawCorrect).toBe(1);
+    expect(result.rawTotal).toBe(7);
+    expect(result.score).toBe(Math.round((1 / 7) * 100));
+  });
+
+  it("resumes same open skill field without creating a second row", async () => {
+    const ports = buildPorts();
+    const { attempt } = await completeCognitive(ports);
+
+    const first = await createSkillAttempt(ports, {
+      participantId: "p_skill",
+      sourceAttemptId: attempt.id,
+      fieldId: "data_analyst",
+    });
+    const second = await createSkillAttempt(ports, {
+      participantId: "p_skill",
+      sourceAttemptId: attempt.id,
+      fieldId: "data_analyst",
+    });
+    expect(second.id).toBe(first.id);
   });
 });

@@ -23,7 +23,14 @@ export default async function SignInPage({ searchParams }: Props) {
     if (isAdminEmail(user.email) || nextPath?.startsWith("/admin")) {
       redirect(nextPath?.startsWith("/admin") ? nextPath : "/admin");
     }
-    redirect(user.ageBand ? "/dashboard" : "/onboarding/usia");
+    if (!user.ageBand) {
+      redirect("/onboarding/usia");
+    }
+    // Honor safe ?next= after session restore (middleware deep-link to protected route).
+    if (nextPath) {
+      redirect(nextPath);
+    }
+    redirect("/dashboard");
   }
 
   const oauthError = params.error

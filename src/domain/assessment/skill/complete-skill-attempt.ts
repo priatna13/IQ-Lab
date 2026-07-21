@@ -27,6 +27,17 @@ export async function completeSkillAttempt(
     throw new AssessmentError("INVALID_STATE", "Snapshot keahlian hilang");
   }
 
+  if (attempt.status === "abandoned") {
+    throw new AssessmentError(
+      "INVALID_STATE",
+      "Skill attempt sudah dibatalkan",
+    );
+  }
+
+  if (attempt.status !== "in_progress") {
+    throw new AssessmentError("INVALID_STATE", "Skill attempt tidak terbuka");
+  }
+
   const pack = getSkillPack(attempt.fieldId, attempt.skillContentVersionId);
   if (!pack) {
     throw new AssessmentError("NOT_FOUND", "Paket soal tidak ditemukan");

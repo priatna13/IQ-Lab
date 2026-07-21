@@ -2,10 +2,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PageShell } from "@/components/ui/page-shell";
 import { FieldPicker } from "@/components/assessment/field-picker";
+import { AbandonSkillButton } from "@/components/assessment/abandon-skill-button";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
 import { getResultSnapshotForAttempt } from "@/domain/assessment";
 import { recommendFields } from "@/domain/assessment/skill/field-recommendation";
+import { getFieldDef } from "@/domain/assessment/skill/field-catalog";
 import type { FieldId } from "@/domain/assessment/skill/types";
 
 type Props = {
@@ -43,6 +45,16 @@ export default async function KeahlianPickerPage({ params }: Props) {
 
   const skillSnapshots = await ports.skillSnapshots.listBySourceAttempt(attemptId);
 
+  // One open skill per participant (DB unique); may be for this source or another completed attempt.
+  const openSkill = await ports.skillAttempts.findOpenByParticipant(user.id);
+  const openForThisSource =
+    openSkill && openSkill.sourceAttemptId === attemptId ? openSkill : null;
+  const openOtherSource =
+    openSkill && openSkill.sourceAttemptId !== attemptId ? openSkill : null;
+  const openFieldLabel = openSkill
+    ? (getFieldDef(openSkill.fieldId)?.label ?? openSkill.fieldId)
+    : null;
+
   return (
     <PageShell width="md" orbs="calm">
       <Link
@@ -61,6 +73,57 @@ export default async function KeahlianPickerPage({ params }: Props) {
           bidang yang Anda pilih. Rekomendasi disusun dari profil 9 domain Anda.
         </p>
       </div>
+
+      {openForThisSource ? (
+        <section className="mt-6 rounded-[1.25rem] border border-lab-teal/25 bg-gradient-to-br from-lab-mint/50 to-white p-4 sm:p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-lab-teal-deep">
+            Sesi keahlian berjalan
+          </p>
+          <p className="mt-1 text-sm font-semibold text-lab-navy">
+            {openFieldLabel}
+          </p>
+          <p className="mt-1 text-xs text-slate-600">
+            Anda punya satu sesi keahlian terbuka. Lanjutkan, atau batalkan
+            untuk memilih bidang lain.
+          </p>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <Link
+              href={`/asesmen/${attemptId}/keahlian/${openForThisSource.fieldId}/sesi?sid=${openForThisSource.id}`}
+              className="lab-btn-primary"
+            >
+              Lanjutkan sesi
+            </Link>
+            <AbandonSkillButton
+              skillAttemptId={openForThisSource.id}
+              sourceAttemptId={attemptId}
+            />
+          </div>
+        </section>
+      ) : null}
+
+      {openOtherSource ? (
+        <section className="mt-6 rounded-[1.25rem] border border-amber-200 bg-amber-50 p-4 sm:p-5">
+          <p className="text-sm font-semibold text-lab-navy">
+            Ada sesi keahlian di hasil asesmen lain
+          </p>
+          <p className="mt-1 text-xs text-slate-600">
+            Bidang <strong>{openFieldLabel}</strong> masih terbuka pada attempt
+            lain. Selesaikan atau batalkan dulu sebelum memulai di sini.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <Link
+              href={`/asesmen/${openOtherSource.sourceAttemptId}/keahlian/${openOtherSource.fieldId}/sesi?sid=${openOtherSource.id}`}
+              className="lab-btn-primary"
+            >
+              Lanjutkan di attempt itu
+            </Link>
+            <AbandonSkillButton
+              skillAttemptId={openOtherSource.id}
+              sourceAttemptId={openOtherSource.sourceAttemptId}
+            />
+          </div>
+        </section>
+      ) : null}
 
       {skillSnapshots.length > 0 ? (
         <section className="mt-6 lab-card p-4">
@@ -84,11 +147,19 @@ export default async function KeahlianPickerPage({ params }: Props) {
       ) : null}
 
       <div className="mt-8">
-        <FieldPicker
-          sourceAttemptId={attemptId}
-          recommendedFieldIds={recommended}
-          completedFieldIds={completedFieldIds}
-        />
+        {openSkill ? (
+          <p className="mb-4 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-100">
+            Pemilihan bidang baru dinonaktifkan sampai sesi keahlian terbuka
+            diselesaikan atau dibatalkan.
+          </p>
+        ) : null}
+        {!openSkill ? (
+          <FieldPicker
+            sourceAttemptId={attemptId}
+            recommendedFieldIds={recommended}
+            completedFieldIds={completedFieldIds}
+          />
+        ) : null}
       </div>
     </PageShell>
   );

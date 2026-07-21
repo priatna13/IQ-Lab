@@ -37,8 +37,13 @@ export function SkillRunner({ initialView }: Props) {
   const [nowMs, setNowMs] = useState(() => Date.parse(initialView.serverNow));
   const [clockLive, setClockLive] = useState(false);
   const savedFlashRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoCloseStartedRef = useRef(false);
 
   const endsAtMs = useMemo(() => Date.parse(view.endsAt), [view.endsAt]);
+  const graceEndsAtMs = useMemo(
+    () => Date.parse(view.graceEndsAt),
+    [view.graceEndsAt],
+  );
 
   useEffect(() => {
     setClockLive(true);
@@ -55,9 +60,14 @@ export function SkillRunner({ initialView }: Props) {
 
   const remaining = Math.max(0, endsAtMs - nowMs);
   const timedOut = remaining <= 0;
+  const inGrace = nowMs >= endsAtMs && nowMs < graceEndsAtMs;
+  const pastGrace = nowMs >= graceEndsAtMs;
   const item = view.items[index];
   const answer = item ? view.responses[item.id] : undefined;
   const allAnswered = view.answeredCount >= view.itemCount;
+  /** Partial score allowed after timer (blank = salah), same idea as domain timer close. */
+  const canFinish =
+    view.status === "in_progress" && (allAnswered || timedOut);
   const progressPct = Math.round(
     (view.answeredCount / Math.max(1, view.itemCount)) * 100,
   );
@@ -68,9 +78,34 @@ export function SkillRunner({ initialView }: Props) {
     savedFlashRef.current = setTimeout(() => setSaveStatus("idle"), 1400);
   }, []);
 
+  const finish = useCallback(() => {
+    if (autoCloseStartedRef.current) return;
+    autoCloseStartedRef.current = true;
+    startClose(async () => {
+      setError(null);
+      const res = await completeSkillAttemptAction(
+        view.skillAttemptId,
+        view.sourceAttemptId,
+        view.fieldId,
+      );
+      if (!res.ok) {
+        setError(res.error);
+        autoCloseStartedRef.current = false;
+      }
+    });
+  }, [view.skillAttemptId, view.sourceAttemptId, view.fieldId]);
+
+  // Mirror domain runner: after endsAt + grace, freeze partial score automatically.
+  useEffect(() => {
+    if (view.status !== "in_progress") return;
+    if (!pastGrace) return;
+    finish();
+  }, [pastGrace, view.status, finish]);
+
   const selectAnswer = useCallback(
     async (itemId: string, choiceId: string) => {
       if (view.status !== "in_progress") return;
+      if (pastGrace) return;
       setError(null);
       setSaveStatus("saving");
       setView((v) => {
@@ -93,20 +128,8 @@ export function SkillRunner({ initialView }: Props) {
       }
       flashSaved();
     },
-    [view.skillAttemptId, view.status, flashSaved],
+    [view.skillAttemptId, view.status, pastGrace, flashSaved],
   );
-
-  const finish = () => {
-    startClose(async () => {
-      setError(null);
-      const res = await completeSkillAttemptAction(
-        view.skillAttemptId,
-        view.sourceAttemptId,
-        view.fieldId,
-      );
-      if (!res.ok) setError(res.error);
-    });
-  };
 
   if (!item) {
     return (
@@ -145,7 +168,7 @@ export function SkillRunner({ initialView }: Props) {
               }`}
             >
               <p className="text-[10px] font-semibold uppercase text-slate-500">
-                Sisa waktu
+                {inGrace ? "Grace" : "Sisa waktu"}
               </p>
               <p
                 className={`font-mono text-xl font-bold tabular-nums ${
@@ -154,7 +177,11 @@ export function SkillRunner({ initialView }: Props) {
                     : "text-lab-navy"
                 }`}
               >
-                {clockLive ? formatRemaining(remaining) : "—"}
+                {clockLive
+                  ? inGrace
+                    ? formatRemaining(graceEndsAtMs - nowMs)
+                    : formatRemaining(remaining)
+                  : "—"}
               </p>
             </div>
             <p className="text-[10px] text-slate-500" aria-live="polite">
@@ -202,6 +229,25 @@ export function SkillRunner({ initialView }: Props) {
 
       <p className="text-sm leading-relaxed text-slate-600">{view.instruction}</p>
 
+      {inGrace ? (
+        <p
+          role="status"
+          className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-100"
+        >
+          Waktu habis — jendela grace: Anda masih bisa memperbarui jawaban yang
+          sudah ada. Setelah grace, sesi ditutup otomatis (soal kosong = salah).
+        </p>
+      ) : null}
+
+      {pastGrace && closing ? (
+        <p
+          role="status"
+          className="rounded-xl bg-lab-mint/50 px-3 py-2 text-sm text-lab-navy ring-1 ring-lab-teal/15"
+        >
+          Waktu sesi habis. Menyimpan hasil partial…
+        </p>
+      ) : null}
+
       <section className="lab-card animate-fade-up p-5 sm:p-6">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
           Pertanyaan {index + 1}
@@ -217,6 +263,7 @@ export function SkillRunner({ initialView }: Props) {
                 <button
                   type="button"
                   onClick={() => selectAnswer(item.id, c.id)}
+                  disabled={pastGrace || view.status !== "in_progress"}
                   className={`lab-choice w-full text-left ${
                     selected ? "lab-choice-selected" : ""
                   }`}
@@ -261,17 +308,27 @@ export function SkillRunner({ initialView }: Props) {
         <button
           type="button"
           className="lab-btn-primary ml-auto"
-          disabled={closing || !allAnswered}
+          disabled={closing || !canFinish}
           onClick={finish}
         >
-          {closing ? "Menyimpan hasil…" : "Selesai & lihat hasil"}
+          {closing
+            ? "Menyimpan hasil…"
+            : timedOut && !allAnswered
+              ? "Selesai (partial)"
+              : "Selesai & lihat hasil"}
         </button>
       </div>
 
-      {!allAnswered ? (
+      {!allAnswered && !timedOut ? (
         <p className="text-xs text-slate-500">
           Jawab semua {view.itemCount} soal sebelum menyelesaikan (
-          {view.itemCount - view.answeredCount} tersisa).
+          {view.itemCount - view.answeredCount} tersisa), atau tunggu timer
+          habis untuk skor partial.
+        </p>
+      ) : timedOut && !allAnswered ? (
+        <p className="text-xs font-medium text-amber-800">
+          Waktu habis — soal kosong dihitung salah. Anda bisa menyelesaikan
+          sekarang.
         </p>
       ) : (
         <p className="text-xs font-medium text-lab-teal">
