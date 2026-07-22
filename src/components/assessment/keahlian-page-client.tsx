@@ -3,19 +3,39 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FieldPicker } from "@/components/assessment/field-picker";
-import { AbandonSkillButton } from "@/components/assessment/abandon-skill-button";
+import dynamic from "next/dynamic";
 import { PageShell } from "@/components/ui/page-shell";
 import type {
   KeahlianApiResponse,
   KeahlianViewDto,
 } from "@/lib/assessment/keahlian-types";
 
+/** Lazy client-only — ssr:false is legal inside Client Components. */
+const FieldPicker = dynamic(
+  () =>
+    import("@/components/assessment/field-picker").then((m) => m.FieldPicker),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="text-sm text-slate-500">Memuat pemilih bidang…</p>
+    ),
+  },
+);
+
+const AbandonSkillButton = dynamic(
+  () =>
+    import("@/components/assessment/abandon-skill-button").then(
+      (m) => m.AbandonSkillButton,
+    ),
+  { ssr: false },
+);
+
 type Props = {
   attemptId: string;
 };
 
 type LoadState =
+  | { status: "booting" }
   | { status: "loading" }
   | { status: "ok"; view: KeahlianViewDto }
   | {
@@ -27,13 +47,12 @@ type LoadState =
     };
 
 /**
- * Client-side loader: avoids production RSC digest masking.
- * Fetches /api/asesmen/:id/keahlian with credentials so cookies/JWT apply.
+ * Client-side loader only. No Server Component data path.
  */
 export function KeahlianPageClient({ attemptId }: Props) {
   const router = useRouter();
   const nextPath = `/asesmen/${attemptId}/keahlian`;
-  const [state, setState] = useState<LoadState>({ status: "loading" });
+  const [state, setState] = useState<LoadState>({ status: "booting" });
 
   const load = useCallback(async () => {
     setState({ status: "loading" });
@@ -78,9 +97,7 @@ export function KeahlianPageClient({ attemptId }: Props) {
       });
 
       if (res.status === 401 || (!body.ok && body.kind === "unauthenticated")) {
-        router.replace(
-          `/masuk?next=${encodeURIComponent(nextPath)}`,
-        );
+        router.replace(`/masuk?next=${encodeURIComponent(nextPath)}`);
         return;
       }
 
@@ -112,18 +129,23 @@ export function KeahlianPageClient({ attemptId }: Props) {
     }
   }, [attemptId, nextPath, router]);
 
+  // Run only after browser mount — avoids SSR import/eval side effects.
   useEffect(() => {
     void load();
   }, [load]);
 
-  if (state.status === "loading") {
+  if (state.status === "booting" || state.status === "loading") {
     return (
       <PageShell width="md" orbs="calm">
         <p className="lab-section-label">Langkah lanjutan</p>
         <h1 className="mt-1 text-2xl font-bold text-lab-navy">
           Asesmen keahlian bidang
         </h1>
-        <p className="mt-4 text-sm text-slate-600">Memuat sesi &amp; data…</p>
+        <p className="mt-4 text-sm text-slate-600">
+          {state.status === "booting"
+            ? "Menyiapkan browser…"
+            : "Memuat sesi & data dari API…"}
+        </p>
       </PageShell>
     );
   }
@@ -136,8 +158,8 @@ export function KeahlianPageClient({ attemptId }: Props) {
           Tidak bisa memuat keahlian
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Error asli dari API (bukan digest RSC production). Salin teks di
-          bawah.
+          Error asli dari API (bukan digest RSC). Salin teks di bawah — ini
+          yang perlu diperbaiki.
         </p>
         <pre
           role="alert"
@@ -151,7 +173,11 @@ ${state.message}${
           }`}
         </pre>
         <div className="mt-4 flex flex-wrap gap-3">
-          <button type="button" className="lab-btn-primary" onClick={() => void load()}>
+          <button
+            type="button"
+            className="lab-btn-primary"
+            onClick={() => void load()}
+          >
             Coba lagi
           </button>
           <Link href="/dashboard" className="lab-btn-secondary">
@@ -183,11 +209,11 @@ ${state.message}${
         </h1>
         <p className="mt-2 text-sm text-slate-600">
           Pilih kategori, lalu role/bidang pekerjaan. Soal menyesuaikan dengan
-          bidang yang Anda pilih. Rekomendasi disusun dari profil 9 domain Anda.
+          bidang yang Anda pilih.
         </p>
         <p className="mt-2 font-mono text-[10px] text-slate-400">
-          session={view.diagnostics.userId.slice(0, 8)}… refreshed=
-          {view.diagnostics.refreshed ? "1" : "0"} via=api
+          session={view.diagnostics.userId.slice(0, 8)}… via=api host=
+          {typeof window !== "undefined" ? window.location.host : "ssr"}
         </p>
       </div>
 
@@ -199,7 +225,7 @@ ${state.message}${
           <p className="mt-1 text-sm font-semibold text-lab-navy">
             {openSkill.fieldLabel}
           </p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
               href={`/asesmen/${attemptId}/keahlian/${openSkill.fieldId}/sesi?sid=${openSkill.id}`}
               className="lab-btn-primary"
@@ -219,11 +245,7 @@ ${state.message}${
           <p className="text-sm font-semibold text-lab-navy">
             Ada sesi keahlian di hasil asesmen lain
           </p>
-          <p className="mt-1 text-xs text-slate-600">
-            Bidang <strong>{openSkill.fieldLabel}</strong> masih terbuka pada
-            attempt lain.
-          </p>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
               href={`/asesmen/${openSkill.sourceAttemptId}/keahlian/${openSkill.fieldId}/sesi?sid=${openSkill.id}`}
               className="lab-btn-primary"
@@ -264,8 +286,8 @@ ${state.message}${
       <div className="mt-8">
         {openSkill ? (
           <p className="mb-4 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-100">
-            Pemilihan bidang baru dinonaktifkan sampai sesi keahlian terbuka
-            diselesaikan atau dibatalkan.
+            Pemilihan bidang baru dinonaktifkan sampai sesi terbuka selesai
+            atau dibatalkan.
           </p>
         ) : (
           <FieldPicker
