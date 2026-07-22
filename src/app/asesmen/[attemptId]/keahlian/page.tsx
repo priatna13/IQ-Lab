@@ -1,121 +1,74 @@
 import Link from "next/link";
-import { notFound, redirect, unstable_rethrow } from "next/navigation";
+import { redirect } from "next/navigation";
 import { PageShell } from "@/components/ui/page-shell";
 import { FieldPicker } from "@/components/assessment/field-picker";
 import { AbandonSkillButton } from "@/components/assessment/abandon-skill-button";
-import { getSessionUser } from "@/lib/auth/session";
-import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
-import { loadOwnedAttempt } from "@/lib/assessment/owned-attempt";
-import { getResultSnapshotForAttempt } from "@/domain/assessment";
-import { recommendFields } from "@/domain/assessment/skill/field-recommendation";
+import { AssessmentDiagnostic } from "@/components/assessment/assessment-diagnostic";
+import { loadKeahlianPage } from "@/lib/assessment/load-owned-assessment";
 import { getFieldDef } from "@/domain/assessment/skill/field-catalog";
-import type { FieldId } from "@/domain/assessment/skill/types";
-import type { SkillAttempt, SkillResultSnapshot } from "@/domain/assessment/skill/types";
 
 type Props = {
   params: Promise<{ attemptId: string }>;
 };
 
-function SoftLoadError({
-  nextPath,
-  message,
-}: {
-  nextPath: string;
-  message: string;
-}) {
-  return (
-    <PageShell width="md" orbs="calm">
-      <Link
-        href="/dashboard"
-        className="text-sm font-semibold text-lab-teal hover:underline"
-      >
-        ← Dasbor
-      </Link>
-      <div className="mt-4">
-        <p className="lab-section-label">Langkah lanjutan</p>
-        <h1 className="mt-1 text-2xl font-bold text-lab-navy sm:text-3xl">
-          Asesmen keahlian bidang
-        </h1>
-        <p
-          role="alert"
-          className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-amber-100"
-        >
-          {message}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link href={nextPath} className="lab-btn-primary">
-            Coba lagi
-          </Link>
-          <Link href="/dashboard" className="lab-btn-secondary">
-            Ke dasbor
-          </Link>
-        </div>
-      </div>
-    </PageShell>
-  );
-}
-
+/**
+ * Keahlian picker — auth session fully resolved BEFORE any attempt query.
+ * Failures render diagnostic codes (not the generic error boundary).
+ */
 export default async function KeahlianPickerPage({ params }: Props) {
   const { attemptId } = await params;
   const nextPath = `/asesmen/${attemptId}/keahlian`;
 
-  const user = await getSessionUser();
-  if (!user) redirect(`/masuk?next=${encodeURIComponent(nextPath)}`);
-
-  let recommended: FieldId[] = [];
-  let completedFieldIds: FieldId[] = [];
-  let skillSnapshots: SkillResultSnapshot[] = [];
-  let openSkill: SkillAttempt | null = null;
-
+  let result;
   try {
-    const ports = createServerAssessmentPorts();
-
-    const owned = await loadOwnedAttempt(ports, attemptId, user.id);
-    if (owned.status === "unavailable") {
-      return <SoftLoadError nextPath={nextPath} message={owned.message} />;
-    }
-    if (owned.status === "not_found") {
-      notFound();
-    }
-
-    const attempt = owned.attempt;
-    if (attempt.status !== "completed") {
-      redirect(`/asesmen/${attemptId}`);
-    }
-
-    const snapshot = await getResultSnapshotForAttempt(ports, {
-      attemptId,
-      participantId: user.id,
-    });
-    if (!snapshot) {
-      // Owned completed attempt but no snapshot, or RLS hid snapshot — not a 500.
-      notFound();
-    }
-
-    recommended = recommendFields(
-      snapshot.abilityProfile ?? [],
-      snapshot.rulePayload,
-      3,
-    );
-
-    const skillAttempts = await ports.skillAttempts.listBySourceAttempt(
-      attemptId,
-    );
-    completedFieldIds = skillAttempts
-      .filter((a) => a.status === "completed")
-      .map((a) => a.fieldId) as FieldId[];
-
-    skillSnapshots = await ports.skillSnapshots.listBySourceAttempt(attemptId);
-    openSkill = await ports.skillAttempts.findOpenByParticipant(user.id);
+    result = await loadKeahlianPage(attemptId);
   } catch (err) {
-    unstable_rethrow(err);
+    // Absolute last resort — still never hit silent "gangguan sementara".
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("[ASSESSMENT_FATAL] page wrapper", { attemptId, message, stack });
     return (
-      <SoftLoadError
+      <AssessmentDiagnostic
+        code="PAGE_UNCAUGHT"
+        message={message}
+        detail={stack?.slice(0, 1200)}
         nextPath={nextPath}
-        message="Halaman keahlian sementara tidak bisa dimuat. Coba muat ulang sebentar lagi."
       />
     );
   }
+
+  if (result.kind === "unauthenticated") {
+    // Preserve diagnostic in query for one hop if needed later.
+    redirect(`/masuk?next=${encodeURIComponent(nextPath)}`);
+  }
+
+  if (result.kind === "invalid_state") {
+    redirect(result.redirectTo);
+  }
+
+  if (result.kind === "not_found" || result.kind === "error") {
+    return (
+      <AssessmentDiagnostic
+        code={result.code}
+        message={result.message}
+        detail={result.detail}
+        nextPath={nextPath}
+        title={
+          result.kind === "not_found"
+            ? "Asesmen tidak ditemukan / tidak bisa diakses"
+            : "Gagal memuat keahlian"
+        }
+      />
+    );
+  }
+
+  const {
+    recommended,
+    completedFieldIds,
+    skillSnapshots,
+    openSkill,
+    diagnostics,
+  } = result.data;
 
   const openForThisSource =
     openSkill && openSkill.sourceAttemptId === attemptId ? openSkill : null;
@@ -141,6 +94,11 @@ export default async function KeahlianPickerPage({ params }: Props) {
         <p className="mt-2 text-sm text-slate-600">
           Pilih kategori, lalu role/bidang pekerjaan. Soal menyesuaikan dengan
           bidang yang Anda pilih. Rekomendasi disusun dari profil 9 domain Anda.
+        </p>
+        {/* Temporary session diagnostic strip — remove after confirmed stable */}
+        <p className="mt-2 font-mono text-[10px] text-slate-400">
+          session={diagnostics.userId.slice(0, 8)}… refreshed=
+          {diagnostics.refreshed ? "1" : "0"}
         </p>
       </div>
 

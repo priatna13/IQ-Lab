@@ -9,16 +9,22 @@ type Props = {
 };
 
 /**
- * Route-level recovery UI for unexpected server/render failures.
+ * Route-level recovery UI.
+ * Shows the real error message (temporary) so we stop flying blind with
+ * only "gangguan sementara".
  */
 export default function AppError({ error, reset }: Props) {
   useEffect(() => {
-    console.error("[iq-lab] route error", error.digest ?? error.message);
+    console.error("[iq-lab] route error", {
+      message: error.message,
+      digest: error.digest,
+      stack: error.stack,
+      name: error.name,
+    });
   }, [error]);
 
   function clearSiteAndReload() {
     try {
-      // Best-effort: drop cookies for this host so stale auth cannot loop.
       for (const part of document.cookie.split(";")) {
         const name = part.split("=")[0]?.trim();
         if (!name) continue;
@@ -39,12 +45,13 @@ export default function AppError({ error, reset }: Props) {
         Terjadi gangguan sementara
       </h1>
       <p className="text-sm leading-relaxed text-slate-600">
-        Halaman gagal dimuat. Coba muat ulang. Jika berulang, reset sesi
-        (hapus cookie) lalu masuk lagi.
+        Halaman gagal dimuat. Detail error asli ada di bawah (untuk debugging).
       </p>
-      {error.digest ? (
-        <p className="font-mono text-xs text-slate-400">Kode: {error.digest}</p>
-      ) : null}
+      <pre className="w-full overflow-x-auto rounded-xl bg-slate-950 px-3 py-3 text-left text-[11px] leading-relaxed text-amber-100 ring-1 ring-slate-800">
+        {`name: ${error.name}\nmessage: ${error.message}${
+          error.digest ? `\ndigest: ${error.digest}` : ""
+        }`}
+      </pre>
       <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
         <button type="button" className="lab-btn-primary" onClick={reset}>
           Coba lagi

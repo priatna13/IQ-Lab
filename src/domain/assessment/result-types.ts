@@ -55,13 +55,21 @@ export type PublicResultReport = {
 };
 
 export function toPublicResultReport(snapshot: ResultSnapshot): PublicResultReport {
+  const profile = Array.isArray(snapshot.abilityProfile)
+    ? snapshot.abilityProfile
+    : [];
+  const frozenAt =
+    snapshot.frozenAt instanceof Date && !Number.isNaN(snapshot.frozenAt.getTime())
+      ? snapshot.frozenAt.toISOString()
+      : new Date(0).toISOString();
+
   return {
     attemptId: snapshot.attemptId,
     track: snapshot.track,
     contentVersionId: snapshot.contentVersionId,
     normVersion: snapshot.normVersion,
-    frozenAt: snapshot.frozenAt.toISOString(),
-    abilityProfile: snapshot.abilityProfile.map((e) => ({ ...e })),
+    frozenAt,
+    abilityProfile: profile.map((e) => ({ ...e })),
     compositeIndex: snapshot.compositeIndex,
     iqEstimate: snapshot.iqEstimate,
     labels: {
