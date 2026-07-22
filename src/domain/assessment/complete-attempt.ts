@@ -166,13 +166,19 @@ export async function completeAttempt(
   return { attempt: completed, snapshot };
 }
 
+/**
+ * Read frozen Result Snapshot for an owned attempt.
+ * Returns null when attempt is missing, hidden by RLS, not owned, or snapshot
+ * is absent — never throws NOT_FOUND (callers use notFound() / 404 UI).
+ * Transport errors from ports still propagate for the caller to soft-handle.
+ */
 export async function getResultSnapshotForAttempt(
   ports: AssessmentPorts,
   input: { attemptId: string; participantId: ParticipantId },
 ): Promise<ResultSnapshot | null> {
   const attempt = await ports.attempts.findById(input.attemptId);
   if (!attempt || attempt.participantId !== input.participantId) {
-    throw new AssessmentError("NOT_FOUND", "Attempt not found");
+    return null;
   }
   return ports.resultSnapshots.findByAttemptId(input.attemptId);
 }

@@ -32,10 +32,18 @@ export async function GET(_request: NextRequest, { params }: Params) {
     );
   }
 
-  const snapshot = await getResultSnapshotForAttempt(ports, {
-    attemptId,
-    participantId: user.id,
-  });
+  let snapshot;
+  try {
+    snapshot = await getResultSnapshotForAttempt(ports, {
+      attemptId,
+      participantId: user.id,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Snapshot temporarily unavailable" },
+      { status: 503 },
+    );
+  }
   if (!snapshot) {
     return NextResponse.json({ error: "Snapshot missing" }, { status: 404 });
   }

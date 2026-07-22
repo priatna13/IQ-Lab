@@ -6,6 +6,7 @@ import {
   parseAgeBand,
 } from "@/domain/participant/age-band";
 import type { AgeBand } from "@/domain/assessment/types";
+import { readJwtSub } from "@/lib/auth/jwt";
 
 export type SessionUser = {
   id: string;
@@ -17,13 +18,17 @@ export type SessionUser = {
 const ACCESS_COOKIE = "insforge_access_token";
 const REFRESH_COOKIE = "insforge_refresh_token";
 
-/** Deduped per request so multi-step server actions do not re-hit auth. */
+/**
+ * Deduped per request so multi-step server actions do not re-hit auth.
+ * Uses createInsForgeServerClient (which refreshes expired access tokens) so
+ * user.id matches auth.uid() used by RLS on attempts / snapshots.
+ */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   try {
     const jar = await cookies();
-    const hasSession =
-      Boolean(jar.get(ACCESS_COOKIE)?.value) ||
-      Boolean(jar.get(REFRESH_COOKIE)?.value);
+    const access = jar.get(ACCESS_COOKIE)?.value;
+    const refresh = jar.get(REFRESH_COOKIE)?.value;
+    const hasSession = Boolean(access) || Boolean(refresh);
 
     // Anonymous: zero network to InsForge (homepage must stay instant).
     if (!hasSession) {
@@ -41,13 +46,22 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     const profile = user.profile as Record<string, unknown> | null | undefined;
     const metadata = user.metadata as Record<string, unknown> | null | undefined;
 
+    // Prefer API user id; fall back to JWT sub so we never invent an id.
+    const id =
+      (typeof user.id === "string" && user.id) ||
+      readJwtSub(access) ||
+      null;
+    if (!id) {
+      return null;
+    }
+
     const ageBand =
       parseAgeBand(profile?.[AGE_BAND_PROFILE_KEY]) ??
       parseAgeBand(metadata?.[AGE_BAND_PROFILE_KEY]) ??
       null;
 
     return {
-      id: user.id,
+      id,
       email: user.email ?? null,
       name:
         (typeof profile?.name === "string" ? profile.name : null) ??

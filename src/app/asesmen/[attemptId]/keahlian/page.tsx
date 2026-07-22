@@ -5,16 +5,55 @@ import { FieldPicker } from "@/components/assessment/field-picker";
 import { AbandonSkillButton } from "@/components/assessment/abandon-skill-button";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
+import { loadOwnedAttempt } from "@/lib/assessment/owned-attempt";
 import { getResultSnapshotForAttempt } from "@/domain/assessment";
 import { recommendFields } from "@/domain/assessment/skill/field-recommendation";
 import { getFieldDef } from "@/domain/assessment/skill/field-catalog";
 import type { FieldId } from "@/domain/assessment/skill/types";
-import type { ResultSnapshot } from "@/domain/assessment/result-types";
 import type { SkillAttempt, SkillResultSnapshot } from "@/domain/assessment/skill/types";
 
 type Props = {
   params: Promise<{ attemptId: string }>;
 };
+
+function SoftLoadError({
+  nextPath,
+  message,
+}: {
+  nextPath: string;
+  message: string;
+}) {
+  return (
+    <PageShell width="md" orbs="calm">
+      <Link
+        href="/dashboard"
+        className="text-sm font-semibold text-lab-teal hover:underline"
+      >
+        ← Dasbor
+      </Link>
+      <div className="mt-4">
+        <p className="lab-section-label">Langkah lanjutan</p>
+        <h1 className="mt-1 text-2xl font-bold text-lab-navy sm:text-3xl">
+          Asesmen keahlian bidang
+        </h1>
+        <p
+          role="alert"
+          className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-amber-100"
+        >
+          {message}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link href={nextPath} className="lab-btn-primary">
+            Coba lagi
+          </Link>
+          <Link href="/dashboard" className="lab-btn-secondary">
+            Ke dasbor
+          </Link>
+        </div>
+      </div>
+    </PageShell>
+  );
+}
 
 export default async function KeahlianPickerPage({ params }: Props) {
   const { attemptId } = await params;
@@ -23,79 +62,58 @@ export default async function KeahlianPickerPage({ params }: Props) {
   const user = await getSessionUser();
   if (!user) redirect(`/masuk?next=${encodeURIComponent(nextPath)}`);
 
-  let snapshot: ResultSnapshot | null = null;
   let recommended: FieldId[] = [];
   let completedFieldIds: FieldId[] = [];
   let skillSnapshots: SkillResultSnapshot[] = [];
   let openSkill: SkillAttempt | null = null;
-  let dataError: string | null = null;
 
   try {
     const ports = createServerAssessmentPorts();
-    const attempt = await ports.attempts.findById(attemptId);
-    if (!attempt || attempt.participantId !== user.id) notFound();
+
+    const owned = await loadOwnedAttempt(ports, attemptId, user.id);
+    if (owned.status === "unavailable") {
+      return <SoftLoadError nextPath={nextPath} message={owned.message} />;
+    }
+    if (owned.status === "not_found") {
+      notFound();
+    }
+
+    const attempt = owned.attempt;
     if (attempt.status !== "completed") {
       redirect(`/asesmen/${attemptId}`);
     }
 
-    snapshot = await getResultSnapshotForAttempt(ports, {
+    const snapshot = await getResultSnapshotForAttempt(ports, {
       attemptId,
       participantId: user.id,
     });
-    if (!snapshot) notFound();
+    if (!snapshot) {
+      // Owned completed attempt but no snapshot, or RLS hid snapshot — not a 500.
+      notFound();
+    }
 
     recommended = recommendFields(
-      snapshot.abilityProfile,
+      snapshot.abilityProfile ?? [],
       snapshot.rulePayload,
       3,
     );
 
-    const skillAttempts = await ports.skillAttempts.listBySourceAttempt(attemptId);
+    const skillAttempts = await ports.skillAttempts.listBySourceAttempt(
+      attemptId,
+    );
     completedFieldIds = skillAttempts
       .filter((a) => a.status === "completed")
       .map((a) => a.fieldId) as FieldId[];
 
     skillSnapshots = await ports.skillSnapshots.listBySourceAttempt(attemptId);
-
-    // One open skill per participant (DB unique); may be for this source or another completed attempt.
     openSkill = await ports.skillAttempts.findOpenByParticipant(user.id);
   } catch (err) {
-    // Preserve Next.js control-flow (redirect / notFound).
     unstable_rethrow(err);
-    dataError =
-      "Halaman keahlian sementara tidak bisa dimuat (backend sibuk di plan free). Coba muat ulang sebentar lagi.";
-  }
-
-  if (dataError) {
     return (
-      <PageShell width="md" orbs="calm">
-        <Link
-          href="/dashboard"
-          className="text-sm font-semibold text-lab-teal hover:underline"
-        >
-          ← Dasbor
-        </Link>
-        <div className="mt-4">
-          <p className="lab-section-label">Langkah lanjutan</p>
-          <h1 className="mt-1 text-2xl font-bold text-lab-navy sm:text-3xl">
-            Asesmen keahlian bidang
-          </h1>
-          <p
-            role="alert"
-            className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-amber-100"
-          >
-            {dataError}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link href={nextPath} className="lab-btn-primary">
-              Coba lagi
-            </Link>
-            <Link href="/dashboard" className="lab-btn-secondary">
-              Ke dasbor
-            </Link>
-          </div>
-        </div>
-      </PageShell>
+      <SoftLoadError
+        nextPath={nextPath}
+        message="Halaman keahlian sementara tidak bisa dimuat. Coba muat ulang sebentar lagi."
+      />
     );
   }
 
@@ -179,7 +197,9 @@ export default async function KeahlianPickerPage({ params }: Props) {
 
       {skillSnapshots.length > 0 ? (
         <section className="mt-6 lab-card p-4">
-          <h2 className="text-sm font-bold text-lab-navy">Hasil keahlian sebelumnya</h2>
+          <h2 className="text-sm font-bold text-lab-navy">
+            Hasil keahlian sebelumnya
+          </h2>
           <ul className="mt-2 space-y-2 text-sm">
             {skillSnapshots.map((s) => (
               <li key={s.id} className="flex flex-wrap justify-between gap-2">
