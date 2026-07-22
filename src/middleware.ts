@@ -41,6 +41,7 @@ export const config = {
     /*
      * Only run on app pages that may need a session gate.
      * Skip static assets and pure marketing to minimize edge work.
+     * API routes under /api/asesmen handle their own auth (JSON diagnostics).
      */
     "/dashboard/:path*",
     "/onboarding/:path*",

@@ -1,196 +1,29 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { PageShell } from "@/components/ui/page-shell";
-import { FieldPicker } from "@/components/assessment/field-picker";
-import { AbandonSkillButton } from "@/components/assessment/abandon-skill-button";
-import { AssessmentDiagnostic } from "@/components/assessment/assessment-diagnostic";
-import { loadKeahlianPage } from "@/lib/assessment/load-owned-assessment";
-import { getFieldDef } from "@/domain/assessment/skill/field-catalog";
+import { KeahlianPageClient } from "@/components/assessment/keahlian-page-client";
 
 type Props = {
   params: Promise<{ attemptId: string }>;
 };
 
 /**
- * Keahlian picker — auth session fully resolved BEFORE any attempt query.
- * Failures render diagnostic codes (not the generic error boundary).
+ * Thin server shell — data loads on the client via API so production Next.js
+ * does not swallow the real error into a digest-only RSC failure.
  */
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export default async function KeahlianPickerPage({ params }: Props) {
   const { attemptId } = await params;
-  const nextPath = `/asesmen/${attemptId}/keahlian`;
-
-  let result;
-  try {
-    result = await loadKeahlianPage(attemptId);
-  } catch (err) {
-    // Absolute last resort — still never hit silent "gangguan sementara".
-    const message = err instanceof Error ? err.message : String(err);
-    const stack = err instanceof Error ? err.stack : undefined;
-    console.error("[ASSESSMENT_FATAL] page wrapper", { attemptId, message, stack });
+  // Validate path param early without throwing opaque RSC digests.
+  if (!attemptId || attemptId.length < 8) {
     return (
-      <AssessmentDiagnostic
-        code="PAGE_UNCAUGHT"
-        message={message}
-        detail={stack?.slice(0, 1200)}
-        nextPath={nextPath}
-      />
+      <main className="mx-auto max-w-lg px-4 py-16">
+        <h1 className="text-xl font-bold text-lab-navy">ID asesmen tidak valid</h1>
+        <pre className="mt-4 rounded-xl bg-slate-950 p-3 text-xs text-emerald-200">
+          {`code: INVALID_ATTEMPT_ID\nmessage: attemptId=${String(attemptId)}`}
+        </pre>
+      </main>
     );
   }
 
-  if (result.kind === "unauthenticated") {
-    // Preserve diagnostic in query for one hop if needed later.
-    redirect(`/masuk?next=${encodeURIComponent(nextPath)}`);
-  }
-
-  if (result.kind === "invalid_state") {
-    redirect(result.redirectTo);
-  }
-
-  if (result.kind === "not_found" || result.kind === "error") {
-    return (
-      <AssessmentDiagnostic
-        code={result.code}
-        message={result.message}
-        detail={result.detail}
-        nextPath={nextPath}
-        title={
-          result.kind === "not_found"
-            ? "Asesmen tidak ditemukan / tidak bisa diakses"
-            : "Gagal memuat keahlian"
-        }
-      />
-    );
-  }
-
-  const {
-    recommended,
-    completedFieldIds,
-    skillSnapshots,
-    openSkill,
-    diagnostics,
-  } = result.data;
-
-  const openForThisSource =
-    openSkill && openSkill.sourceAttemptId === attemptId ? openSkill : null;
-  const openOtherSource =
-    openSkill && openSkill.sourceAttemptId !== attemptId ? openSkill : null;
-  const openFieldLabel = openSkill
-    ? (getFieldDef(openSkill.fieldId)?.label ?? openSkill.fieldId)
-    : null;
-
-  return (
-    <PageShell width="md" orbs="calm">
-      <Link
-        href={`/asesmen/${attemptId}/hasil`}
-        className="text-sm font-semibold text-lab-teal hover:underline"
-      >
-        ← Kembali ke hasil asesmen
-      </Link>
-      <div className="mt-4">
-        <p className="lab-section-label">Langkah lanjutan</p>
-        <h1 className="mt-1 text-2xl font-bold text-lab-navy sm:text-3xl">
-          Asesmen keahlian bidang
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Pilih kategori, lalu role/bidang pekerjaan. Soal menyesuaikan dengan
-          bidang yang Anda pilih. Rekomendasi disusun dari profil 9 domain Anda.
-        </p>
-        {/* Temporary session diagnostic strip — remove after confirmed stable */}
-        <p className="mt-2 font-mono text-[10px] text-slate-400">
-          session={diagnostics.userId.slice(0, 8)}… refreshed=
-          {diagnostics.refreshed ? "1" : "0"}
-        </p>
-      </div>
-
-      {openForThisSource ? (
-        <section className="mt-6 rounded-[1.25rem] border border-lab-teal/25 bg-gradient-to-br from-lab-mint/50 to-white p-4 sm:p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-lab-teal-deep">
-            Sesi keahlian berjalan
-          </p>
-          <p className="mt-1 text-sm font-semibold text-lab-navy">
-            {openFieldLabel}
-          </p>
-          <p className="mt-1 text-xs text-slate-600">
-            Anda punya satu sesi keahlian terbuka. Lanjutkan, atau batalkan
-            untuk memilih bidang lain.
-          </p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <Link
-              href={`/asesmen/${attemptId}/keahlian/${openForThisSource.fieldId}/sesi?sid=${openForThisSource.id}`}
-              className="lab-btn-primary"
-            >
-              Lanjutkan sesi
-            </Link>
-            <AbandonSkillButton
-              skillAttemptId={openForThisSource.id}
-              sourceAttemptId={attemptId}
-            />
-          </div>
-        </section>
-      ) : null}
-
-      {openOtherSource ? (
-        <section className="mt-6 rounded-[1.25rem] border border-amber-200 bg-amber-50 p-4 sm:p-5">
-          <p className="text-sm font-semibold text-lab-navy">
-            Ada sesi keahlian di hasil asesmen lain
-          </p>
-          <p className="mt-1 text-xs text-slate-600">
-            Bidang <strong>{openFieldLabel}</strong> masih terbuka pada attempt
-            lain. Selesaikan atau batalkan dulu sebelum memulai di sini.
-          </p>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <Link
-              href={`/asesmen/${openOtherSource.sourceAttemptId}/keahlian/${openOtherSource.fieldId}/sesi?sid=${openOtherSource.id}`}
-              className="lab-btn-primary"
-            >
-              Lanjutkan di attempt itu
-            </Link>
-            <AbandonSkillButton
-              skillAttemptId={openOtherSource.id}
-              sourceAttemptId={openOtherSource.sourceAttemptId}
-            />
-          </div>
-        </section>
-      ) : null}
-
-      {skillSnapshots.length > 0 ? (
-        <section className="mt-6 lab-card p-4">
-          <h2 className="text-sm font-bold text-lab-navy">
-            Hasil keahlian sebelumnya
-          </h2>
-          <ul className="mt-2 space-y-2 text-sm">
-            {skillSnapshots.map((s) => (
-              <li key={s.id} className="flex flex-wrap justify-between gap-2">
-                <Link
-                  href={`/asesmen/${attemptId}/keahlian/${s.fieldId}/hasil`}
-                  className="font-medium text-lab-teal hover:underline"
-                >
-                  {s.fieldLabel}
-                </Link>
-                <span className="font-mono tabular-nums text-slate-600">
-                  {s.score}/100
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      <div className="mt-8">
-        {openSkill ? (
-          <p className="mb-4 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-100">
-            Pemilihan bidang baru dinonaktifkan sampai sesi keahlian terbuka
-            diselesaikan atau dibatalkan.
-          </p>
-        ) : null}
-        {!openSkill ? (
-          <FieldPicker
-            sourceAttemptId={attemptId}
-            recommendedFieldIds={recommended}
-            completedFieldIds={completedFieldIds}
-          />
-        ) : null}
-      </div>
-    </PageShell>
-  );
+  return <KeahlianPageClient attemptId={attemptId} />;
 }

@@ -27,8 +27,12 @@ const CLUSTER_TO_FIELDS: Record<CareerClusterId, FieldId[]> = {
 
 function domainScoreMap(profile: AbilityProfile): Record<string, number> {
   const map: Record<string, number> = {};
+  if (!Array.isArray(profile)) return map;
   for (const e of profile) {
-    map[e.domainId] = e.score;
+    if (!e || typeof e !== "object") continue;
+    if (typeof e.domainId === "string" && typeof e.score === "number") {
+      map[e.domainId] = e.score;
+    }
   }
   return map;
 }
@@ -58,12 +62,16 @@ export function recommendFields(
 ): FieldId[] {
   const ranked = new Map<FieldId, number>();
 
-  // Seed from cluster priority in rule payload
-  if (rulePayload?.clusters?.length) {
-    rulePayload.clusters.forEach((c, clusterIdx) => {
+  // Seed from cluster priority in rule payload (guard non-array JSON)
+  const clusters = Array.isArray(rulePayload?.clusters)
+    ? rulePayload.clusters
+    : [];
+  if (clusters.length > 0) {
+    clusters.forEach((c, clusterIdx) => {
+      if (!c || typeof c !== "object" || typeof c.id !== "string") return;
       const fields = CLUSTER_TO_FIELDS[c.id as CareerClusterId] ?? [];
       fields.forEach((fieldId, fieldIdx) => {
-        const base = (rulePayload.clusters.length - clusterIdx) * 100;
+        const base = (clusters.length - clusterIdx) * 100;
         const orderBonus = fields.length - fieldIdx;
         const fit = scoreFieldAgainstProfile(fieldId, profile);
         ranked.set(fieldId, (ranked.get(fieldId) ?? 0) + base + orderBonus + fit);
