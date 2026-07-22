@@ -56,10 +56,22 @@ export function createInsForgeAttemptRepository(): AttemptRepository {
         .limit(1);
 
       if (error) {
-        throw new Error(error.message ?? "Failed to load Attempt");
+        console.error("[ATTEMPT_QUERY_FAILED]", {
+          attemptId: id,
+          code: (error as { code?: string }).code,
+          message: error.message,
+          details: (error as { details?: string }).details,
+          hint: (error as { hint?: string }).hint,
+        });
+        throw new Error(
+          `ATTEMPT_QUERY_FAILED: ${error.message ?? "Failed to load Attempt"}`,
+        );
       }
       const rows = (data ?? []) as AttemptRow[];
-      if (rows.length === 0) return null;
+      if (rows.length === 0) {
+        console.info("[ATTEMPT_NOT_FOUND_OR_RLS]", { attemptId: id });
+        return null;
+      }
       return mapRow(rows[0]);
     },
 

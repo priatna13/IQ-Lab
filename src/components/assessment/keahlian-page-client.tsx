@@ -9,7 +9,7 @@ import { PageShell } from "@/components/ui/page-shell";
 import type {
   KeahlianApiResponse,
   KeahlianViewDto,
-} from "@/lib/assessment/keahlian-dto";
+} from "@/lib/assessment/keahlian-types";
 
 type Props = {
   attemptId: string;

@@ -1,43 +1,8 @@
-import type { FieldId } from "@/domain/assessment/skill/types";
 import type { LoadKeahlianResult } from "@/lib/assessment/load-owned-assessment";
+import type { KeahlianApiResponse } from "@/lib/assessment/keahlian-types";
 import { getFieldDef } from "@/domain/assessment/skill/field-catalog";
 
-/** Fully JSON-serializable DTO for client + API (no Date / class instances). */
-export type KeahlianViewDto = {
-  recommended: FieldId[];
-  completedFieldIds: FieldId[];
-  skillSnapshots: Array<{
-    id: string;
-    fieldId: string;
-    fieldLabel: string;
-    score: number;
-  }>;
-  openSkill: null | {
-    id: string;
-    fieldId: string;
-    sourceAttemptId: string;
-    fieldLabel: string;
-  };
-  openForThisSource: boolean;
-  openOtherSource: boolean;
-  diagnostics: {
-    refreshed: boolean;
-    userId: string;
-    attemptId: string;
-  };
-};
-
-export type KeahlianApiResponse =
-  | { ok: true; view: KeahlianViewDto }
-  | {
-      ok: false;
-      kind: "unauthenticated" | "not_found" | "invalid_state" | "error";
-      code: string;
-      message: string;
-      detail?: string;
-      redirectTo?: string;
-    };
-
+/** Server-only mapper (safe to import from Route Handlers / RSC). */
 export function toKeahlianApiResponse(
   attemptId: string,
   result: LoadKeahlianResult,

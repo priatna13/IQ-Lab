@@ -13,11 +13,19 @@ export const runtime = "nodejs";
  * Auth cookies must be sent: credentials: "include".
  */
 export async function GET(_request: NextRequest, { params }: Ctx) {
-  const { attemptId } = await params;
-
+  let attemptId = "unknown";
   try {
+    const p = await params;
+    attemptId = p.attemptId;
     console.info("[API keahlian] start", { attemptId });
+
     const result = await loadKeahlianPage(attemptId);
+    console.info("[API keahlian] load result", {
+      attemptId,
+      kind: result.kind,
+      code: "code" in result ? result.code : undefined,
+    });
+
     const body = toKeahlianApiResponse(attemptId, result);
 
     if (!body.ok && body.kind === "unauthenticated") {
@@ -40,7 +48,12 @@ export async function GET(_request: NextRequest, { params }: Ctx) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     const stack = err instanceof Error ? err.stack : undefined;
-    console.error("[API keahlian] fatal", { attemptId, message, stack });
+    console.error("[API keahlian] fatal", {
+      attemptId,
+      name: err instanceof Error ? err.name : "UnknownError",
+      message,
+      stack,
+    });
     return NextResponse.json(
       {
         ok: false,
