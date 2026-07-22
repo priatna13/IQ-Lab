@@ -4,13 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { PageShell } from "@/components/ui/page-shell";
 import type {
   KeahlianApiResponse,
   KeahlianViewDto,
 } from "@/lib/assessment/keahlian-types";
 
-/** Lazy client-only — ssr:false is legal inside Client Components. */
+/** Lazy — only after this client module loads (post-mount from page). */
 const FieldPicker = dynamic(
   () =>
     import("@/components/assessment/field-picker").then((m) => m.FieldPicker),
@@ -35,7 +34,6 @@ type Props = {
 };
 
 type LoadState =
-  | { status: "booting" }
   | { status: "loading" }
   | { status: "ok"; view: KeahlianViewDto }
   | {
@@ -46,13 +44,23 @@ type LoadState =
       httpStatus?: number;
     };
 
+function Shell({ children }: { children: React.ReactNode }) {
+  // Lightweight shell without SiteHeader/BrandLogo/next-image (those can fail SSR graphs).
+  return (
+    <div className="mx-auto min-h-[70dvh] w-full max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
+      {children}
+    </div>
+  );
+}
+
 /**
- * Client-side loader only. No Server Component data path.
+ * Fetches assessment data via API (credentials: include).
+ * Never runs on server — only imported after browser mount.
  */
 export function KeahlianPageClient({ attemptId }: Props) {
   const router = useRouter();
   const nextPath = `/asesmen/${attemptId}/keahlian`;
-  const [state, setState] = useState<LoadState>({ status: "booting" });
+  const [state, setState] = useState<LoadState>({ status: "loading" });
 
   const load = useCallback(async () => {
     setState({ status: "loading" });
@@ -129,37 +137,37 @@ export function KeahlianPageClient({ attemptId }: Props) {
     }
   }, [attemptId, nextPath, router]);
 
-  // Run only after browser mount — avoids SSR import/eval side effects.
   useEffect(() => {
     void load();
   }, [load]);
 
-  if (state.status === "booting" || state.status === "loading") {
+  if (state.status === "loading") {
     return (
-      <PageShell width="md" orbs="calm">
-        <p className="lab-section-label">Langkah lanjutan</p>
-        <h1 className="mt-1 text-2xl font-bold text-lab-navy">
+      <Shell>
+        <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+          Langkah lanjutan
+        </p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900">
           Asesmen keahlian bidang
         </h1>
         <p className="mt-4 text-sm text-slate-600">
-          {state.status === "booting"
-            ? "Menyiapkan browser…"
-            : "Memuat sesi & data dari API…"}
+          Memuat sesi &amp; data dari API…
         </p>
-      </PageShell>
+      </Shell>
     );
   }
 
   if (state.status === "error") {
     return (
-      <PageShell width="md" orbs="calm">
-        <p className="lab-section-label">Diagnostik</p>
-        <h1 className="mt-1 text-2xl font-bold text-lab-navy">
+      <Shell>
+        <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+          Diagnostik
+        </p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900">
           Tidak bisa memuat keahlian
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Error asli dari API (bukan digest RSC). Salin teks di bawah — ini
-          yang perlu diperbaiki.
+          Error asli dari API (bukan digest RSC). Salin teks di bawah.
         </p>
         <pre
           role="alert"
@@ -175,19 +183,25 @@ ${state.message}${
         <div className="mt-4 flex flex-wrap gap-3">
           <button
             type="button"
-            className="lab-btn-primary"
+            className="rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white"
             onClick={() => void load()}
           >
             Coba lagi
           </button>
-          <Link href="/dashboard" className="lab-btn-secondary">
+          <Link
+            href="/dashboard"
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800"
+          >
             Ke dasbor
           </Link>
-          <Link href="/masuk" className="lab-btn-ghost border border-slate-200">
+          <Link
+            href="/masuk"
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800"
+          >
             Masuk ulang
           </Link>
         </div>
-      </PageShell>
+      </Shell>
     );
   }
 
@@ -195,40 +209,40 @@ ${state.message}${
   const openSkill = view.openSkill;
 
   return (
-    <PageShell width="md" orbs="calm">
+    <Shell>
       <Link
         href={`/asesmen/${attemptId}/hasil`}
-        className="text-sm font-semibold text-lab-teal hover:underline"
+        className="text-sm font-semibold text-teal-700 hover:underline"
       >
         ← Kembali ke hasil asesmen
       </Link>
       <div className="mt-4">
-        <p className="lab-section-label">Langkah lanjutan</p>
-        <h1 className="mt-1 text-2xl font-bold text-lab-navy sm:text-3xl">
+        <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">
+          Langkah lanjutan
+        </p>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
           Asesmen keahlian bidang
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Pilih kategori, lalu role/bidang pekerjaan. Soal menyesuaikan dengan
-          bidang yang Anda pilih.
+          Pilih kategori, lalu role/bidang pekerjaan.
         </p>
         <p className="mt-2 font-mono text-[10px] text-slate-400">
-          session={view.diagnostics.userId.slice(0, 8)}… via=api host=
-          {typeof window !== "undefined" ? window.location.host : "ssr"}
+          session={view.diagnostics.userId.slice(0, 8)}… via=api
         </p>
       </div>
 
       {view.openForThisSource && openSkill ? (
-        <section className="mt-6 rounded-[1.25rem] border border-lab-teal/25 bg-gradient-to-br from-lab-mint/50 to-white p-4 sm:p-5">
-          <p className="text-xs font-semibold uppercase tracking-wide text-lab-teal-deep">
+        <section className="mt-6 rounded-2xl border border-teal-200 bg-teal-50/50 p-4">
+          <p className="text-xs font-semibold uppercase text-teal-800">
             Sesi keahlian berjalan
           </p>
-          <p className="mt-1 text-sm font-semibold text-lab-navy">
+          <p className="mt-1 text-sm font-semibold text-slate-900">
             {openSkill.fieldLabel}
           </p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <Link
               href={`/asesmen/${attemptId}/keahlian/${openSkill.fieldId}/sesi?sid=${openSkill.id}`}
-              className="lab-btn-primary"
+              className="rounded-full bg-teal-600 px-4 py-2 text-center text-sm font-semibold text-white"
             >
               Lanjutkan sesi
             </Link>
@@ -241,14 +255,14 @@ ${state.message}${
       ) : null}
 
       {view.openOtherSource && openSkill ? (
-        <section className="mt-6 rounded-[1.25rem] border border-amber-200 bg-amber-50 p-4 sm:p-5">
-          <p className="text-sm font-semibold text-lab-navy">
+        <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-slate-900">
             Ada sesi keahlian di hasil asesmen lain
           </p>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <Link
               href={`/asesmen/${openSkill.sourceAttemptId}/keahlian/${openSkill.fieldId}/sesi?sid=${openSkill.id}`}
-              className="lab-btn-primary"
+              className="rounded-full bg-teal-600 px-4 py-2 text-center text-sm font-semibold text-white"
             >
               Lanjutkan di attempt itu
             </Link>
@@ -261,8 +275,8 @@ ${state.message}${
       ) : null}
 
       {view.skillSnapshots.length > 0 ? (
-        <section className="mt-6 lab-card p-4">
-          <h2 className="text-sm font-bold text-lab-navy">
+        <section className="mt-6 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <h2 className="text-sm font-bold text-slate-900">
             Hasil keahlian sebelumnya
           </h2>
           <ul className="mt-2 space-y-2 text-sm">
@@ -270,7 +284,7 @@ ${state.message}${
               <li key={s.id} className="flex flex-wrap justify-between gap-2">
                 <Link
                   href={`/asesmen/${attemptId}/keahlian/${s.fieldId}/hasil`}
-                  className="font-medium text-lab-teal hover:underline"
+                  className="font-medium text-teal-700 hover:underline"
                 >
                   {s.fieldLabel}
                 </Link>
@@ -297,6 +311,6 @@ ${state.message}${
           />
         )}
       </div>
-    </PageShell>
+    </Shell>
   );
 }
