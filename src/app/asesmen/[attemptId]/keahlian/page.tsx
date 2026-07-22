@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect, unstable_rethrow } from "next/navigation";
 import { PageShell } from "@/components/ui/page-shell";
 import { FieldPicker } from "@/components/assessment/field-picker";
 import { AbandonSkillButton } from "@/components/assessment/abandon-skill-button";
@@ -9,44 +9,96 @@ import { getResultSnapshotForAttempt } from "@/domain/assessment";
 import { recommendFields } from "@/domain/assessment/skill/field-recommendation";
 import { getFieldDef } from "@/domain/assessment/skill/field-catalog";
 import type { FieldId } from "@/domain/assessment/skill/types";
+import type { ResultSnapshot } from "@/domain/assessment/result-types";
+import type { SkillAttempt, SkillResultSnapshot } from "@/domain/assessment/skill/types";
 
 type Props = {
   params: Promise<{ attemptId: string }>;
 };
 
 export default async function KeahlianPickerPage({ params }: Props) {
-  const user = await getSessionUser();
-  if (!user) redirect("/masuk");
-
   const { attemptId } = await params;
-  const ports = createServerAssessmentPorts();
-  const attempt = await ports.attempts.findById(attemptId);
-  if (!attempt || attempt.participantId !== user.id) notFound();
-  if (attempt.status !== "completed") {
-    redirect(`/asesmen/${attemptId}`);
+  const nextPath = `/asesmen/${attemptId}/keahlian`;
+
+  const user = await getSessionUser();
+  if (!user) redirect(`/masuk?next=${encodeURIComponent(nextPath)}`);
+
+  let snapshot: ResultSnapshot | null = null;
+  let recommended: FieldId[] = [];
+  let completedFieldIds: FieldId[] = [];
+  let skillSnapshots: SkillResultSnapshot[] = [];
+  let openSkill: SkillAttempt | null = null;
+  let dataError: string | null = null;
+
+  try {
+    const ports = createServerAssessmentPorts();
+    const attempt = await ports.attempts.findById(attemptId);
+    if (!attempt || attempt.participantId !== user.id) notFound();
+    if (attempt.status !== "completed") {
+      redirect(`/asesmen/${attemptId}`);
+    }
+
+    snapshot = await getResultSnapshotForAttempt(ports, {
+      attemptId,
+      participantId: user.id,
+    });
+    if (!snapshot) notFound();
+
+    recommended = recommendFields(
+      snapshot.abilityProfile,
+      snapshot.rulePayload,
+      3,
+    );
+
+    const skillAttempts = await ports.skillAttempts.listBySourceAttempt(attemptId);
+    completedFieldIds = skillAttempts
+      .filter((a) => a.status === "completed")
+      .map((a) => a.fieldId) as FieldId[];
+
+    skillSnapshots = await ports.skillSnapshots.listBySourceAttempt(attemptId);
+
+    // One open skill per participant (DB unique); may be for this source or another completed attempt.
+    openSkill = await ports.skillAttempts.findOpenByParticipant(user.id);
+  } catch (err) {
+    // Preserve Next.js control-flow (redirect / notFound).
+    unstable_rethrow(err);
+    dataError =
+      "Halaman keahlian sementara tidak bisa dimuat (backend sibuk di plan free). Coba muat ulang sebentar lagi.";
   }
 
-  const snapshot = await getResultSnapshotForAttempt(ports, {
-    attemptId,
-    participantId: user.id,
-  });
-  if (!snapshot) notFound();
+  if (dataError) {
+    return (
+      <PageShell width="md" orbs="calm">
+        <Link
+          href="/dashboard"
+          className="text-sm font-semibold text-lab-teal hover:underline"
+        >
+          ← Dasbor
+        </Link>
+        <div className="mt-4">
+          <p className="lab-section-label">Langkah lanjutan</p>
+          <h1 className="mt-1 text-2xl font-bold text-lab-navy sm:text-3xl">
+            Asesmen keahlian bidang
+          </h1>
+          <p
+            role="alert"
+            className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-amber-100"
+          >
+            {dataError}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href={nextPath} className="lab-btn-primary">
+              Coba lagi
+            </Link>
+            <Link href="/dashboard" className="lab-btn-secondary">
+              Ke dasbor
+            </Link>
+          </div>
+        </div>
+      </PageShell>
+    );
+  }
 
-  const recommended = recommendFields(
-    snapshot.abilityProfile,
-    snapshot.rulePayload,
-    3,
-  );
-
-  const skillAttempts = await ports.skillAttempts.listBySourceAttempt(attemptId);
-  const completedFieldIds = skillAttempts
-    .filter((a) => a.status === "completed")
-    .map((a) => a.fieldId) as FieldId[];
-
-  const skillSnapshots = await ports.skillSnapshots.listBySourceAttempt(attemptId);
-
-  // One open skill per participant (DB unique); may be for this source or another completed attempt.
-  const openSkill = await ports.skillAttempts.findOpenByParticipant(user.id);
   const openForThisSource =
     openSkill && openSkill.sourceAttemptId === attemptId ? openSkill : null;
   const openOtherSource =

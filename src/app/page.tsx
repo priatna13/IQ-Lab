@@ -9,7 +9,6 @@ import {
   IconSparkle,
 } from "@/components/ui/icons";
 import { getInsForgePublicConfig } from "@/lib/insforge/public-config";
-import { getSessionUser } from "@/lib/auth/session";
 
 const DOMAINS = [
   "Verbal",
@@ -35,9 +34,13 @@ const DOMAIN_TINTS = [
   "bg-lab-teal/10 text-lab-navy ring-lab-teal/15",
 ];
 
-export default async function HomePage() {
+/** Always static — never depends on cookies/auth (prevents server digests on beranda). */
+export const dynamic = "force-static";
+export const revalidate = 300;
+
+export default function HomePage() {
+  // Public landing: no InsForge/session I/O so marketing stays up when auth is flaky.
   const insforge = getInsForgePublicConfig();
-  const user = await getSessionUser();
 
   return (
     <PageShell width="xl" orbs="full" particles mainClassName="sm:py-14">
@@ -61,20 +64,15 @@ export default async function HomePage() {
             mahasiswa, fresh graduate, dan profesional mid-career.
           </p>
           <div className="lab-actions">
-            {user ? (
-              <Link href="/dashboard" className="btn fx-59">
-                <span className="btn-label">Buka dasbor</span>
-              </Link>
-            ) : (
-              <>
-                <Link href="/daftar" className="btn fx-59">
-                  <span className="btn-label">Mulai gratis</span>
-                </Link>
-                <Link href="/masuk" className="btn fx-59 fx-59--alt">
-                  <span className="btn-label">Sudah punya akun</span>
-                </Link>
-              </>
-            )}
+            <Link href="/daftar" className="btn fx-59">
+              <span className="btn-label">Mulai gratis</span>
+            </Link>
+            <Link href="/masuk" className="btn fx-59 fx-59--alt">
+              <span className="btn-label">Sudah punya akun</span>
+            </Link>
+            <Link href="/dashboard" className="btn fx-59 fx-59--alt">
+              <span className="btn-label">Buka dasbor</span>
+            </Link>
           </div>
           <p className="text-xs leading-relaxed text-slate-500">
             Gratis di fase MVP · ~60–90 menit · jeda antar domain diizinkan
@@ -263,24 +261,9 @@ export default async function HomePage() {
               Mulai gratis. Hasil jujur untuk refleksi — bukan label rekrutmen.
             </p>
           </div>
-          {user ? (
-            <Link
-              href="/dashboard"
-              className="btn fx-59 shrink-0"
-              style={
-                {
-                  "--primary": "#ffffff",
-                  "--secondary": "#0f191e",
-                } as React.CSSProperties
-              }
-            >
-              <span className="btn-label">Ke dasbor</span>
-            </Link>
-          ) : (
-            <Link href="/daftar" className="btn fx-59 shrink-0">
-              <span className="btn-label">Mulai gratis</span>
-            </Link>
-          )}
+          <Link href="/daftar" className="btn fx-59 shrink-0">
+            <span className="btn-label">Mulai gratis</span>
+          </Link>
         </div>
       </section>
 

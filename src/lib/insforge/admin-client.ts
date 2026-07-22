@@ -15,5 +15,11 @@ export function createInsForgeAdminClient(): InsForgeClient {
       "Admin client requires INSFORGE_URL and INSFORGE_API_KEY (server-only).",
     );
   }
-  return createAdminClient({ baseUrl, apiKey });
+  return createAdminClient({
+    baseUrl,
+    apiKey,
+    // Match SSR client budgets — avoid long serverless hangs.
+    timeout: 4_000,
+    retryCount: 0,
+  });
 }

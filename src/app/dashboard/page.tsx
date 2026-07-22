@@ -22,27 +22,45 @@ export default async function DashboardPage() {
     redirect("/onboarding/usia");
   }
 
-  const ports = createServerAssessmentPorts();
-  const openAttempt = await getOpenAttempt(ports, user.id);
-  const completedAttempts =
-    await ports.attempts.listCompletedByParticipant(user.id);
-  const cooldownUntil = getRetakeCooldownUntil(
-    completedAttempts,
-    new Date(),
-  );
-
-  /** Completed skill fields per cognitive attempt + open skill (if any). */
+  let openAttempt: Awaited<ReturnType<typeof getOpenAttempt>> = null;
+  let completedAttempts: Awaited<
+    ReturnType<
+      ReturnType<typeof createServerAssessmentPorts>["attempts"]["listCompletedByParticipant"]
+    >
+  > = [];
+  let cooldownUntil: Date | null = null;
   const skillBySource = new Map<string, number>();
-  const allSkillAttempts = await ports.skillAttempts.listByParticipant(user.id);
-  for (const sa of allSkillAttempts) {
-    if (sa.status !== "completed") continue;
-    skillBySource.set(
-      sa.sourceAttemptId,
-      (skillBySource.get(sa.sourceAttemptId) ?? 0) + 1,
+  let openSkill: Awaited<
+    ReturnType<
+      ReturnType<typeof createServerAssessmentPorts>["skillAttempts"]["listByParticipant"]
+    >
+  >[number] | null = null;
+  let dataError: string | null = null;
+
+  try {
+    const ports = createServerAssessmentPorts();
+    openAttempt = await getOpenAttempt(ports, user.id);
+    completedAttempts = await ports.attempts.listCompletedByParticipant(
+      user.id,
     );
+    cooldownUntil = getRetakeCooldownUntil(completedAttempts, new Date());
+    const allSkillAttempts = await ports.skillAttempts.listByParticipant(
+      user.id,
+    );
+    for (const sa of allSkillAttempts) {
+      if (sa.status !== "completed") continue;
+      skillBySource.set(
+        sa.sourceAttemptId,
+        (skillBySource.get(sa.sourceAttemptId) ?? 0) + 1,
+      );
+    }
+    openSkill =
+      allSkillAttempts.find((s) => s.status === "in_progress") ?? null;
+  } catch {
+    dataError =
+      "Data asesmen sementara tidak bisa dimuat (backend sibuk). Coba muat ulang sebentar lagi.";
   }
-  const openSkill =
-    allSkillAttempts.find((s) => s.status === "in_progress") ?? null;
+
   const openSkillLabel = openSkill
     ? (getFieldDef(openSkill.fieldId)?.label ?? openSkill.fieldId)
     : null;
@@ -67,6 +85,15 @@ export default async function DashboardPage() {
         </p>
 
         <div className="lab-card mt-6 space-y-5 p-4 sm:mt-8 sm:p-6">
+          {dataError ? (
+            <p
+              role="alert"
+              className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-amber-100"
+            >
+              {dataError}
+            </p>
+          ) : null}
+
           <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 sm:gap-4">
             <div className="rounded-xl bg-lab-mist/80 px-4 py-3 ring-1 ring-white">
               <dt className="text-slate-500">Rentang usia</dt>
@@ -81,11 +108,13 @@ export default async function DashboardPage() {
             <div className="rounded-xl bg-lab-mint/40 px-4 py-3 ring-1 ring-lab-teal/10">
               <dt className="text-slate-500">Status asesmen</dt>
               <dd className="mt-1 font-semibold text-lab-navy">
-                {openAttempt
-                  ? "Ada Attempt berjalan"
-                  : openSkill
-                    ? "Keahlian berjalan"
-                    : "Belum ada Open Attempt"}
+                {dataError
+                  ? "Tidak tersedia"
+                  : openAttempt
+                    ? "Ada Attempt berjalan"
+                    : openSkill
+                      ? "Keahlian berjalan"
+                      : "Belum ada Open Attempt"}
               </dd>
             </div>
           </dl>

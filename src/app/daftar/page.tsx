@@ -6,21 +6,33 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { GoogleButton } from "@/components/auth/google-button";
 import { signUpAction } from "@/app/actions/auth";
 import { getSessionUser } from "@/lib/auth/session";
+import { safeDecodeURIComponent } from "@/lib/auth/safe-query";
 
 type Props = {
   searchParams: Promise<{ error?: string }>;
 };
 
+function isNextRedirect(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "digest" in err &&
+    String((err as { digest?: string }).digest).startsWith("NEXT_REDIRECT")
+  );
+}
+
 export default async function SignUpPage({ searchParams }: Props) {
-  const user = await getSessionUser();
-  if (user) {
-    redirect(user.ageBand ? "/dashboard" : "/onboarding/usia");
+  try {
+    const user = await getSessionUser();
+    if (user) {
+      redirect(user.ageBand ? "/dashboard" : "/onboarding/usia");
+    }
+  } catch (err) {
+    if (isNextRedirect(err)) throw err;
   }
 
   const params = await searchParams;
-  const oauthError = params.error
-    ? decodeURIComponent(params.error)
-    : null;
+  const oauthError = safeDecodeURIComponent(params.error);
 
   return (
     <PageShell width="sm" orbs="calm">

@@ -8,33 +8,45 @@ import { signInAction } from "@/app/actions/auth";
 import { getSessionUser } from "@/lib/auth/session";
 import { isAdminEmail } from "@/lib/auth/admin";
 import { parseSafeNextPath } from "@/lib/auth/safe-next-path";
+import { safeDecodeURIComponent } from "@/lib/auth/safe-query";
 
 type Props = {
   searchParams: Promise<{ error?: string; next?: string }>;
 };
 
+function isNextRedirect(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "digest" in err &&
+    String((err as { digest?: string }).digest).startsWith("NEXT_REDIRECT")
+  );
+}
+
 export default async function SignInPage({ searchParams }: Props) {
   const params = await searchParams;
   const nextPath = parseSafeNextPath(params.next) ?? undefined;
 
-  const user = await getSessionUser();
-  if (user) {
-    if (isAdminEmail(user.email) || nextPath?.startsWith("/admin")) {
-      redirect(nextPath?.startsWith("/admin") ? nextPath : "/admin");
+  try {
+    const user = await getSessionUser();
+    if (user) {
+      if (isAdminEmail(user.email) || nextPath?.startsWith("/admin")) {
+        redirect(nextPath?.startsWith("/admin") ? nextPath : "/admin");
+      }
+      if (!user.ageBand) {
+        redirect("/onboarding/usia");
+      }
+      if (nextPath) {
+        redirect(nextPath);
+      }
+      redirect("/dashboard");
     }
-    if (!user.ageBand) {
-      redirect("/onboarding/usia");
-    }
-    // Honor safe ?next= after session restore (middleware deep-link to protected route).
-    if (nextPath) {
-      redirect(nextPath);
-    }
-    redirect("/dashboard");
+  } catch (err) {
+    if (isNextRedirect(err)) throw err;
+    // Auth backend down: still show login form.
   }
 
-  const oauthError = params.error
-    ? decodeURIComponent(params.error)
-    : null;
+  const oauthError = safeDecodeURIComponent(params.error);
 
   return (
     <PageShell width="sm" orbs="calm">
