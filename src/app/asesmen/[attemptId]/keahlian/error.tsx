@@ -22,8 +22,14 @@ export default function KeahlianSegmentError({
         textAlign: "center",
       }}
     >
-      <p style={{ fontSize: 12, fontWeight: 600, color: "#0d9488" }}>IQ-Lab · Keahlian</p>
-      <h1 style={{ fontSize: 22, marginTop: 8 }}>Segment error</h1>
+      <p style={{ fontSize: 12, fontWeight: 600, color: "#0d9488" }}>
+        IQ-Lab · Keahlian
+      </p>
+      <h1 style={{ fontSize: 22, marginTop: 8 }}>Gagal memuat keahlian</h1>
+      <p style={{ marginTop: 8, fontSize: 14, color: "#64748b" }}>
+        Halaman picker sudah client-only; error ini biasanya dari sesi/hasil
+        server, auth, atau deploy yang belum memuat fix terbaru.
+      </p>
       <pre
         style={{
           marginTop: 16,
@@ -39,7 +45,8 @@ export default function KeahlianSegmentError({
       >
         {`name: ${error.name}
 message: ${error.message}
-digest: ${error.digest ?? "(none)"}`}
+digest: ${error.digest ?? "(none)"}
+route: /asesmen/[attemptId]/keahlian/*`}
       </pre>
       <div style={{ marginTop: 16, display: "flex", gap: 12, justifyContent: "center" }}>
         <button
