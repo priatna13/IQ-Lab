@@ -8,9 +8,43 @@ import { toPublicSkillResult } from "@/domain/assessment/skill/complete-skill-at
 import { isFieldId } from "@/domain/assessment/skill/field-catalog";
 import { AssessmentError } from "@/domain/assessment";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 type Props = {
   params: Promise<{ attemptId: string; fieldId: string }>;
 };
+
+function HasilErrorShell({
+  attemptId,
+  title,
+  detail,
+}: {
+  attemptId: string;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <PageShell width="md" orbs="calm">
+      <p className="lab-section-label">Keahlian</p>
+      <h1 className="mt-1 text-2xl font-bold text-lab-navy">{title}</h1>
+      <pre className="mt-4 overflow-x-auto rounded-xl bg-slate-950 px-3 py-3 text-left text-xs text-amber-100">
+        {detail}
+      </pre>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href={`/asesmen/${attemptId}/keahlian`}
+          className="lab-btn-primary"
+        >
+          Daftar keahlian
+        </Link>
+        <Link href="/dashboard" className="lab-btn-secondary">
+          Dasbor
+        </Link>
+      </div>
+    </PageShell>
+  );
+}
 
 export default async function SkillHasilPage({ params }: Props) {
   const user = await getSessionUser();
@@ -78,14 +112,23 @@ export default async function SkillHasilPage({ params }: Props) {
     }
     if (err instanceof AssessmentError) {
       if (err.code === "NOT_FOUND") notFound();
-      redirect(`/asesmen/${attemptId}/keahlian`);
+      return (
+        <HasilErrorShell
+          attemptId={attemptId}
+          title="Hasil keahlian tidak tersedia"
+          detail={`code: ${err.code}\nmessage: ${err.message}`}
+        />
+      );
     }
-    console.error("[SKILL_HASIL] fatal", {
-      attemptId,
-      fieldId,
-      message: err instanceof Error ? err.message : String(err),
-      stack: err instanceof Error ? err.stack : undefined,
-    });
-    throw err;
+    const message = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : undefined;
+    console.error("[SKILL_HASIL] fatal", { attemptId, fieldId, message, stack });
+    return (
+      <HasilErrorShell
+        attemptId={attemptId}
+        title="Gagal memuat hasil keahlian"
+        detail={`code: HASIL_FATAL\nmessage: ${message}${stack ? `\n\n${stack.slice(0, 500)}` : ""}`}
+      />
+    );
   }
 }

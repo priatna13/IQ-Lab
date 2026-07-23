@@ -2,11 +2,10 @@
 
 import { AssessmentError, type PublicResultReport } from "@/domain/assessment";
 import { createSkillAttempt } from "@/domain/assessment/skill/create-skill-attempt";
-import { completeSkillAttempt, toPublicSkillResult } from "@/domain/assessment/skill/complete-skill-attempt";
+import { completeSkillAttempt } from "@/domain/assessment/skill/complete-skill-attempt";
 import { abandonSkillAttempt } from "@/domain/assessment/skill/abandon-skill-attempt";
 import { upsertSkillResponse, getSkillRunnerView } from "@/domain/assessment/skill/skill-session";
-import { recommendFields } from "@/domain/assessment/skill/field-recommendation";
-import { FIELD_CATEGORIES, FIELD_DEFS, isFieldId } from "@/domain/assessment/skill/field-catalog";
+import { isFieldId } from "@/domain/assessment/skill/field-catalog";
 import type { PublicSkillResult, PublicSkillRunnerView } from "@/domain/assessment/skill/types";
 import { getSessionUser } from "@/lib/auth/session";
 import { createServerAssessmentPorts } from "@/lib/assessment/ports-factory";
@@ -160,10 +159,7 @@ export async function refreshSkillRunnerViewAction(
   }
 }
 
-export {
-  recommendFields,
-  FIELD_CATEGORIES,
-  FIELD_DEFS,
-  toPublicSkillResult,
-};
+// NOTE: Do NOT re-export non-async values from a "use server" file.
+// Next.js requires every export here to be an async Server Action.
+// Import FIELD_DEFS / recommendFields / toPublicSkillResult from domain modules.
 export type { PublicResultReport, PublicSkillResult, PublicSkillRunnerView };

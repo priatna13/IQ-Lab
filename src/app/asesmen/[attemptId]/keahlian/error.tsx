@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
+
 /**
- * Segment error boundary for /keahlian only.
- * Inline styles only — no design-system classes that could fail to resolve.
+ * Last-resort boundary. Prefer client LocalBoundary + API error states.
+ * Inline styles only — never depend on design-system CSS here.
  */
 export default function KeahlianSegmentError({
   error,
@@ -11,6 +13,15 @@ export default function KeahlianSegmentError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("[KEAHLIAN_SEGMENT_ERROR]", {
+      name: error.name,
+      message: error.message,
+      digest: error.digest,
+      stack: error.stack,
+    });
+  }, [error]);
+
   return (
     <main
       style={{
@@ -27,8 +38,8 @@ export default function KeahlianSegmentError({
       </p>
       <h1 style={{ fontSize: 22, marginTop: 8 }}>Gagal memuat keahlian</h1>
       <p style={{ marginTop: 8, fontSize: 14, color: "#64748b" }}>
-        Halaman picker sudah client-only; error ini biasanya dari sesi/hasil
-        server, auth, atau deploy yang belum memuat fix terbaru.
+        Error segment tertangkap. Salin detail di bawah lalu coba refresh atau
+        masuk ulang.
       </p>
       <pre
         style={{
@@ -46,9 +57,18 @@ export default function KeahlianSegmentError({
         {`name: ${error.name}
 message: ${error.message}
 digest: ${error.digest ?? "(none)"}
-route: /asesmen/[attemptId]/keahlian/*`}
+route: /asesmen/[attemptId]/keahlian/*
+build: keahlian-v2-inline`}
       </pre>
-      <div style={{ marginTop: 16, display: "flex", gap: 12, justifyContent: "center" }}>
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          gap: 12,
+          justifyContent: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <button
           type="button"
           onClick={reset}
@@ -76,6 +96,19 @@ route: /asesmen/[attemptId]/keahlian/*`}
           }}
         >
           Dasbor
+        </a>
+        <a
+          href="/masuk"
+          style={{
+            padding: "10px 16px",
+            borderRadius: 999,
+            border: "1px solid #cbd5e1",
+            color: "#0f2744",
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
+        >
+          Masuk ulang
         </a>
       </div>
     </main>
