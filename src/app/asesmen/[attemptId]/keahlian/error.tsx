@@ -2,9 +2,12 @@
 
 import { useEffect } from "react";
 
+const BUILD = "v3-zero-20260723";
+
 /**
- * Last-resort boundary. Prefer client LocalBoundary + API error states.
- * Inline styles only — never depend on design-system CSS here.
+ * Last-resort segment boundary.
+ * If you still see digest here after hard refresh, the failure is outside
+ * the picker client (nested sesi/hasil, or deploy cache).
  */
 export default function KeahlianSegmentError({
   error,
@@ -15,6 +18,7 @@ export default function KeahlianSegmentError({
 }) {
   useEffect(() => {
     console.error("[KEAHLIAN_SEGMENT_ERROR]", {
+      build: BUILD,
       name: error.name,
       message: error.message,
       digest: error.digest,
@@ -34,12 +38,13 @@ export default function KeahlianSegmentError({
       }}
     >
       <p style={{ fontSize: 12, fontWeight: 600, color: "#0d9488" }}>
-        IQ-Lab · Keahlian
+        IQ-Lab · Keahlian · {BUILD}
       </p>
       <h1 style={{ fontSize: 22, marginTop: 8 }}>Gagal memuat keahlian</h1>
       <p style={{ marginTop: 8, fontSize: 14, color: "#64748b" }}>
-        Error segment tertangkap. Salin detail di bawah lalu coba refresh atau
-        masuk ulang.
+        Boundary v3. Hard refresh (Ctrl+Shift+R). Jika{" "}
+        <code style={{ fontSize: 11 }}>build={BUILD}</code> tidak muncul di
+        halaman normal, cache/deploy belum update.
       </p>
       <pre
         style={{
@@ -54,11 +59,11 @@ export default function KeahlianSegmentError({
           overflow: "auto",
         }}
       >
-        {`name: ${error.name}
+        {`build: ${BUILD}
+name: ${error.name}
 message: ${error.message}
 digest: ${error.digest ?? "(none)"}
-route: /asesmen/[attemptId]/keahlian/*
-build: keahlian-v2-inline`}
+route: /asesmen/[attemptId]/keahlian/*`}
       </pre>
       <div
         style={{

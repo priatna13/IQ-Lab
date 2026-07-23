@@ -78,12 +78,12 @@ export function SkillSummaryOnHasil({ attemptId, snapshots }: Props) {
               ))}
             </ul>
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Link
+              <a
                 href={`/asesmen/${attemptId}/keahlian`}
                 className="lab-btn-primary inline-flex"
               >
                 Bidang lain / pilih ulang
-              </Link>
+              </a>
             </div>
           </>
         ) : (
@@ -104,12 +104,12 @@ export function SkillSummaryOnHasil({ attemptId, snapshots }: Props) {
                 Rekomendasi dari profil
               </li>
             </ul>
-            <Link
+            <a
               href={`/asesmen/${attemptId}/keahlian`}
               className="lab-btn-primary mt-5 inline-flex"
             >
               Pilih bidang kerja
-            </Link>
+            </a>
           </>
         )}
       </div>

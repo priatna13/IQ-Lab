@@ -151,12 +151,12 @@ export default async function DashboardPage() {
                   Lanjutkan keahlian
                   <IconArrowRight />
                 </Link>
-                <Link
+                <a
                   href={`/asesmen/${openSkill.sourceAttemptId}/keahlian`}
                   className="lab-btn-secondary"
                 >
                   Daftar bidang
-                </Link>
+                </a>
                 <AbandonSkillButton
                   skillAttemptId={openSkill.id}
                   sourceAttemptId={openSkill.sourceAttemptId}
@@ -267,7 +267,8 @@ export default async function DashboardPage() {
                         >
                           Lihat profil
                         </Link>
-                        <Link
+                        {/* Native <a>: full document load avoids soft-nav RSC digests on keahlian */}
+                        <a
                           href={
                             skillOpenHere
                               ? `/asesmen/${a.id}/keahlian/${skillOpenHere.fieldId}/sesi?sid=${skillOpenHere.id}`
@@ -276,7 +277,7 @@ export default async function DashboardPage() {
                           className="lab-btn-primary min-h-11 px-3 text-xs sm:text-sm"
                         >
                           {skillOpenHere ? "Lanjut keahlian" : "Keahlian"}
-                        </Link>
+                        </a>
                         <a
                           href={`/api/asesmen/${a.id}/pdf`}
                           className="lab-btn-ghost col-span-2 min-h-11 border border-slate-200 px-3 text-xs sm:col-span-1 sm:text-sm"
